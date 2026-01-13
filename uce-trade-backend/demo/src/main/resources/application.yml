@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: UCE-Trade
+  
+  # CONEXIÓN A LA BASE DE DATOS (Que creamos en el Paso 1)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/uce_trade_db
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  
+  # CONFIGURACIÓN AUTOMÁTICA DE TABLAS
+  jpa:
+    hibernate:
+      ddl-auto: update # Esto crea las tablas solito
+    show-sql: true # Para ver en consola qué hace la BD
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080

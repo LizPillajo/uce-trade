@@ -1,0 +1,19 @@
+# --- Ignorar cosas de Docker ---
+.env
+postgres_data/
+redis_data/
+
+# --- Ignorar cosas de Node (Frontend) ---
+node_modules/
+dist/
+.DS_Store
+
+# --- Ignorar cosas de Java (Backend) ---
+target/
+.mvn/
+mvnw
+mvnw.cmd
+*.class
+*.log
+.idea/
+*.iml
