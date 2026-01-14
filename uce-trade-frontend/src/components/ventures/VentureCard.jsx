@@ -28,7 +28,7 @@ const VentureCard = ({ data }) => {
         <CardMedia
           component="img"
           height="180"
-          image={data.image}
+          image={data.imageUrl}
           alt={data.title}
           sx={{ objectFit: 'cover' }}
         />
@@ -74,7 +74,7 @@ const VentureCard = ({ data }) => {
         </Box>
 
         <Typography variant="body2" color="text.secondary" display="block" mb={2}>
-           By {data.author}
+           By {data.owner.fullName || "Unknown"}
         </Typography>
 
         {/* Precio y Botón */}

@@ -1,14 +1,14 @@
 // src/components/home/FeaturedSection.jsx
 import { Box, Container, Typography, Grid, CircularProgress, Alert } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { fetchServices } from '../../services/api'; // Asegúrate de tener datos en api.js
+import { fetchFeaturedServices } from '../../services/api'; // Asegúrate de tener datos en api.js
 import VentureCard from '../ventures/VentureCard';
 
 const FeaturedSection = () => {
-  // Usamos el hook de TanStack Query para traer los datos
+  // Usar la nueva función fetchFeaturedServices
   const { data: ventures, isLoading, isError } = useQuery({
     queryKey: ['featuredVentures'],
-    queryFn: fetchServices,
+    queryFn: fetchFeaturedServices, 
   });
 
   return (

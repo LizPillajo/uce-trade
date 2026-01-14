@@ -20,24 +20,29 @@ export const registerUser = async (userData) => {
   }
 };
 
-// 3. (Temporal) Mantener el mock de servicios para que no se rompa el Home
-//    Esto lo cambiaremos cuando tengas endpoints de productos
-export const fetchServices = async () => {
-  return [
-    {
-        id: 1,
-        title: "Programming Classes (Demo)",
-        category: "Tutorials",
-        rating: 4.9,
-        price: 15.00,
-        author: "Liz Pillajo",
-        image: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&q=80"
-    }
-  ];
+// GET /api/ventures
+export const fetchFeaturedServices = async () => {
+  try {
+    const response = await api.get('/ventures/featured');
+    return response.data; // Aquí vienen tus 4 registros destacados
+  } catch (error) {
+    console.error("Error fetching ventures:", error);
+    return []; // Retorna array vacío si falla para no romper la página
+  }
+};
+
+// 2. Para el Explorer: Obtener lista PAGINADA
+// Recibe el número de página (empieza en 0 en Java)
+export const fetchServices = async (page = 1) => {
+  // Java usa paginación base-0, pero visualmente usamos base-1
+  const pageParam = page - 1; 
+  const response = await api.get(`/ventures?page=${pageParam}&size=12`);
+  return response.data; // Esto ahora devuelve un objeto { content: [], totalPages: ..., etc }
 };
 
 export const fetchServiceById = async (id) => {
-    return null; // Pendiente
+  const response = await api.get(`/ventures/${id}`);
+  return response.data;
 };
 
 export default api;
