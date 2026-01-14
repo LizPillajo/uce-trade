@@ -1,8 +1,6 @@
 package UCE_Trade.demo.repository;
 
 import UCE_Trade.demo.model.Venture;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
