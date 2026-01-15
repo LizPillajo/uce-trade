@@ -19,8 +19,13 @@ public class UserService {
 
     // Método para crear un estudiante 
     public User registerStudent(User user) {
-        // 1. Validar dominio UCE
-        if (user.getEmail() == null || !user.getEmail().endsWith("@uce.edu.ec")) {
+        // 1. Validar dominio UCE - Lógica de Roles
+        if ("admin@uce.edu.ec".equalsIgnoreCase(user.getEmail())) {
+            user.setRole("ADMIN");
+        } else if (user.getEmail().endsWith("@uce.edu.ec")) {
+            // CASO ESTUDIANTE: Correo institucional
+            user.setRole("STUDENT");
+        } else {
             throw new RuntimeException("Registro permitido solo para correos institucionales (@uce.edu.ec)");
         }
 
@@ -28,10 +33,8 @@ public class UserService {
             throw new RuntimeException("El email ya está registrado en UCE Trade");
         }
         
-        user.setRole("STUDENT");
         // ENCRIPTAR CONTRASEÑA ANTES DE GUARDAR
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
+        user.setPassword(passwordEncoder.encode(user.getPassword()));        
         return userRepository.save(user);
     }
 

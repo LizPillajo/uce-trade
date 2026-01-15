@@ -19,9 +19,9 @@ const Navbar = () => {
   // Definir links según el rol
   let links = [{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }];
   
-  if (user?.role === 'student') {
+  if (user?.role === 'STUDENT') {
     links.push({ name: 'Dashboard', path: '/student/dashboard' });
-  } else if (user?.role === 'admin') {
+  } else if (user?.role === 'ADMIN') {
     links.push({ name: 'Dashboard', path: '/admin/dashboard' });
   }
 
@@ -97,7 +97,7 @@ const Navbar = () => {
                   <Divider />
                   
                   {/* Link a Perfil Personal (Solo si es estudiante) */}
-                  {user.role === 'student' && (
+                  {user.role === 'STUDENT' && (
                       <MenuItem onClick={() => { navigate('/student/my-ventures'); setAnchorEl(null); }}>My Profile</MenuItem>
                   )}
                   
