@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -21,7 +22,10 @@ public class VentureController {
     // 1. ENDPOINT PARA EL HOME (Solo 4 destacados)
     // GET http://localhost:8080/api/ventures/featured
     @GetMapping("/featured")
+    @Cacheable(value = "featured_ventures") 
     public List<Venture> getFeaturedVentures() {
+        // Simular lentitud para que notes la diferencia la primera vez (opcional)
+        // Thread.sleep(2000); 
         return ventureRepository.findTop4ByOrderByRatingDesc();
     }
 
@@ -44,4 +48,5 @@ public class VentureController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    
 }
