@@ -3,7 +3,6 @@ import { Box } from '@mui/material';
 import HeroSection from '../../components/home/HeroSection';
 import CategorySection from '../../components/home/CategorySection';
 import FeaturedSection from '../../components/home/FeaturedSection';
-import Footer from '../../components/layout/Footer';
 
 const HomePage = () => {
   return (

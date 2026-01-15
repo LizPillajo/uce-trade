@@ -1,34 +1,57 @@
-// src/context/AuthContext.jsx
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import { loginUser } from '../services/api'; // Importamos la función real
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Estado del usuario: null (visitante), 'student', o 'admin'
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Función para simular Login
-  const login = (role) => {
-    // Simulamos datos de usuario según el rol
-    const userData = role === 'admin' 
-      ? { name: 'Admin User', role: 'admin', avatar: 'AD' }
-      : { name: 'Liz Pillajo', role: 'student', avatar: 'LP', career: 'Systems Engineering' };
-    
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData)); // Persistencia simple
+  // Al cargar la página, revisamos si ya había un usuario guardado en localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  // FUNCIÓN DE LOGIN REAL
+  const login = async (email, password) => {
+    try {
+      // 1. Llamamos al Backend
+      const data = await loginUser({ email, password });
+      
+      // 2. Si llegamos aquí, el backend ya puso la Cookie HttpOnly automáticamente.
+      // Nosotros solo guardamos los datos visibles (Nombre, Rol) para la interfaz.
+      const userData = {
+        name: data.name,
+        role: data.role, // "STUDENT" o "ADMIN"
+        email: email,
+        avatar: data.name.charAt(0).toUpperCase() // Inicial del nombre
+      };
+
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData)); // Persistencia visual
+      return { success: true };
+
+    } catch (error) {
+      return { success: false, message: error.message || "Login fallido" };
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    // Nota: Para borrar la cookie HttpOnly deberíamos llamar a un endpoint /logout en el backend
+    // Por ahora, esto limpia la sesión visual.
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
-      {children}
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, loading }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-// Hook personalizado para usar el contexto
 export const useAuth = () => useContext(AuthContext);

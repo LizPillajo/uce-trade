@@ -19,6 +19,11 @@ public class UserService {
 
     // Método para crear un estudiante 
     public User registerStudent(User user) {
+        // 1. Validar dominio UCE
+        if (user.getEmail() == null || !user.getEmail().endsWith("@uce.edu.ec")) {
+            throw new RuntimeException("Registro permitido solo para correos institucionales (@uce.edu.ec)");
+        }
+
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("El email ya está registrado en UCE Trade");
         }

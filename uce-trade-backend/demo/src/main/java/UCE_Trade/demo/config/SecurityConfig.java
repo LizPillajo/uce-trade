@@ -1,11 +1,10 @@
-package UCE_Trade.demo.config;
+package UCE_Trade.demo.config; 
 
-import UCE_Trade.demo.service.CustomUserDetailsService;
+import UCE_Trade.demo.service.CustomUserDetailsService; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider; // <--- VITAL
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,6 +22,8 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // Al inyectar esto aquí, Spring Security lo usa automáticamente.
+    // Ya no necesitamos crear el DaoAuthenticationProvider manualmente.
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
@@ -32,20 +33,13 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                // Rutas públicas: Auth y Ventures (para el Home/Explorer)
                 .requestMatchers("/api/auth/**", "/api/ventures/**").permitAll()
+                // Todo lo demás: Privado (Dashboard, Perfil)
                 .anyRequest().authenticated()
-            )
-            .authenticationProvider(authenticationProvider()); // Conectamos el proveedor
+            );
 
         return http.build();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService); // Ya no debería dar error
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
     }
 
     @Bean
@@ -61,6 +55,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        // Ajusta el puerto si tu React corre en otro (ej: 3000 o 5173)
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));

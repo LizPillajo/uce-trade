@@ -8,6 +8,19 @@ const api = axios.create({
   },
 });
 
+// LOGIN
+export const loginUser = async (credentials) => {
+  try {
+    // credentials es { email: "...", password: "..." }
+    // El backend nos devolverá { message: "...", role: "...", name: "..." } y la Cookie sola
+    const response = await api.post('/auth/login', credentials);
+    return response.data;
+  } catch (error) {
+    console.error("Error en login:", error);
+    throw error.response ? error.response.data : new Error("Error de conexión");
+  }
+};
+
 // 2. Función para REGISTRAR un usuario
 export const registerUser = async (userData) => {
   try {
