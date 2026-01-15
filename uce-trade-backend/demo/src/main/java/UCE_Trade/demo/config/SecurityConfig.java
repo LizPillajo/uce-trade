@@ -34,6 +34,10 @@ public class SecurityConfig {
                 // 1. RUTAS PÚBLICAS (Sin Login)
                 .requestMatchers(
                     "/api/**", // <--- LO PONEMOS EXPLÍCITO POR SI ACASO
+                    "/api/auth/**",           // Login y Registro
+                    "/api/ventures",          // Listar todos (Explore)
+                    "/api/ventures/**",       // Detalles y Featured
+                    "/api/ventures/featured", // <--- LO PONEMOS EXPLÍCITO
                     "/v3/api-docs/**",        // Swagger Docs
                     "/swagger-ui/**",         // Swagger UI
                     "/swagger-ui.html"        // Swagger HTML

@@ -6,14 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "ventures")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Venture {
+public class Venture implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
