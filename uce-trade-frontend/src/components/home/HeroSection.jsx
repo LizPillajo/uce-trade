@@ -7,11 +7,11 @@ const HeroSection = () => {
   return (
     <Box
       sx={{
-        // Altura completa de la ventana (restando navbar aproximado)
+        // Full window height (minus navbar approx)
         minHeight: "calc(110vh - 64px)",
         display: "flex",
         alignItems: "center",
-        // Degradado azul
+        // Blue gradient
         background: (theme) =>
           `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
         color: "white",
@@ -22,7 +22,7 @@ const HeroSection = () => {
       }}
     >
       <Container maxWidth="lg">
-        {/* Título Principal más grande */}
+        {/* Larger Main Title */}
         <Typography
           variant="h2"
           component="h1"
@@ -63,7 +63,7 @@ const HeroSection = () => {
           University of Ecuador.
         </Typography>
 
-        {/* 2. BARRA DE BÚSQUEDA (píldora) + botón separado - centrados */}
+        {/* 2. SEARCH BAR (pill) + separate button - centered */}
         <Box sx={{ display: "flex", justifyContent: "center", mt: 2, mb: 4 }}>
           <Box
             sx={{
@@ -133,7 +133,7 @@ const HeroSection = () => {
           </Box>
         </Box>
 
-        {/* Estadísticas */}
+        {/* Statistics */}
         <Box
           sx={{
             mt: 6,

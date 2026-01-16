@@ -7,12 +7,12 @@ import SchoolIcon from '@mui/icons-material/School';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import AuthBluePanel from '../../components/auth/AuthBluePanel';
-import { registerUser } from '../../services/api'; // <--- IMPORTANTE
+import { registerUser } from '../../services/api'; 
 
 const RegisterPage = () => {
   const navigate = useNavigate();
 
-  // 1. ESTADOS PARA LOS DATOS
+  // 1. STATES FOR DATA
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -24,7 +24,7 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 2. MANEJAR CAMBIOS EN LOS INPUTS
+  // 2. HANDLE INPUT CHANGES
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -32,25 +32,25 @@ const RegisterPage = () => {
     });
   };
 
-  // 3. ENVIAR AL BACKEND
+  // 3. SEND TO BACKEND
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Validaciones simples
+    // Simple validations
     if (formData.password !== formData.confirmPassword) {
-      setError("Las contraseñas no coinciden");
+      setError("Passwords do not match");
       return;
     }
     if (!formData.email.endsWith('@uce.edu.ec')) {
-      setError("Debes usar un correo institucional (@uce.edu.ec)");
+      setError("You must use an institutional email (@uce.edu.ec)");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Enviamos solo lo que el Backend (User.java) espera
+      // Send only what the Backend (User.java) expects
       // fullName, email, password, faculty
       await registerUser({
         fullName: formData.fullName,
@@ -59,14 +59,14 @@ const RegisterPage = () => {
         faculty: formData.faculty
       });
 
-      // Si todo sale bien:
-      alert('¡Cuenta creada con éxito! Ahora inicia sesión.');
+      // If everything goes well:
+      alert('Account created successfully! Now log in.');
       navigate('/login');
 
     } catch (err) {
       console.error(err);
-      // Mostramos el mensaje que venga del backend o un genérico
-      setError(typeof err === 'string' ? err : 'Error al registrar. Revisa los datos.');
+      // Show the message from the backend or a generic one
+      setError(typeof err === 'string' ? err : 'Registration error. Check your data.');
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ const RegisterPage = () => {
   return (
     <Grid container sx={{ minHeight: '100vh', width: '100%', m: 0, alignItems: 'stretch' }}>
       
-      {/* IZQUIERDA: Panel Azul */}
+      {/* LEFT: Blue Panel */}
       <Grid size={{ xs: 12, md: 6 }} sx={{ display: { xs: 'none', md: 'flex' }, p: 0, minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
         <AuthBluePanel 
           title="Start your business venture"
@@ -83,7 +83,7 @@ const RegisterPage = () => {
         />
       </Grid>
 
-      {/* DERECHA: Formulario Blanco */}
+      {/* RIGHT: White Form */}
       <Grid size={{ xs: 12, md: 6 }} sx={{ bgcolor: 'white', p: { xs: 4, md: 6 }, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100vh' }}>
         <Container maxWidth="sm">
           <Box mb={4}>
@@ -104,11 +104,11 @@ const RegisterPage = () => {
             Sign up to publish your services
           </Typography>
 
-          {/* ALERTA DE ERROR */}
+          {/* ERROR ALERT */}
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
           <Box component="form" onSubmit={handleSubmit}>
-            {/* OJO: Agregamos 'name', 'value' y 'onChange' a todos los inputs */}
+            {/* NOTE: Added 'name', 'value', and 'onChange' to all inputs */}
             
             <Input 
                 label="Full Name" 

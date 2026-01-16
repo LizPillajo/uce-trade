@@ -11,13 +11,13 @@ const AuthLayout = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        // El degradado azul exacto de tus wireframes
+        // The exact blue gradient from your wireframes
         background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
         p: 2
       }}
     >
       <Container maxWidth="sm">
-        {/* Cabecera (Logo y Texto) fuera de la tarjeta */}
+        {/* Header (Logo and Text) outside the card */}
         <Box textAlign="center" mb={4} color="white">
           <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
             <SchoolIcon sx={{ fontSize: 40, color: '#efb034', mr: 1 }} />
@@ -28,7 +28,7 @@ const AuthLayout = () => {
           </Typography>
         </Box>
 
-        {/* Tarjeta Blanca Centrada */}
+        {/* Centered White Card */}
         <Paper
           elevation={10}
           sx={{
@@ -37,11 +37,11 @@ const AuthLayout = () => {
             boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
           }}
         >
-          {/* AQUÍ SE CARGARÁ EL LOGIN O EL REGISTER */}
+          {/* LOGIN OR REGISTER WILL BE LOADED HERE */}
           <Outlet />
         </Paper>
 
-        {/* Link para volver */}
+        {/* Back link */}
         <Box textAlign="center" mt={3}>
           <Typography 
             component={RouterLink} 

@@ -2,7 +2,7 @@
 import { Card, CardMedia, CardContent, Typography, Box, Chip, Rating } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import Button from '../ui/Button'; // Usamos tu botón reutilizable
+import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 
 const VentureCard = ({ data }) => {
@@ -13,7 +13,7 @@ const VentureCard = ({ data }) => {
       height: '100%', 
       display: 'flex', 
       flexDirection: 'column',
-      borderRadius: '16px', // Bordes redondeados como Wireframe Pág 4
+      borderRadius: '16px',
       boxShadow: 'none',
       border: '1px solid #eaecf0',
       position: 'relative',

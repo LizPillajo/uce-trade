@@ -1,11 +1,11 @@
 // src/components/home/FeaturedSection.jsx
 import { Box, Container, Typography, Grid, CircularProgress, Alert } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { fetchFeaturedServices } from '../../services/api'; // Asegúrate de tener datos en api.js
+import { fetchFeaturedServices } from '../../services/api'; 
 import VentureCard from '../ventures/VentureCard';
 
 const FeaturedSection = () => {
-  // Usar la nueva función fetchFeaturedServices
+  // Use the new fetchFeaturedServices function
   const { data: ventures, isLoading, isError } = useQuery({
     queryKey: ['featuredVentures'],
     queryFn: fetchFeaturedServices, 
@@ -25,19 +25,19 @@ const FeaturedSection = () => {
           </Box>
         </Box>
 
-        {/* Estado de Carga */}
+        {/* Loading State */}
         {isLoading && (
           <Box display="flex" justifyContent="center" py={5}>
             <CircularProgress color="primary" />
           </Box>
         )}
 
-        {/* Estado de Error */}
+        {/* Error State */}
         {isError && (
           <Alert severity="error">Could not load featured ventures.</Alert>
         )}
 
-        {/* Grilla de Tarjetas */}
+        {/* Card Grid */}
         {!isLoading && !isError && (
           <Grid container spacing={3} justifyContent="flex-start" sx={{ mb: 6 }}>
             {ventures?.map((venture) => (

@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
-import ProtectedRoute from '../components/common/ProtectedRoute'; // <--- IMPORTAR
+import ProtectedRoute from '../components/common/ProtectedRoute'; 
 
 // Public Imports
 import HomePage from '../pages/public/HomePage';
@@ -24,23 +24,23 @@ export const AppRouter = () => {
   return (
     <Routes>
       
-      {/* RUTAS PÚBLICAS (Dentro del Layout Principal) */}
+      {/* PUBLIC ROUTES (Inside Main Layout) */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/venture/:id" element={<VentureDetailPage />} />
         <Route path="/seller" element={<SellerProfilePage />} />
 
-        {/* --- ZONA ESTUDIANTE (Solo rol STUDENT) --- */}
+        {/* --- STUDENT AREA (Only role STUDENT) --- */}
         <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/student/my-ventures" element={<MyVenturesPage />} />
             <Route path="/student/create-venture" element={<CreateVenturePage />} />
-            {/* Perfil personal reutiliza MyVentures por ahora */}
+            {/* Personal profile reuses MyVentures for now */}
             <Route path="/profile" element={<MyVenturesPage />} />
         </Route>
 
-        {/* --- ZONA ADMIN (Solo rol ADMIN) --- */}
+        {/* --- ADMIN AREA (Only role ADMIN) --- */}
         <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/ventures" element={<AdminVenturesPage />} />

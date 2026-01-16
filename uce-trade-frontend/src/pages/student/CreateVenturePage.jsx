@@ -3,15 +3,14 @@ import { useState } from 'react';
 import { 
   Box, Container, Paper, Typography, Grid, TextField, 
   MenuItem, Button, Stack, IconButton, InputAdornment, 
-  CircularProgress, Alert // <--- AQUÍ ESTABA EL ERROR 1
+  CircularProgress, Alert 
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
 
-// Importaciones de servicios
+// Service imports
 import { supabase } from '../../services/supabaseClient';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -50,14 +49,14 @@ const CreateVenturePage = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       
-      // Subir a Supabase
+      // Upload to Supabase
       const { error: uploadError } = await supabase.storage
         .from('ventures')
         .upload(fileName, file); // Nombre directo, sin carpetas complejas
 
       if (uploadError) throw uploadError;
 
-      // Obtener URL
+      // Get URL
       const { data } = supabase.storage
         .from('ventures')
         .getPublicUrl(fileName);
@@ -87,7 +86,7 @@ const CreateVenturePage = () => {
       await api.post('/ventures', {
           title: formData.title,
           description: formData.description,
-          price: parseFloat(formData.price), // <--- Asegurar que sea número
+          price: parseFloat(formData.price), 
           category: formData.category,
           imageUrl: formData.imageUrl
       });
@@ -211,7 +210,7 @@ const CreateVenturePage = () => {
                 />
                 
                 {uploading ? (
-                    <CircularProgress /> // <--- ESTO FUE LO QUE FALLÓ ANTES
+                    <CircularProgress /> // <--- THIS IS WHAT FAILED BEFORE
                 ) : (
                     <>
                         <CloudUploadIcon sx={{ fontSize: 48, color: '#9ca3af', mb: 2 }} />

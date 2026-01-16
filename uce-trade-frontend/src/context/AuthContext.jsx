@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import { loginUser } from '../services/api'; // Importamos la función real
+import { loginUser } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -26,9 +26,9 @@ export const AuthProvider = ({ children }) => {
       // Nosotros solo guardamos los datos visibles (Nombre, Rol) para la interfaz.
       const userData = {
         name: data.name,
-        role: data.role, // "STUDENT" o "ADMIN"
+        role: data.role, 
         email: email,
-        avatar: data.name.charAt(0).toUpperCase() // Inicial del nombre
+        avatar: data.name.charAt(0).toUpperCase() 
       };
 
       setUser(userData);

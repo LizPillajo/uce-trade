@@ -5,7 +5,7 @@ const SeoMeta = ({ title, description }) => {
     <Helmet>
       <title>{title} | UCE Trade</title>
       <meta name="description" content={description} />
-      {/* Open Graph para cuando compartan el link en WhatsApp/Facebook */}
+      {/* Open Graph for sharing the link on WhatsApp/Facebook */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
     </Helmet>

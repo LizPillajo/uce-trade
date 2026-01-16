@@ -2,11 +2,11 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
 
-// allowedRoles: Array con los roles permitidos para esta ruta ['ADMIN'], ['STUDENT'], etc.
+// allowedRoles: Array with the allowed roles for this route ['ADMIN'], ['STUDENT'], etc.
 const ProtectedRoute = ({ allowedRoles }) => {
   const { user, isAuthenticated, loading } = useAuth();
 
-  // 1. Mientras carga la info del usuario, mostramos un spinner
+  // 1. While loading user info, show a spinner
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -15,18 +15,18 @@ const ProtectedRoute = ({ allowedRoles }) => {
     );
   }
 
-  // 2. Si no está logueado, mandar al Login
+  // 2. If not logged in, redirect to Login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // 3. Si está logueado pero su rol no está en la lista permitida
+  // 3. If logged in but role is not in the allowed list
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // Si intenta entrar a admin siendo estudiante, lo mandamos a su dashboard o home
+    // If a student tries to access admin, redirect to home
     return <Navigate to="/" replace />;
   }
 
-  // 4. Si pasa todas las pruebas, renderizar la página (Outlet)
+  // 4. If all checks pass, render the page
   return <Outlet />;
 };
 

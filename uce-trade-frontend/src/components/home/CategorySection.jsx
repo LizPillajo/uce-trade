@@ -22,7 +22,7 @@ const categories = [
 const CategorySection = () => {
   return (
     <Box component="section" sx={{ py: 5, bgcolor: '#f8f9fa' }}>
-      <Container maxWidth="xl"> {/* Usamos XL para tener más ancho disponible */}
+      <Container maxWidth="xl"> 
         
         <Box textAlign="center" mb={6}>
           <Typography variant="h4" fontWeight="bold" gutterBottom color="primary">
@@ -33,12 +33,11 @@ const CategorySection = () => {
           </Typography>
         </Box>
 
-        {/* GRILLA DE CATEGORÍAS */}
-        {/* spacing={4} separa más las tarjetas */}
+        {/* CATEGORY GRID */}
         <Grid container spacing={3} justifyContent="center" alignItems="stretch">
           {categories.map((cat) => (
-            // md={3} significa 4 columnas por fila (12/3 = 4).
-            // sm={6} significa 2 columnas en tablets.
+            // md={3} means 4 columns per row (12/3 = 4).
+            // sm={6} means 2 columns on tablets.
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={cat.id} sx={{ display: 'flex' }}>
               <Paper
                 component={Link}
@@ -47,7 +46,7 @@ const CategorySection = () => {
                 sx={{
                   width: '100%',
                   height: '100%',
-                  // Padding aumentado para que se vean grandes
+                  // Increased padding for larger appearance
                   p: 2, 
                   display: 'flex',
                   flexDirection: 'column',
@@ -55,7 +54,7 @@ const CategorySection = () => {
                   justifyContent: 'center',
                   textAlign: 'center',
                   textDecoration: 'none',
-                  borderRadius: '24px', // Bordes más redondeados
+                  borderRadius: '24px', 
                   border: '1px solid',
                   borderColor: 'divider',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -67,11 +66,11 @@ const CategorySection = () => {
                   }
                 }}
               >
-                {/* Círculo del Icono Grande */}
+                {/* Large Icon Circle */}
                 <Box sx={{ 
                     bgcolor: cat.color, 
                     color: cat.iconColor, 
-                    width: 80, // Tamaño fijo grande
+                    width: 80, 
                     height: 80,
                     borderRadius: '50%', 
                     mb: 3,
@@ -79,7 +78,7 @@ const CategorySection = () => {
                     alignItems: 'center', 
                     justifyContent: 'center'
                 }}>
-                  {/* Icono Grande */}
+                  {/* Large Icon */}
                   <cat.icon sx={{ fontSize: 40 }} />
                 </Box>
                 

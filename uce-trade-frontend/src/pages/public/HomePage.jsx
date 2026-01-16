@@ -10,15 +10,15 @@ const HomePage = () => {
     
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
 
-      <SeoMeta title="Home" description="Descubre los mejores emprendimientos de la UCE." />
+      <SeoMeta title="Home" description="Discover the best ventures from UCE." />
       
-      {/* 1. HERO (Azul) */}
+      {/* 1. HERO (Blue) */}
       <HeroSection />
 
-      {/* 2. CATEGORÍAS (Gris claro) */}
+      {/* 2. CATEGORIES (Light gray) */}
       <CategorySection />
 
-      {/* 3. DESTACADOS (Blanco) */}
+      {/* 3. FEATURED (White) */}
       <FeaturedSection />
 
     </Box>

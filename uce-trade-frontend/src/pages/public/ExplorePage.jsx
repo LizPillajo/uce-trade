@@ -7,28 +7,28 @@ import VentureCard from '../../components/ventures/VentureCard';
 import VentureFilter from '../../components/ventures/VentureFilter';
 
 const ExplorePage = () => {
-  // Estados
-  const [page, setPage] = useState(1); // Página actual
+
+  const [page, setPage] = useState(1); // Current page
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('All');
   const [sort, setSort] = useState('recent');
 
-  // Query con Paginación
-  // La 'key' incluye 'page' para que al cambiar de página, TanStack Query vuelva a buscar
+  // Query with Pagination
+  // The 'key' includes 'page' so that when the page changes, TanStack Query fetches again
   const { data, isLoading, isPlaceholderData } = useQuery({
-    queryKey: ['ventures', page, category], // Agregamos dependencias
+    queryKey: ['ventures', page, category], // Added dependencies
     queryFn: () => fetchServices(page),
-    keepPreviousData: true, // Mantiene los datos viejos mientras cargan los nuevos (mejor UX)
+    keepPreviousData: true, // Keeps old data while new loads
   });
 
-  // En Spring Boot, la data viene en 'data.content' y el total de páginas en 'data.totalPages'
+  // In Spring Boot, data comes in 'data.content' and total pages in 'data.totalPages'
   const venturesList = data?.content || [];
   const totalPages = data?.totalPages || 1;
 
-  // Manejador de cambio de página
+  // Page change handler
   const handlePageChange = (event, value) => {
     setPage(value);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Subir al inicio suavemente
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll smoothly to top
   };
 
   return (
@@ -65,7 +65,7 @@ const ExplorePage = () => {
           )}
         </Box>
         
-        {/* PAGINACIÓN REAL */}
+        {/* REAL PAGINATION */}
         <Box display="flex" justifyContent="center" mt={6}>
           <Pagination 
             count={totalPages} 

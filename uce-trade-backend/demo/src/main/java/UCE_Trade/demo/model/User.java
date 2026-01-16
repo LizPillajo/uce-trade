@@ -14,7 +14,7 @@ import java.io.Serializable;
 
 public class User implements Serializable{
 
-    private static final long serialVersionUID = 1L; // <--- AGREGAR ESTO (Es como una cédula de versión)
+    private static final long serialVersionUID = 1L; // cédula de versión
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

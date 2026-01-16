@@ -18,7 +18,7 @@ const Badge = ({ status, ...props }) => {
     case 'tutorials':
       styles = { bgcolor: '#e0f2fe', color: '#0369a1' };
       break;
-    // Agrega más casos según necesites
+
   }
 
   return (

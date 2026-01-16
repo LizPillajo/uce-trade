@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     
-                    // 4. Establecer el usuario en el contexto (¡Aquí deja de ser anonymous!)
+                    // 4. Establecer el usuario en el contexto. Aquí deja de ser anonymous
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }

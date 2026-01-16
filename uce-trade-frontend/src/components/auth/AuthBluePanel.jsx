@@ -20,7 +20,7 @@ const AuthBluePanel = ({ title, subtitle }) => {
         overflow: 'hidden'
       }}
     >
-      {/* Icono del Birrete en cuadrado semitransparente */}
+      {/* Graduation Cap Icon */}
       <Box 
         sx={{ 
           bgcolor: 'rgba(255,255,255,0.1)', 
@@ -43,7 +43,7 @@ const AuthBluePanel = ({ title, subtitle }) => {
         {subtitle}
       </Typography>
 
-      {/* Decoración de fondo (opcional, círculos sutiles) */}
+      {/* Background decoration (subtle circles) */}
       <Box sx={{ 
           position: 'absolute', top: -50, right: -50, width: 200, height: 200, 
           borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.03)' 

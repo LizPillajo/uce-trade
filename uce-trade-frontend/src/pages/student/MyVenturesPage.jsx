@@ -16,16 +16,16 @@ import StarIcon from "@mui/icons-material/Star";
 import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
 
-// --- IMPORTACIONES DE LÓGICA ---
+// --- LOGIC IMPORTS ---
 import { useQuery } from '@tanstack/react-query';
 import { fetchMyVentures } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 const MyVenturesPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Datos del usuario logueado
+  const { user } = useAuth(); // Logged-in user data
 
-  // TRAER DATOS REALES DEL BACKEND
+  // FETCH REAL DATA FROM BACKEND
   const { data: ventures, isLoading, isError } = useQuery({
     queryKey: ['myVentures'],
     queryFn: fetchMyVentures,
@@ -35,17 +35,17 @@ const MyVenturesPage = () => {
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
       <Container maxWidth="xl">
         
-        {/* 1. HEADER DEL PERFIL (TU DISEÑO ORIGINAL) */}
+        {/* 1. PROFILE HEADER (YOUR ORIGINAL DESIGN) */}
         <Paper elevation={0} sx={{borderRadius: "24px", overflow: "hidden", mb: 4, border: "1px solid #e5e7eb"}}>
-          {/* Banner Amarillo */}
+          {/* Yellow Banner */}
           <Box sx={{ height: 80, bgcolor: "#efb034" }} />
-          {/* Contenido principal horizontal */}
+          {/* Main horizontal content */}
           <Box px={4} pb={4}>
             <Grid container alignItems="flex-end" spacing={3} sx={{ mt: -6 }}>
-              {/* Foto Perfil */}
+              {/* Profile Photo */}
               <Grid size="auto">
                 <Avatar 
-                  src={user?.avatar || ""} // Intentamos usar avatar si existe
+                  src={user?.avatar || ""} // Try to use avatar if exists
                   alt={user?.name}
                   sx={{
                     width: 150,
@@ -55,12 +55,12 @@ const MyVenturesPage = () => {
                     fontSize: "3rem",
                   }}
                 >
-                  {/* Si no hay foto, ponemos la inicial */}
+                  {/* If no photo, show initial */}
                   {user?.name?.charAt(0) || "U"}
                 </Avatar>
               </Grid>
 
-              {/* Info Texto */}
+              {/* Info Text */}
               <Grid size="grow">
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                   <Box>
@@ -83,7 +83,7 @@ const MyVenturesPage = () => {
               </Grid>
             </Grid>
 
-            {/* Stats Rápidas Perfil */}
+            {/* Quick Profile Stats */}
             <Box display="flex" gap={4} mt={3}>
               <Box display="flex" alignItems="center" gap={1}>
                 <StarIcon sx={{ color: "#f59e0b" }} />
@@ -102,7 +102,7 @@ const MyVenturesPage = () => {
           </Box>
         </Paper>
 
-        {/* 2. FILA INFO + CONTACTO (TU DISEÑO ORIGINAL) */}
+        {/* 2. INFO + CONTACT ROW (YOUR ORIGINAL DESIGN) */}
         <Grid container spacing={4} mb={6}>
           {/* About Me */}
           <Grid size={{ xs: 12, md: 8 }}>
@@ -139,7 +139,7 @@ const MyVenturesPage = () => {
           </Grid>
         </Grid>
 
-        {/* 3. SECCIÓN: MY VENTURES (CON DATOS REALES) */}
+        {/* 3. SECTION: MY VENTURES (WITH REAL DATA) */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box>
             <Typography variant="h5" fontWeight="800" color="#0d2149">My ventures</Typography>
@@ -157,14 +157,14 @@ const MyVenturesPage = () => {
           </Button>
         </Box>
 
-        {/* KPI Mini - Ahora dinámicos según cantidad de items */}
+        {/* Mini KPI - Now dynamic according to number of items */}
         <Grid container spacing={3} mb={4}>
           <MiniStat label="Active Services" value={ventures?.length || 0} icon="📦" />
           <MiniStat label="Total Views" value="0" icon="📈" />
           <MiniStat label="Average Rating" value="0.0" icon="⭐" />
         </Grid>
 
-        {/* TABLA DE PRODUCTOS REAL */}
+        {/* REAL PRODUCTS TABLE */}
         {isLoading ? (
             <Box display="flex" justifyContent="center" py={5}><CircularProgress /></Box>
         ) : isError ? (
@@ -195,12 +195,12 @@ const MyVenturesPage = () => {
                         <TableRow key={row.id} hover>
                         <TableCell>
                             <Box display="flex" alignItems="center" gap={2}>
-                            {/* IMAGEN REAL DE SUPABASE */}
+                            {/* REAL IMAGE FROM SUPABASE */}
                             <Avatar variant="rounded" src={row.imageUrl} sx={{ width: 50, height: 50 }} />
                             <Box>
                                 <Typography fontWeight="bold" color="#0d2149">{row.title}</Typography>
                                 <Typography variant="caption" color="text.secondary">
-                                    Created: {row.createdDate || 'Recently'}
+                                  Created: {row.createdDate || 'Recently'}
                                 </Typography>
                             </Box>
                             </Box>
@@ -209,12 +209,12 @@ const MyVenturesPage = () => {
                         <TableCell fontWeight="bold">${row.price}</TableCell>
                         <TableCell>
                             <Chip 
-                                label="Active" // Por ahora estático, luego podemos agregar campo status
-                                size="small" 
-                                sx={{ bgcolor: "#dcfce7", color: "#166534", fontWeight: "bold" }} 
+                              label="Active" // For now static, later we can add status field
+                              size="small" 
+                              sx={{ bgcolor: "#dcfce7", color: "#166534", fontWeight: "bold" }} 
                             />
                         </TableCell>
-                        <TableCell>0</TableCell> {/* Mock visitas */}
+                        <TableCell>0</TableCell> {/* Mock visits */}
                         <TableCell>
                             <Box display="flex" alignItems="center" gap={0.5}>
                             <StarIcon fontSize="small" sx={{ color: "#f59e0b" }} />

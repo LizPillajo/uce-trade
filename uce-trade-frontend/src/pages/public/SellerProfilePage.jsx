@@ -21,14 +21,14 @@ const SellerProfilePage = () => {
   return (
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
       <Container maxWidth="xl">
-        {/* 1. HEADER DEL PERFIL */}
+        {/* 1. PROFILE HEADER */}
         <Paper elevation={0} sx={{ borderRadius: "24px", overflow: "hidden", mb: 4, border: "1px solid #e5e7eb" }}>
-          {/* Banner Amarillo */}
+          {/* Yellow Banner */}
           <Box sx={{ height: 80, bgcolor: "#efb034" }} />
-          {/* Contenido principal horizontal */}
+          {/* Main horizontal content */}
           <Box px={4} pb={4}>
             <Grid container alignItems="flex-end" spacing={3} sx={{ mt: -6 }}>
-              {/* Foto Perfil */}
+              {/* Profile Photo */}
               <Grid size="auto">
                 <Avatar src="https://i.pravatar.cc/300?u=liz"
                   sx={{
@@ -44,7 +44,7 @@ const SellerProfilePage = () => {
                 </Avatar>
               </Grid>
 
-              {/* Info Texto */}
+              {/* Info Text */}
               <Grid size="grow" sx={{mb:1}}>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                   <Box>
@@ -61,7 +61,7 @@ const SellerProfilePage = () => {
                   </Box>                  
                 </Box>                
               </Grid>
-              {/* Contacto */}
+              {/* Contact */}
               <Box flex={0.2} minWidth={250} sx={{ textAlign: { xs: 'left', md: 'center' }, display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', md: 'center' }, justifyContent: 'center', height: '100%' }}>
                 <Typography variant="h6" fontWeight="bold" color="#222" sx={{ mb: 1, mt:8 }}>Contact</Typography>
                 <Button size="large" variant="contained" startIcon={<WhatsAppIcon />} sx={{ bgcolor: '#25D366', '&:hover': { bgcolor: '#20bd5a' }, py: 1, fontSize: '0.9rem', mb: 2, minWidth: 200, maxWidth: 200, borderRadius: '12px' }}>WhatsApp</Button>
@@ -69,7 +69,7 @@ const SellerProfilePage = () => {
               </Box>
             </Grid>
 
-            {/* Stats Rápidas Perfil */}
+            {/* Quick Profile Stats */}
             <Box display="flex" gap={4} mt={3}>
               <Box display="flex" alignItems="center" gap={1}>
                 <StarIcon sx={{ color: "#f59e0b" }} />
@@ -88,7 +88,7 @@ const SellerProfilePage = () => {
           </Box>
         </Paper>
 
-        {/* ABOUT ME */}
+            {/* ABOUT ME */}
         <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #e5e7eb', mb: 5 }}>
           <Typography variant="h6" fontWeight="bold" color="#0d2149" gutterBottom>About me</Typography>
           <Typography variant="body1" color="text.secondary" paragraph>

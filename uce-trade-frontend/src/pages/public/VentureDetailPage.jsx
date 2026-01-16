@@ -28,8 +28,8 @@ const VentureDetailPage = () => {
   if (isLoading) return <Box sx={{ pt: 15, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>;
   if (isError || !venture) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">Service not found or deleted.</Alert></Box>;
 
-  // PREPARAR DATOS (Adaptador Backend -> Frontend)
-  // Si no hay imagen, usamos una por defecto de placeholder
+  // PREPARE DATA (Backend -> Frontend adapter)
+  // If there is no image, use a default placeholder
   const mainImage = venture.imageUrl || "https://placehold.co/600x400?text=No+Image";
   const ownerName = venture.owner?.fullName || "UCE Student";
   const ownerFaculty = venture.owner?.faculty || "UCE Faculty";
@@ -42,17 +42,17 @@ const VentureDetailPage = () => {
 
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
         
-        {/* Botón Volver */}
+        {/* Back Button */}
         <Button variant="text" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 3, color: 'text.secondary' }}>
             Back
         </Button>
 
-        {/* CONTENEDOR PRINCIPAL */}
+        {/* MAIN CONTAINER */}
         <Grid container spacing={4}>
           
           <Grid size={{ xs: 12, lg: 8 }}>
             
-            {/* 1. IMAGEN PRINCIPAL */}
+            {/* 1. MAIN IMAGE */}
             <Box 
               sx={{ 
                 position: 'relative',
@@ -86,7 +86,7 @@ const VentureDetailPage = () => {
                 {venture.description}
               </Typography>
 
-              {/* Si tu backend tuviera "features" lo mostraríamos aquí. Por ahora estático o condicional */}
+              {/* If your backend had "features" we would show them here. For now, static or conditional */}
               <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 2 }}>
                 Service published on: {venture.createdDate}
               </Typography>
@@ -95,12 +95,12 @@ const VentureDetailPage = () => {
 
 
           {/* ============================================================== */}
-          {/* COLUMNA DERECHA (Lateral): Info + Proveedor + Precios          */}
+          {/* RIGHT COLUMN (Sidebar): Info + Provider + Prices               */}
           {/* ============================================================== */}
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={3}>
 
-              {/* TARJETA 1: INFO BÁSICA Y BOTONES */}
+              {/* CARD 1: BASIC INFO AND BUTTONS */}
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
                 <Box display="flex" justifyContent="space-between" mb={1}>
                     <Chip label={venture.category} sx={{ bgcolor: '#0d2149', color: 'white', fontWeight: 'bold', fontSize: '0.7rem', height: 24 }} />
@@ -134,7 +134,7 @@ const VentureDetailPage = () => {
               </Paper>
 
 
-              {/* TARJETA 2: PROVEEDOR */}
+              {/* CARD 2: PROVIDER */}
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Typography variant="caption" color="text.secondary" fontWeight="bold">PROVIDED BY</Typography>

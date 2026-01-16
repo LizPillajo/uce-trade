@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { AppBar, Toolbar, Box, Typography, IconButton, Avatar, Menu, MenuItem, useScrollTrigger, Container, Divider } from '@mui/material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
-import Button from '../ui/Button'; // Tu botón custom
-import { useAuth } from '../../context/AuthContext'; // <--- IMPORTAR EL HOOK
+import Button from '../ui/Button'; // Your custom button
+import { useAuth } from '../../context/AuthContext'; // <--- IMPORT THE HOOK
 
 const Navbar = () => {
-  const { user, logout } = useAuth(); // Usar el contexto
+  const { user, logout } = useAuth(); // Use the context
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -16,7 +16,7 @@ const Navbar = () => {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
   const isTransparent = isHome && !trigger;
   
-  // Definir links según el rol
+  // Define links according to the role
   let links = [{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }];
   
   if (user?.role === 'STUDENT') {
@@ -49,7 +49,7 @@ const Navbar = () => {
             </Box>
           </Box>
 
-          {/* MENÚ CENTRAL DINÁMICO */}
+          {/* DYNAMIC CENTRAL MENU */}
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 3 }}>
             {links.map((link) => (
               <Button 
@@ -64,10 +64,10 @@ const Navbar = () => {
             ))}
           </Box>
 
-          {/* ZONA DE USUARIO */}
+          {/* USER AREA */}
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             {!user ? (
-              // VISTA PÚBLICA (NO LOGUEADO)
+              // PUBLIC VIEW (NOT LOGGED IN)
               <>
                 <Button component={RouterLink} to="/login" variant="text" sx={{ color: 'white', fontWeight: 600 }}>
                   Log in
@@ -77,7 +77,7 @@ const Navbar = () => {
                 </Button>
               </>
             ) : (
-              // VISTA LOGUEADO (Avatar Menú)
+              // LOGGED IN VIEW (Avatar Menu)
               <>
                 <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0 }}>
                   <Avatar sx={{ bgcolor: '#efb034', color: '#0d2149', fontWeight: 'bold' }}>
@@ -96,7 +96,7 @@ const Navbar = () => {
                   </Box>
                   <Divider />
                   
-                  {/* Link a Perfil Personal (Solo si es estudiante) */}
+                  {/* Link to Personal Profile (Only if student) */}
                   {user.role === 'STUDENT' && (
                       <MenuItem onClick={() => { navigate('/student/my-ventures'); setAnchorEl(null); }}>My Profile</MenuItem>
                   )}

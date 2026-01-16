@@ -12,7 +12,7 @@ const Avatar = ({ src, alt, size = 40, fallback = 'U', sx, ...props }) => {
         bgcolor: '#0d2149', // Color corporativo UCE por defecto
         color: 'white',
         fontWeight: 'bold',
-        fontSize: size * 0.4, // El texto escala con el tamaño
+        fontSize: size * 0.4,
         border: '2px solid white',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         ...sx

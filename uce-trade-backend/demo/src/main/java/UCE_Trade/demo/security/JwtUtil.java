@@ -10,7 +10,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // En producción esto debería venir de application.yml, pero para el proyecto úsala aquí.
+    // En producción esto debería venir de application.yml.
     // Tiene que ser una clave MUY larga (mínimo 32 caracteres)
     private static final String SECRET_KEY = "uce_trade_super_secret_key_proyect_ingenieria_web_2025";
     private static final long EXPIRATION_TIME = 86400000; // 24 horas
