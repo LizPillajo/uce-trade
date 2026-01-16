@@ -51,7 +51,7 @@ const LoginPage = () => {
     if(role === 'admin') {
        setEmail('admin@uce.edu.ec'); setPassword('123'); // Asegúrate que este usuario exista en tu BD
     } else {
-       setEmail('ldpillajo@uce.edu.ec'); setPassword('secretPassword123');
+       setEmail('liz@uce.edu.ec'); setPassword('secretPassword123');
     }
   };
 

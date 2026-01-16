@@ -9,7 +9,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.cache.annotation.Cacheable;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
+import UCE_Trade.demo.model.User;
 import java.util.List;
 
 @RestController
@@ -18,6 +21,9 @@ public class VentureController {
 
     @Autowired
     private VentureRepository ventureRepository;
+    
+    @Autowired
+    private UCE_Trade.demo.service.UserService userService;
 
     // 1. ENDPOINT PARA EL HOME (Solo 4 destacados)
     // GET http://localhost:8080/api/ventures/featured
@@ -49,4 +55,31 @@ public class VentureController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
+    // POST http://localhost:8080/api/ventures
+    @PostMapping
+    public ResponseEntity<?> createVenture(@RequestBody Venture venture) {
+        try {
+            System.out.println("RECIBIDO: " + venture); // <--- DEBUG 1: Ver qué llega
+
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName(); 
+            System.out.println("USUARIO: " + email); // <--- DEBUG 2: Ver quién lo envía
+            
+            User owner = userService.getUserByEmail(email);
+            if (owner == null) {
+                 return ResponseEntity.badRequest().body("Error: Usuario no encontrado en BD");
+            }
+
+            venture.setOwner(owner);
+            venture.setCreatedDate(java.time.LocalDate.now());
+            venture.setRating(0.0);
+            
+            Venture savedVenture = ventureRepository.save(venture);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedVenture);
+            
+        } catch (Exception e) {
+            e.printStackTrace(); // <--- IMPRIMIR ERROR REAL EN CONSOLA VS CODE
+            return ResponseEntity.badRequest().body("Error interno: " + e.getMessage());
+        }
+    }
 }
