@@ -11,9 +11,9 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
 import { fetchServiceById } from '../../services/api';
 import Button from '../../components/ui/Button';
+import SeoMeta from '../../components/common/SeoMeta';
 
 const VentureDetailPage = () => {
   const { id } = useParams();
@@ -37,6 +37,9 @@ const VentureDetailPage = () => {
 
   return (
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
+
+      <SeoMeta title={venture.title} description={(venture.description || "").substring(0, 150)} />
+
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
         
         {/* Botón Volver */}
