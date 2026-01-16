@@ -55,6 +55,23 @@ public class VentureController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
+    // GET http://localhost:8080/api/ventures/my-ventures
+    @GetMapping("/my-ventures")
+    public ResponseEntity<List<Venture>> getMyVentures() {
+        try {
+            // 1. ¿Quién está logueado?
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            
+            // 2. Buscar SUS emprendimientos
+            List<Venture> myVentures = ventureRepository.findByOwnerEmail(email);
+            
+            return ResponseEntity.ok(myVentures);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     // POST http://localhost:8080/api/ventures
     @PostMapping
     public ResponseEntity<?> createVenture(@RequestBody Venture venture) {

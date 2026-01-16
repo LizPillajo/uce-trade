@@ -59,4 +59,10 @@ export const fetchServiceById = async (id) => {
   return response.data;
 };
 
+// Obtener mis emprendimientos
+export const fetchMyVentures = async () => {
+  const response = await api.get('/ventures/my-ventures');
+  return response.data;
+};
+
 export default api;
