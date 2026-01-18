@@ -40,11 +40,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 1. RUTAS PÚBLICAS (Sin Login)
                 .requestMatchers(
-                    //"/api/**", // <--- LO PONEMOS EXPLÍCITO POR SI ACASO
+                    //"/api/**",
                     "/api/auth/**",           // Login y Registro
                     "/api/ventures",          // Listar todos (Explore)
                     "/api/ventures/**",       // Detalles y Featured
-                    "/api/ventures/featured", // <--- LO PONEMOS EXPLÍCITO
+                    "/api/ventures/featured", 
                     "/v3/api-docs/**",        // Swagger Docs
                     "/swagger-ui/**",         // Swagger UI
                     "/swagger-ui.html"        // Swagger HTML

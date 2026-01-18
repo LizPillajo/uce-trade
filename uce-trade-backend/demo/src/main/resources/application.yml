@@ -23,5 +23,9 @@ spring:
       host: localhost
       port: 6379
 
+  stripe:
+    secret: sk_test_TU_CLAVE_SECRETA_AQUI
+    public: pk_test_TU_CLAVE_PUBLICA_AQUI 
+
 server:
   port: 8080
