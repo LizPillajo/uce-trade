@@ -2,18 +2,16 @@ spring:
   application:
     name: UCE-Trade
   
-  # CONEXIÓN A LA BASE DE DATOS (Que creamos en el Paso 1)
   datasource:
     url: jdbc:postgresql://localhost:5433/uce_trade_db
     username: admin
     password: admin
     driver-class-name: org.postgresql.Driver
   
-  # CONFIGURACIÓN AUTOMÁTICA DE TABLAS
   jpa:
     hibernate:
-      ddl-auto: update # Esto crea las tablas solito
-    show-sql: true # Para ver en consola qué hace la BD
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -23,9 +21,10 @@ spring:
       host: localhost
       port: 6379
 
+  # SOLO LA SECRETA AQUÍ
   stripe:
     secret: sk_test_TU_CLAVE_SECRETA_AQUI
-    public: pk_test_TU_CLAVE_PUBLICA_AQUI 
+    # La pública bórrala de aquí, la pegaremos en React.
 
 server:
   port: 8080

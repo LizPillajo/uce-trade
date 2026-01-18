@@ -1,7 +1,11 @@
 // src/pages/public/VentureDetailPage.jsx
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Container, Grid, Box, Typography, Paper, Chip, Avatar, Stack, Divider, CircularProgress, Alert } from '@mui/material';
+import { 
+  Container, Grid, Box, Typography, Paper, Chip, Avatar, 
+  Stack, Divider, CircularProgress, Alert 
+} from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
@@ -11,13 +15,19 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout'; // Icono para comprar
+
 import { fetchServiceById } from '../../services/api';
 import Button from '../../components/ui/Button';
 import SeoMeta from '../../components/common/SeoMeta';
+import PaymentModal from '../../components/payment/PaymentModal'; // <--- IMPORTANTE: Importar el Modal
 
 const VentureDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  // Estado para controlar el modal de pago
+  const [openPayment, setOpenPayment] = useState(false);
 
   const { data: venture, isLoading, isError } = useQuery({
     queryKey: ['venture', id],
@@ -28,8 +38,6 @@ const VentureDetailPage = () => {
   if (isLoading) return <Box sx={{ pt: 15, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>;
   if (isError || !venture) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">Service not found or deleted.</Alert></Box>;
 
-  // PREPARE DATA (Backend -> Frontend adapter)
-  // If there is no image, use a default placeholder
   const mainImage = venture.imageUrl || "https://placehold.co/600x400?text=No+Image";
   const ownerName = venture.owner?.fullName || "UCE Student";
   const ownerFaculty = venture.owner?.faculty || "UCE Faculty";
@@ -39,6 +47,14 @@ const VentureDetailPage = () => {
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
 
       <SeoMeta title={venture.title} description={(venture.description || "").substring(0, 150)} />
+
+      {/* RENDERIZADO DEL MODAL DE PAGO (Invisible hasta que se active) */}
+      <PaymentModal 
+        open={openPayment} 
+        handleClose={() => setOpenPayment(false)} 
+        ventureId={id}
+        price={venture.price}
+      />
 
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
         
@@ -76,7 +92,7 @@ const VentureDetailPage = () => {
               </Box>
             </Box>
 
-            {/* 2. TARJETA DE DESCRIPCIÓN */}
+            {/* 2. DESCRIPTION */}
             <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
               <Typography variant="h5" fontWeight="bold" gutterBottom color="#0d2149">
                 Description
@@ -86,7 +102,6 @@ const VentureDetailPage = () => {
                 {venture.description}
               </Typography>
 
-              {/* If your backend had "features" we would show them here. For now, static or conditional */}
               <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 2 }}>
                 Service published on: {venture.createdDate}
               </Typography>
@@ -100,7 +115,7 @@ const VentureDetailPage = () => {
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={3}>
 
-              {/* CARD 1: BASIC INFO AND BUTTONS */}
+              {/* CARD 1: ACTION CARD (Compra y Contacto) */}
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
                 <Box display="flex" justifyContent="space-between" mb={1}>
                     <Chip label={venture.category} sx={{ bgcolor: '#0d2149', color: 'white', fontWeight: 'bold', fontSize: '0.7rem', height: 24 }} />
@@ -117,24 +132,52 @@ const VentureDetailPage = () => {
                     <Typography variant="caption" color="text.secondary">(New Service)</Typography>
                 </Box>
                 
-                <Box display="flex" justifyContent="flex-end" alignItems="baseline" mb={3}>
-                    <Typography variant="h4" fontWeight="900" color="#0d2149">
-                        ${venture.price}
+                {/* ZONA DE PAGO (Destacada) */}
+                <Box sx={{ bgcolor: '#f8fafc', p: 2, borderRadius: '12px', mb: 3, border: '1px dashed #cbd5e1' }}>
+                    <Typography variant="caption" color="text.secondary" fontWeight="bold">TOTAL PRICE</Typography>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                        <Typography variant="h3" fontWeight="900" color="#0d2149">
+                            ${venture.price}
+                        </Typography>
+                    </Box>
+                    <Button 
+                      fullWidth 
+                      variant="contained" 
+                      size="large"
+                      startIcon={<ShoppingCartCheckoutIcon />}
+                      sx={{ 
+                        bgcolor: '#efb034', 
+                        color: '#0d2149', 
+                        fontSize: '1.1rem',
+                        boxShadow: '0 4px 14px rgba(239, 176, 52, 0.4)',
+                        '&:hover': { bgcolor: '#f0b94e', transform: 'translateY(-2px)' }
+                      }}
+                      onClick={() => setOpenPayment(true)}
+                    >
+                      Buy Now
+                    </Button>
+                    <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={1}>
+                        Secure payment via Stripe • Invoice included
                     </Typography>
                 </Box>
 
+                <Divider sx={{ my: 3 }}>
+                    <Typography variant="caption" color="text.secondary">OR CONTACT SELLER</Typography>
+                </Divider>
+
+                {/* ZONA DE CONTACTO */}
                 <Box display="flex" gap={1}>
                     <Button fullWidth variant="contained" startIcon={<WhatsAppIcon />} sx={{ bgcolor: '#25D366', color: 'white', borderRadius: '8px', '&:hover': { bgcolor: '#20bd5a' } }}>
-                        Contact
+                        WhatsApp
                     </Button>
                     <Button fullWidth variant="contained" startIcon={<EmailIcon />} sx={{ bgcolor: '#f3f4f6', color: '#1f2937', borderRadius: '8px', boxShadow: 'none', '&:hover': { bgcolor: '#e5e7eb' } }}>
                         Email
-                    </Button>
+                    </Button>                     
                 </Box>
               </Paper>
 
 
-              {/* CARD 2: PROVIDER */}
+              {/* CARD 2: PROVIDER INFO */}
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Typography variant="caption" color="text.secondary" fontWeight="bold">PROVIDED BY</Typography>
