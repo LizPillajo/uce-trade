@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { Box, Modal, Paper, Typography, CircularProgress } from '@mui/material';
+import { Box, Modal, Paper, Typography, CircularProgress, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import CheckoutForm from './CheckoutForm';
 import api from '../../services/api';
 
@@ -12,11 +13,14 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: { xs: '95%', sm: 450 },
+  maxHeight: '90vh',   // Ocupa máximo el 90% de la altura de la pantalla
+  overflowY: 'auto',   // Si el contenido es más alto, activa el scroll vertical
   bgcolor: 'background.paper',
   borderRadius: '16px',
   boxShadow: 24,
   p: 4,
+  outline: 'none'
 };
 
 const PaymentModal = ({ open, handleClose, ventureId, price }) => {
@@ -25,6 +29,7 @@ const PaymentModal = ({ open, handleClose, ventureId, price }) => {
   // Al abrir el modal, pedimos al backend la intención de pago
   useEffect(() => {
     if (open && ventureId) {
+      setClientSecret('');
       api.post('/payments/create-intent', { ventureId })
         .then(res => setClientSecret(res.data.clientSecret))
         .catch(err => console.error("Error iniciando pago:", err));
@@ -34,9 +39,14 @@ const PaymentModal = ({ open, handleClose, ventureId, price }) => {
   return (
     <Modal open={open} onClose={handleClose}>
       <Paper sx={style}>
-        <Typography variant="h5" fontWeight="bold" mb={3} color="#0d2149">
-          Checkout Seguro
-        </Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h5" fontWeight="bold" color="#0d2149">
+            Secure Checkout
+            </Typography>
+            <IconButton onClick={handleClose} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         
         {clientSecret ? (
           <Elements stripe={stripePromise} options={{ clientSecret }}>
