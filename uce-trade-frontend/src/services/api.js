@@ -64,4 +64,12 @@ export const fetchMyVentures = async () => {
   return response.data;
 };
 
+// Download Invoice
+export const downloadInvoice = async (ventureId) => {
+  const response = await api.get(`/payments/invoice/${ventureId}`, {
+    responseType: 'blob', // Important for binary files
+  });
+  return response.data;
+};
+
 export default api;

@@ -20,6 +20,18 @@ spring:
     redis:
       host: localhost
       port: 6379
+  
+  mail:
+    host: smtp.office365.com 
+    port: 587
+    username: ${MAIL_USERNAME} 
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 stripe:
   secret: ${STRIPE_API_KEY:clave_no_encontrada}

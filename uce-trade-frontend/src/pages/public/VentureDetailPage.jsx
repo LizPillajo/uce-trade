@@ -18,13 +18,14 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout'; 
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'; // Icono PDF
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Icono Éxito
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; 
 
 import { fetchServiceById } from '../../services/api';
 import Button from '../../components/ui/Button';
 import SeoMeta from '../../components/common/SeoMeta';
 import PaymentModal from '../../components/payment/PaymentModal'; 
+import { downloadInvoice } from '../../services/api';
 
 const VentureDetailPage = () => {
   const { id } = useParams();
@@ -34,7 +35,33 @@ const VentureDetailPage = () => {
   const [openPayment, setOpenPayment] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null); // 'succeeded' | null
 
-  // 1. DETECT IF WE COME FROM A SUCCESSFUL STRIPE PAYMENT
+  const [downloading, setDownloading] = useState(false); // Status for button loading
+
+  // FUNCTION FOR DOWNLOADING
+  const handleDownloadInvoice = async () => {
+      try {
+          setDownloading(true);
+          const blob = await downloadInvoice(id); 
+            
+          // To download Blob in the browser
+          const url = window.URL.createObjectURL(new Blob([blob]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `invoice_${venture.title}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+          link.parentNode.removeChild(link);
+            
+          alert("Invoice sent to your email as well.");
+      } catch (error) {
+          console.error("Error downloading invoice", error);
+          alert("Error generating invoice.");
+      } finally {
+          setDownloading(false);
+      }
+  };
+
+  // DETECT IF WE COME FROM A SUCCESSFUL STRIPE PAYMENT
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const redirectStatus = query.get('redirect_status');
@@ -166,13 +193,14 @@ const VentureDetailPage = () => {
                       </Typography>
                       
                       <Button 
-                        fullWidth 
-                        variant="outlined" 
-                        startIcon={<PictureAsPdfIcon />}
-                        sx={{ borderColor: '#059669', color: '#059669', bgcolor: 'white', fontWeight: 'bold' }}
-                        onClick={() => alert("Próximamente: Descargar PDF")}
+                          fullWidth 
+                          variant="outlined" 
+                          startIcon={downloading ? <CircularProgress size={20}/> : <PictureAsPdfIcon />}
+                          disabled={downloading}
+                          onClick={handleDownloadInvoice} 
+                          sx={{ borderColor: '#059669', color: '#059669', bgcolor: 'white', fontWeight: 'bold' }}
                       >
-                        Download Invoice
+                          {downloading ? "Generating..." : "Download Invoice"}
                       </Button>
                    </Box>
                 ) : (
