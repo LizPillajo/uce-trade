@@ -21,10 +21,8 @@ spring:
       host: localhost
       port: 6379
 
-  # SOLO LA SECRETA AQUÍ
-  stripe:
-    secret: sk_test_TU_CLAVE_SECRETA_AQUI
-    # La pública bórrala de aquí, la pegaremos en React.
+stripe:
+  secret: ${STRIPE_API_KEY:clave_no_encontrada}
 
 server:
   port: 8080

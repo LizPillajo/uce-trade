@@ -17,3 +17,5 @@ mvnw.cmd
 *.log
 .idea/
 *.iml
+
+.vscode/

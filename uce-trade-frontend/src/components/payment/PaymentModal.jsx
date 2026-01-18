@@ -5,8 +5,7 @@ import { Box, Modal, Paper, Typography, CircularProgress } from '@mui/material';
 import CheckoutForm from './CheckoutForm';
 import api from '../../services/api';
 
-// Pon tu llave PÚBLICA de Stripe aquí (empieza con pk_test_)
-const stripePromise = loadStripe('pk_test_TU_LLAVE_PUBLICA'); 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const style = {
   position: 'absolute',

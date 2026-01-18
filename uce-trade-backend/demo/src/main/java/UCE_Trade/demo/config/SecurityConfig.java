@@ -45,6 +45,7 @@ public class SecurityConfig {
                     "/api/ventures",          // Listar todos (Explore)
                     "/api/ventures/**",       // Detalles y Featured
                     "/api/ventures/featured", 
+                    "/api/payments/**",
                     "/v3/api-docs/**",        // Swagger Docs
                     "/swagger-ui/**",         // Swagger UI
                     "/swagger-ui.html"        // Swagger HTML

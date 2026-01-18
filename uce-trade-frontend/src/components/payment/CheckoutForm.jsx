@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
-import { Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { Typography, Alert, CircularProgress } from '@mui/material';
 import Button from '../ui/Button';
 
 const CheckoutForm = ({ amount }) => {
@@ -23,16 +23,14 @@ const CheckoutForm = ({ amount }) => {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // A dónde redirigir tras el pago exitoso (crearemos esta página luego)
-        return_url: `${window.location.origin}/payment-success`, 
+        // IMPORTANTE: Redirige a la misma página del producto
+        return_url: window.location.href,
       },
     });
 
     if (error) {
       setMessage(error.message);
       setIsProcessing(false);
-    } else {
-      // Si es exitoso, Stripe redirige automáticamente a return_url
     }
   };
 
@@ -42,7 +40,7 @@ const CheckoutForm = ({ amount }) => {
         Total a pagar: <b>${amount}</b>
       </Typography>
       
-      {/* Elemento preconstruido de Stripe que maneja tarjetas, validaciones, etc. */}
+      {/* Elemento oficial de Stripe (Tarjeta, CVC, Zip) */}
       <PaymentElement />
 
       {message && <Alert severity="error" sx={{ mt: 2 }}>{message}</Alert>}
