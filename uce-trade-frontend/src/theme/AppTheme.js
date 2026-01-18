@@ -2,10 +2,10 @@
 import { createTheme } from '@mui/material/styles';
 
 const colors = {
-  uceBlueDark: '#0d2149',  // Azul oscuro
-  uceBlueLight: '#1a3a75', // Azul claro
-  uceGold: '#efb034',      // Dorado
-  backgroundGray: '#f3f4f6', // Gris suave de fondo
+  uceBlueDark: '#0d2149',  // Dark blue
+  uceBlueLight: '#1a3a75', // Light blue
+  uceGold: '#efb034',      // Gold
+  backgroundGray: '#f3f4f6', // Soft background gray
 };
 
 export const AppTheme = createTheme({
@@ -17,7 +17,7 @@ export const AppTheme = createTheme({
     },
     secondary: {
       main: colors.uceGold,
-      contrastText: '#0d2149', // Texto oscuro sobre dorado para contraste
+      contrastText: '#0d2149', // Dark text on gold for contrast
     },
     background: {
       default: colors.backgroundGray,
@@ -31,7 +31,7 @@ export const AppTheme = createTheme({
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     button: {
-      textTransform: 'none', // Sin mayúsculas forzadas
+      textTransform: 'none', 
       fontWeight: 600,
     },
   },

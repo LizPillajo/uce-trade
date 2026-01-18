@@ -8,7 +8,7 @@ import VentureFilter from '../../components/ventures/VentureFilter';
 
 const ExplorePage = () => {
 
-  const [page, setPage] = useState(1); // Current page
+  const [page, setPage] = useState(1); 
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('All');
   const [sort, setSort] = useState('recent');

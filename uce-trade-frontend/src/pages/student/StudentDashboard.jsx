@@ -7,7 +7,6 @@ import MessageIcon from '@mui/icons-material/Message';
 import StarIcon from '@mui/icons-material/Star';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
-// Datos falsos
 const dataVisits = [
   { name: 'Mon', visits: 130 }, { name: 'Tue', visits: 180 },
   { name: 'Wed', visits: 200 }, { name: 'Thu', visits: 250 },
@@ -34,8 +33,6 @@ const StudentDashboard = () => {
           </Typography>
         </Box>
 
-        {/* 2. TARJETAS DE ESTADÍSTICAS (KPIs) */}
-        {/* Usamos size={{...}} en lugar de item xs={...} */}
         <Grid container spacing={3} mb={6}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <StatsCard title="Total Visits" value="2,847" percent="+12.5%" icon={<VisibilityIcon sx={{ color: 'white' }} />} color="#3b82f6" />
@@ -51,17 +48,15 @@ const StudentDashboard = () => {
           </Grid>
         </Grid>
 
-        {/* 3. GRÁFICAS PRINCIPALES */}
         <Grid container spacing={4} mb={6}>
-          {/* Gráfica de Visitas (Línea) */}
+
           <Grid size={{ xs: 12, lg: 6 }}>
             <Paper sx={{ p: 4, borderRadius: '24px', border: '1px solid #e5e7eb' }} elevation={0}>
               <Box display="flex" justifyContent="space-between" mb={2}>
                  <Typography variant="h6" fontWeight="bold" color="#0d2149">Visits Overview</Typography>
                  <Box bgcolor="#ecfdf5" px={2} py={0.5} borderRadius="20px" color="#059669" fontWeight="bold">+12.5%</Box>
               </Box>
-              
-              {/* SOLUCIÓN AL ERROR DE RECHARTS: Altura explícita en el contenedor padre */}
+                      
               <Box sx={{ width: '100%', height: 350 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={dataVisits}>
@@ -76,12 +71,10 @@ const StudentDashboard = () => {
             </Paper>
           </Grid>
 
-          {/* Gráfica de Horas Pico (Barras) */}
           <Grid size={{ xs: 12, lg: 6 }}>
             <Paper sx={{ p: 4, borderRadius: '24px', border: '1px solid #e5e7eb', height: '100%' }} elevation={0}>
               <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Peak Hours</Typography>
               
-              {/* SOLUCIÓN AL ERROR DE RECHARTS */}
               <Box sx={{ width: '100%', height: 350 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dataHours} layout="vertical">
@@ -97,7 +90,6 @@ const StudentDashboard = () => {
           </Grid>
         </Grid>
 
-        {/* 4. LISTA INFERIOR */}
         <Grid container spacing={4}>
            {/* Most Viewed Services */}
            <Grid size={{ xs: 12, md: 6 }}>
@@ -147,7 +139,6 @@ const StudentDashboard = () => {
   );
 };
 
-// Componente pequeño para las tarjetas de arriba
 const StatsCard = ({ title, value, percent, icon, color }) => (
   <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     <Box>

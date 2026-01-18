@@ -4,14 +4,14 @@ import UCE_Trade.demo.model.User;
 import UCE_Trade.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService; // <--- Importante
+import org.springframework.security.core.userdetails.UserDetailsService; 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService { // <--- ESTO FALTABA O ESTABA MAL
+public class CustomUserDetailsService implements UserDetailsService { 
 
     @Autowired
     private UserRepository userRepository;

@@ -9,7 +9,7 @@ const Avatar = ({ src, alt, size = 40, fallback = 'U', sx, ...props }) => {
       sx={{
         width: size,
         height: size,
-        bgcolor: '#0d2149', // Color corporativo UCE por defecto
+        bgcolor: '#0d2149', // UCE corporate color
         color: 'white',
         fontWeight: 'bold',
         fontSize: size * 0.4,
@@ -19,7 +19,7 @@ const Avatar = ({ src, alt, size = 40, fallback = 'U', sx, ...props }) => {
       }}
       {...props}
     >
-      {/* Si no hay imagen, muestra la inicial */}
+      {/* If there is no image, show the initial */}
       {!src && fallback.charAt(0).toUpperCase()}
     </MuiAvatar>
   );

@@ -14,8 +14,8 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: { xs: '95%', sm: 450 },
-  maxHeight: '90vh',   // Ocupa máximo el 90% de la altura de la pantalla
-  overflowY: 'auto',   // Si el contenido es más alto, activa el scroll vertical
+  maxHeight: '90vh',   // Occupies up to 90% of the screen height
+  overflowY: 'auto',   // If the content is taller, enable vertical scroll
   bgcolor: 'background.paper',
   borderRadius: '16px',
   boxShadow: 24,
@@ -26,7 +26,7 @@ const style = {
 const PaymentModal = ({ open, handleClose, ventureId, price }) => {
   const [clientSecret, setClientSecret] = useState('');
 
-  // Al abrir el modal, pedimos al backend la intención de pago
+  // When opening the modal, request the payment intent from the backend
   useEffect(() => {
     if (open && ventureId) {
       setClientSecret('');

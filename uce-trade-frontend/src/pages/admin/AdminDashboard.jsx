@@ -37,7 +37,6 @@ import {
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
-  // Datos Falsos
   const growthData = [
     { name: "Jan", val: 400 },
     { name: "Feb", val: 800 },
@@ -82,7 +81,6 @@ const AdminDashboard = () => {
             </Typography>
           </Box>
 
-          {/* GRUPO DE BOTONES */}
           <Box display="flex" gap={2} flexWrap="wrap" width={{ xs: '100%', md: 'auto' }}>
             <Button
               variant="outlined"
@@ -143,7 +141,6 @@ const AdminDashboard = () => {
           />
         </Grid>
 
-        {/* 2. GRÁFICAS SUPERIORES */}
         <Grid container spacing={3} mb={5}>
           {/* Platform Growth (Line) */}
           <Grid size={{ xs: 12, md: 8 }}>
@@ -159,7 +156,7 @@ const AdminDashboard = () => {
               <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>
                 Platform Growth
               </Typography>
-              {/* FIJAMOS LA ALTURA AQUÍ PARA QUE RECHARTS NO FALLE */}
+
               <Box sx={{ width: "100%", height: 300, minHeight: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={growthData}>
@@ -208,7 +205,7 @@ const AdminDashboard = () => {
               <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>
                 Ventures by Faculty
               </Typography>
-              {/* FIJAMOS LA ALTURA AQUÍ TAMBIÉN */}
+
               <Box
                 sx={{
                   width: "100%",
@@ -267,7 +264,6 @@ const AdminDashboard = () => {
           </Grid>
         </Grid>
 
-        {/* 3. LISTAS INFERIORES */}
         <Grid container spacing={3}>
           {/* Top Rated Services */}
           <Grid size={{ xs: 12, md: 6 }}>
@@ -312,7 +308,7 @@ const AdminDashboard = () => {
             </Paper>
           </Grid>
 
-          {/* Popular Categories (Bar Chart Horizontal) */}
+          {/* Popular Categories */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper
               elevation={0}
@@ -326,7 +322,7 @@ const AdminDashboard = () => {
               <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>
                 Most Popular Categories
               </Typography>
-              {/* FIJAMOS ALTURA AQUÍ TAMBIÉN */}
+              
               <Box sx={{ width: "100%", height: 300, minHeight: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart

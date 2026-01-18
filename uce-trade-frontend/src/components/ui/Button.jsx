@@ -2,8 +2,7 @@
 import { Button as MuiButton } from '@mui/material';
 
 const Button = ({ children, variant = 'contained', color = 'primary', sx, ...props }) => {
-  
-  // Estilo especial para el botón "gradiente" (Azul UCE)
+
   const gradientStyle = variant === 'gradient' ? {
     background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
     color: 'white',
@@ -15,7 +14,6 @@ const Button = ({ children, variant = 'contained', color = 'primary', sx, ...pro
     }
   } : {};
 
-  // Estilo para el botón secundario (Dorado)
   const secondaryStyle = color === 'secondary' && variant === 'contained' ? {
     backgroundColor: '#efb034',
     color: '#0d2149',

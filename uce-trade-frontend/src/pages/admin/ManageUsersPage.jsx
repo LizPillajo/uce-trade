@@ -2,19 +2,19 @@
 import { Box, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Avatar, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // <--- IMPORTANTE
-import { useNavigate } from 'react-router-dom';            // <--- IMPORTANTE
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'; 
+import { useNavigate } from 'react-router-dom';           
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 
 const ManageUsersPage = () => {
-  const navigate = useNavigate(); // <--- Hook para navegar
+    const navigate = useNavigate(); 
 
   return (
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: '120px', pb: 8 }}>
       <Container maxWidth="xl">
         
-        {/* BOTÓN DE REGRESO */}
+        {/* BACK BUTTON */}
         <Button 
             startIcon={<ArrowBackIcon />} 
             onClick={() => navigate('/admin/dashboard')} 

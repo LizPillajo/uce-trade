@@ -48,7 +48,7 @@ export const AppRouter = () => {
         </Route>
       </Route>
 
-      {/* Auth Routes (Sin Layout Principal o con Layout Auth) */}
+      {/* Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

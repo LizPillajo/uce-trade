@@ -122,7 +122,6 @@ const AdminVenturesPage = () => {
   );
 };
 
-// Componentes y Datos de ayuda
 const StatusChip = ({ status }) => {
     let color = '#e5e7eb';
     let textColor = '#374151';

@@ -34,7 +34,7 @@ const VentureDetailPage = () => {
   const [openPayment, setOpenPayment] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null); // 'succeeded' | null
 
-  // 1. DETECTAR SI VENIMOS DE UN PAGO EXITOSO DE STRIPE
+  // 1. DETECT IF WE COME FROM A SUCCESSFUL STRIPE PAYMENT
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const redirectStatus = query.get('redirect_status');
@@ -42,7 +42,7 @@ const VentureDetailPage = () => {
     if (redirectStatus === 'succeeded') {
       setPaymentStatus('succeeded');
       
-      // Opcional: Limpiar la URL para que no se vea fea, pero manteniendo el estado visual
+      // Optional: Clean the URL so it doesn't look messy, but keep the visual state
       // window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [location]);
@@ -56,7 +56,7 @@ const VentureDetailPage = () => {
   if (isLoading) return <Box sx={{ pt: 15, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>;
   if (isError || !venture) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">Service not found or deleted.</Alert></Box>;
 
-  // Datos seguros
+  // Safe data
   const mainImage = venture.imageUrl || "https://placehold.co/600x400?text=No+Image";
   const ownerName = venture.owner?.fullName || "UCE Student";
   const ownerFaculty = venture.owner?.faculty || "UCE Faculty";
@@ -67,7 +67,7 @@ const VentureDetailPage = () => {
 
       <SeoMeta title={venture.title} description={(venture.description || "").substring(0, 150)} />
 
-      {/* RENDERIZADO DEL MODAL DE PAGO (Invisible hasta que se active con el botón) */}
+      {/* PAYMENT MODAL RENDER (Invisible until activated by the button) */}
       <PaymentModal 
         open={openPayment} 
         handleClose={() => setOpenPayment(false)} 
@@ -85,7 +85,7 @@ const VentureDetailPage = () => {
         {/* MAIN GRID */}
         <Grid container spacing={4}>
           
-          {/* COLUMNA IZQUIERDA: IMAGEN Y DESCRIPCIÓN */}
+          {/* LEFT COLUMN: IMAGE AND DESCRIPTION */}
           <Grid size={{ xs: 12, lg: 8 }}>
             
             {/* 1. Main Image */}
@@ -112,7 +112,7 @@ const VentureDetailPage = () => {
               </Box>
             </Box>
 
-            {/* 2. Description */}
+              {/* 2. Description */}
             <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
               <Typography variant="h5" fontWeight="bold" gutterBottom color="#0d2149">
                 Description
@@ -128,14 +128,14 @@ const VentureDetailPage = () => {
             </Paper>
           </Grid>
 
-          {/* COLUMNA DERECHA: SIDEBAR (INFO + PAGO + CONTACTO) */}
+          {/* RIGHT COLUMN: SIDEBAR (INFO + PAYMENT + CONTACT) */}
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={3}>
 
-              {/* CARD 1: ACCIÓN PRINCIPAL (INFO + PAGO + CONTACTO) */}
+              {/* CARD 1: MAIN ACTION (INFO + PAYMENT + CONTACT) */}
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
                 
-                {/* Header del producto */}
+                {/* Product header */}
                 <Box display="flex" justifyContent="space-between" mb={1}>
                     <Chip label={venture.category} sx={{ bgcolor: '#0d2149', color: 'white', fontWeight: 'bold', fontSize: '0.7rem', height: 24 }} />
                     <Chip label={ownerFaculty} variant="outlined" size="small" sx={{ height: 24 }} />
@@ -152,10 +152,10 @@ const VentureDetailPage = () => {
                 </Box>
                 
                 {/* ----------------------------------------------------- */}
-                {/* LÓGICA CONDICIONAL: ¿YA PAGÓ O DEBE PAGAR?            */}
+                {/* CONDITIONAL LOGIC: ALREADY PAID OR NEEDS TO PAY?      */}
                 {/* ----------------------------------------------------- */}
                 {paymentStatus === 'succeeded' ? (
-                   // CASO A: YA PAGÓ -> MOSTRAR MENSAJE DE ÉXITO Y BOTÓN DE FACTURA
+                   // CASE A: ALREADY PAID -> SHOW SUCCESS MESSAGE AND INVOICE BUTTON
                    <Box sx={{ bgcolor: '#ecfdf5', p: 3, borderRadius: '12px', mb: 3, border: '1px solid #10b981', textAlign: 'center' }}>
                       <CheckCircleOutlineIcon sx={{ fontSize: 50, color: '#10b981', mb: 1 }} />
                       <Typography variant="h6" fontWeight="bold" color="#065f46">
@@ -176,7 +176,7 @@ const VentureDetailPage = () => {
                       </Button>
                    </Box>
                 ) : (
-                   // CASO B: NO HA PAGADO -> MOSTRAR PRECIO Y BOTÓN DE COMPRA
+                   // CASE B: NOT PAID YET -> SHOW PRICE AND BUY BUTTON
                    <Box sx={{ bgcolor: '#f8fafc', p: 2, borderRadius: '12px', mb: 3, border: '1px dashed #cbd5e1' }}>
                       <Typography variant="caption" color="text.secondary" fontWeight="bold">TOTAL PRICE</Typography>
                       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -210,7 +210,7 @@ const VentureDetailPage = () => {
                     <Typography variant="caption" color="text.secondary">OR CONTACT SELLER</Typography>
                 </Divider>
 
-                {/* ZONA DE CONTACTO (SIEMPRE VISIBLE) */}
+                {/* CONTACT AREA (ALWAYS VISIBLE) */}
                 <Box display="flex" gap={1}>
                     <Button fullWidth variant="contained" startIcon={<WhatsAppIcon />} sx={{ bgcolor: '#25D366', color: 'white', borderRadius: '8px', '&:hover': { bgcolor: '#20bd5a' } }}>
                         WhatsApp

@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Al cargar la página, revisamos si ya había un usuario guardado en localStorage
+  // On page load, check if a user was already saved in localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -16,14 +16,14 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // FUNCIÓN DE LOGIN REAL
+  // REAL LOGIN FUNCTION
   const login = async (email, password) => {
     try {
-      // 1. Llamamos al Backend
+      // 1. Call the Backend
       const data = await loginUser({ email, password });
       
-      // 2. Si llegamos aquí, el backend ya puso la Cookie HttpOnly automáticamente.
-      // Nosotros solo guardamos los datos visibles (Nombre, Rol) para la interfaz.
+      // 2. If we get here, the backend has already set the HttpOnly Cookie automatically.
+      // We only save the visible data (Name, Role) for the UI.
       const userData = {
         name: data.name,
         role: data.role, 
@@ -32,19 +32,19 @@ export const AuthProvider = ({ children }) => {
       };
 
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData)); // Persistencia visual
+      localStorage.setItem('user', JSON.stringify(userData)); // Visual persistence
       return { success: true };
 
     } catch (error) {
-      return { success: false, message: error.message || "Login fallido" };
+      return { success: false, message: error.message || "Login failed" };
     }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    // Nota: Para borrar la cookie HttpOnly deberíamos llamar a un endpoint /logout en el backend
-    // Por ahora, esto limpia la sesión visual.
+    // Note: To delete the HttpOnly cookie, we should call a /logout endpoint in the backend
+    // For now, this only clears the visual session.
   };
 
   return (

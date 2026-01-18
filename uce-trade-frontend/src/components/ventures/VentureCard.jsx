@@ -23,7 +23,7 @@ const VentureCard = ({ data }) => {
         boxShadow: '0 12px 24px -4px rgba(0, 0, 0, 0.1)',
       }
     }}>
-      {/* 1. IMAGEN */}
+      {/* 1. IMAGE */}
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img"
@@ -32,7 +32,7 @@ const VentureCard = ({ data }) => {
           alt={data.title}
           sx={{ objectFit: 'cover' }}
         />
-        {/* Chip de Categoría (Bottom Left) */}
+        {/* Category Chip (Bottom Left) */}
         <Chip 
           label={data.category} 
           size="small"
@@ -46,7 +46,7 @@ const VentureCard = ({ data }) => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }} 
         />
-        {/* Icono Corazón (Top Right) */}
+        {/* Heart Icon (Top Right) */}
         <Box sx={{ 
             position: 'absolute', top: 10, right: 10, 
             bgcolor: 'white', borderRadius: '50%', p: 0.5, display: 'flex',
@@ -57,7 +57,7 @@ const VentureCard = ({ data }) => {
         </Box>
       </Box>
 
-      {/* 2. CONTENIDO */}
+      {/* 2. CONTENT */}
       <CardContent sx={{ flexGrow: 1, p: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="start" mb={1}>
           <Typography variant="subtitle1" fontWeight="bold" lineHeight={1.3} sx={{ flex: 1, mr: 1 }}>
@@ -77,7 +77,7 @@ const VentureCard = ({ data }) => {
            By {data.owner.fullName || "Unknown"}
         </Typography>
 
-        {/* Precio y Botón */}
+        {/* Price and Button */}
         <Box mt="auto" pt={2} display="flex" alignItems="center" justifyContent="space-between" borderTop="1px solid #f2f4f7">
           <Box>
             <Typography variant="caption" color="text.secondary" display="block">Starting at</Typography>

@@ -9,10 +9,10 @@ const Input = ({ label, type = "text", ...props }) => {
       fullWidth
       variant="outlined"
       sx={{
-        mb: 2, // Margen abajo automático
+        mb: 2, 
         '& .MuiOutlinedInput-root': {
-          borderRadius: '8px', // Bordes redondeados
-          bgcolor: '#f9fafb',  // Fondo gris muy clarito para el input
+          borderRadius: '8px', 
+          bgcolor: '#f9fafb',  
           '&:hover fieldset': {
             borderColor: 'primary.main',
           },

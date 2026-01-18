@@ -52,7 +52,7 @@ const CreateVenturePage = () => {
       // Upload to Supabase
       const { error: uploadError } = await supabase.storage
         .from('ventures')
-        .upload(fileName, file); // Nombre directo, sin carpetas complejas
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
@@ -122,7 +122,7 @@ const CreateVenturePage = () => {
             
             <Box>
               <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>1. Basic Information</Typography>
-              {/* CORRECCIÓN DE GRILLAS PARA MUI v6 */}
+
               <Grid container spacing={3}>
                 <Grid size={{ xs: 12 }}> 
                   <TextField 
@@ -210,7 +210,7 @@ const CreateVenturePage = () => {
                 />
                 
                 {uploading ? (
-                    <CircularProgress /> // <--- THIS IS WHAT FAILED BEFORE
+                    <CircularProgress /> 
                 ) : (
                     <>
                         <CloudUploadIcon sx={{ fontSize: 48, color: '#9ca3af', mb: 2 }} />

@@ -14,16 +14,16 @@ const CheckoutForm = ({ amount }) => {
     e.preventDefault();
 
     if (!stripe || !elements) {
-      return; // Stripe aún no carga
+      return; // Stripe not loaded yet
     }
 
     setIsProcessing(true);
 
-    // Confirmar pago con Stripe
+    // Confirm payment with Stripe
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // IMPORTANTE: Redirige a la misma página del producto
+        // Redirects to the same product page
         return_url: window.location.href,
       },
     });
@@ -37,10 +37,10 @@ const CheckoutForm = ({ amount }) => {
   return (
     <form onSubmit={handleSubmit}>
       <Typography variant="h6" color="#0d2149" mb={2}>
-        Total a pagar: <b>${amount}</b>
+        Total to pay: <b>${amount}</b>
       </Typography>
       
-      {/* Elemento oficial de Stripe (Tarjeta, CVC, Zip) */}
+      {/* Official Stripe element (Card, CVC, Zip) */}
       <PaymentElement />
 
       {message && <Alert severity="error" sx={{ mt: 2 }}>{message}</Alert>}
@@ -52,7 +52,7 @@ const CheckoutForm = ({ amount }) => {
         fullWidth
         sx={{ mt: 3, bgcolor: '#0d2149' }}
       >
-        {isProcessing ? <CircularProgress size={24} color="inherit"/> : "Pagar Ahora"}
+        {isProcessing ? <CircularProgress size={24} color="inherit"/> : "Pay Now"}
       </Button>
     </form>
   );

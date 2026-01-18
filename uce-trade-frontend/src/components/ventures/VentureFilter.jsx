@@ -23,7 +23,7 @@ const VentureFilter = ({
 }) => {
   return (
     <Box sx={{ mb: 4 }}>
-      {/* Título de la sección */}
+      {/* Section title */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4" fontWeight="bold" color="#0d2149" sx={{ mb: 2 }}>
           Explore Business
@@ -31,7 +31,7 @@ const VentureFilter = ({
       </Box>
 
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2, width: '100%', flexWrap: 'wrap' }}>
-        {/* Barra de Herramientas (Blanca y redondeada) - ocupa todo el espacio disponible */}
+        {/* Toolbar (white and rounded) - occupies all available space */}
         <Paper
           elevation={0}
           sx={{
@@ -45,7 +45,7 @@ const VentureFilter = ({
             minWidth: 0,
           }}
         >
-          {/* 1. BUSCADOR */}
+          {/* 1. SEARCH BAR */}
           <Box
             sx={{
               display: "flex",
@@ -68,9 +68,9 @@ const VentureFilter = ({
           </Box>
         </Paper>
 
-        {/* Controles a la derecha */}
+        {/* Controls on the right */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, width: { xs: '100%', md: 'auto' } }}>
-          {/* 2. SELECTOR DE CATEGORÍA */}
+          {/* 2. CATEGORY SELECTOR */}
           <Select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -90,7 +90,7 @@ const VentureFilter = ({
           <MenuItem value="Technology">Technology</MenuItem>
           </Select>
 
-          {/* 3. SELECTOR DE ORDEN */}
+          {/* 3. SORT SELECTOR */}
           <Select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
@@ -114,7 +114,7 @@ const VentureFilter = ({
             sx={{ display: { xs: "none", md: "block" } }}
           />
 
-          {/* 4. BOTONES DE VISTA */}
+          {/* 4. VIEW BUTTONS */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <IconButton color="primary">
               <GridViewIcon />
