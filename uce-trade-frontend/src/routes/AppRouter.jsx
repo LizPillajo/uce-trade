@@ -29,7 +29,7 @@ export const AppRouter = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/venture/:id" element={<VentureDetailPage />} />
-        <Route path="/seller" element={<SellerProfilePage />} />
+        <Route path="/profile/:id" element={<SellerProfilePage />} />
 
         {/* --- STUDENT AREA (Only role STUDENT) --- */}
         <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>

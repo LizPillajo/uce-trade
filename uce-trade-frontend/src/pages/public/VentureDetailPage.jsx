@@ -253,7 +253,7 @@ const VentureDetailPage = () => {
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Typography variant="caption" color="text.secondary" fontWeight="bold">PROVIDED BY</Typography>
-                    <Button size="small" variant="contained" sx={{ bgcolor: '#0d2149', fontSize: '0.7rem', py: 0.5, minWidth: 'auto' }} onClick={() => navigate('/seller')}>
+                    <Button size="small" variant="contained" sx={{ bgcolor: '#0d2149', fontSize: '0.7rem', py: 0.5, minWidth: 'auto' }} onClick={() => navigate(`/profile/${venture.owner.id}`)}>
                         Profile
                     </Button>
                 </Box>
