@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { AppBar, Toolbar, Box, Typography, IconButton, Avatar, Menu, MenuItem, useScrollTrigger, Container, Divider } from '@mui/material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
-import Button from '../ui/Button'; // Your custom button
-import { useAuth } from '../../context/AuthContext'; // <--- IMPORT THE HOOK
+import Button from '../ui/Button'; 
+import { useAuth } from '../../context/AuthContext'; 
 
 const Navbar = () => {
-  const { user, logout } = useAuth(); // Use the context
+  const { user, logout } = useAuth(); 
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);

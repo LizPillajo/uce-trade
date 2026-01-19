@@ -18,6 +18,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import UCE_Trade.demo.model.Transaction;
+import UCE_Trade.demo.repository.TransactionRepository;
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
@@ -37,6 +41,9 @@ public class PaymentController {
     @Autowired
     private VentureRepository ventureRepository;
 
+    @Autowired
+    private TransactionRepository transactionRepository;
+
     // GET /api/payments/invoice/{ventureId}
     @GetMapping("/invoice/{ventureId}")
     public ResponseEntity<byte[]> generateAndSendInvoice(@PathVariable Long ventureId) {
@@ -49,6 +56,18 @@ public class PaymentController {
             // 2. Obtener datos del emprendimiento y vendedor
             Venture venture = ventureRepository.findById(ventureId)
                     .orElseThrow(() -> new RuntimeException("Venture not found"));
+            
+            // GUARDAR LA TRANSACCIÓN EN BD
+            Transaction transaction = new Transaction();
+            transaction.setBuyer(buyer);
+            transaction.setVenture(venture);
+            transaction.setAmount(venture.getPrice());
+            transaction.setDate(LocalDateTime.now());
+            transaction.setPaymentMethod("Stripe");
+            transaction.setStatus("COMPLETED");
+            
+            transactionRepository.save(transaction);
+
             User seller = venture.getOwner();
 
             // 3. Generar PDF
