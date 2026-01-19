@@ -42,10 +42,11 @@ const RegisterPage = () => {
       setError("Passwords do not match");
       return;
     }
-    if (!formData.email.endsWith('@uce.edu.ec')) {
-      setError("You must use an institutional email (@uce.edu.ec)");
-      return;
-    }
+    
+    //if (!formData.email.endsWith('@uce.edu.ec')) {
+      //setError("You must use an institutional email (@uce.edu.ec)");
+      //return;
+    //}
 
     setLoading(true);
 

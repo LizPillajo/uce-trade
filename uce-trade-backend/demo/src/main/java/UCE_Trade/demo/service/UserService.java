@@ -26,7 +26,8 @@ public class UserService {
             // CASO ESTUDIANTE: Correo institucional
             user.setRole("STUDENT");
         } else {
-            throw new RuntimeException("Registro permitido solo para correos institucionales (@uce.edu.ec)");
+            //throw new RuntimeException("Registro permitido solo para correos institucionales (@uce.edu.ec)");
+            user.setRole("CLIENT");
         }
 
         if (userRepository.existsByEmail(user.getEmail())) {
