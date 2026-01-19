@@ -95,7 +95,7 @@ public class VentureController {
             return ResponseEntity.status(HttpStatus.CREATED).body(savedVenture);
             
         } catch (Exception e) {
-            e.printStackTrace(); // <--- IMPRIMIR ERROR REAL EN CONSOLA VS CODE
+            e.printStackTrace(); 
             return ResponseEntity.badRequest().body("Error interno: " + e.getMessage());
         }
     }

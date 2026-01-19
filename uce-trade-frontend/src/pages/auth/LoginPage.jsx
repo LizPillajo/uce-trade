@@ -50,7 +50,7 @@ const LoginPage = () => {
     if(role === 'admin') {
        setEmail('admin@uce.edu.ec'); setPassword('123'); 
     } else {
-       setEmail('lizdaisy@uce.edu.ec'); setPassword('secretPassword123');
+       setEmail('ldpillajo@uce.edu.ec'); setPassword('secretPassword123');
     }
   };
 

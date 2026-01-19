@@ -68,7 +68,7 @@ public class PaymentController {
                 seller.getEmail(), 
                 "New Sale! - " + venture.getTitle(), 
                 "Hello " + seller.getFullName() + ",\n\nGood news! You have sold " + venture.getTitle() + " to " + buyer.getFullName() + ".\n\nThey will contact you soon.", 
-                null 
+                pdfBytes 
             );
 
             // 5. Retornar el PDF al navegador para descarga inmediata
