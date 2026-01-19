@@ -72,8 +72,15 @@ export const downloadInvoice = async (ventureId) => {
   return response.data;
 };
 
+// DASHBOARD: Estadísticas del Estudiante
 export const fetchStudentStats = async () => {
   const response = await api.get('/dashboard/student');
+  return response.data;
+};
+
+// PERFIL PÚBLICO: Ver datos de otro usuario
+export const fetchUserProfile = async (userId) => {
+  const response = await api.get(`/users/${userId}/profile`);
   return response.data;
 };
 
