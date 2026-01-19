@@ -72,4 +72,9 @@ export const downloadInvoice = async (ventureId) => {
   return response.data;
 };
 
+export const fetchStudentStats = async () => {
+  const response = await api.get('/dashboard/student');
+  return response.data;
+};
+
 export default api;
