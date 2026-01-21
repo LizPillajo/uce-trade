@@ -1,6 +1,5 @@
 // src/pages/student/StudentDashboard.jsx
-import { Box, Container, Grid, Paper, Typography, LinearProgress, Avatar, Stack } from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { Box, Container, Grid, Paper, Typography, Avatar, Stack } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import MessageIcon from '@mui/icons-material/Message';
@@ -103,35 +102,6 @@ const StudentDashboard = () => {
               </Paper>
            </Grid>
            
-           {/* Performance Comparison */}
-           <Grid size={{ xs: 12, md: 6 }}>
-              <Paper sx={{ p: 4, borderRadius: '24px', border: '1px solid #e5e7eb', height: '100%' }} elevation={0}>
-                 <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Performance Comparison</Typography>
-                 
-                 <Box mb={4}>
-                   <Box display="flex" justifyContent="space-between" mb={1}>
-                     <Typography fontWeight="500">Your average</Typography>
-                     <Typography fontWeight="bold">85%</Typography>
-                   </Box>
-                   <LinearProgress variant="determinate" value={85} sx={{ height: 10, borderRadius: 5, bgcolor: '#e5e7eb', '& .MuiLinearProgress-bar': { bgcolor: '#0d2149' } }} />
-                 </Box>
-
-                 <Box mb={4}>
-                   <Box display="flex" justifyContent="space-between" mb={1}>
-                     <Typography fontWeight="500" color="text.secondary">Overall average</Typography>
-                     <Typography fontWeight="bold" color="text.secondary">65%</Typography>
-                   </Box>
-                   <LinearProgress variant="determinate" value={65} sx={{ height: 10, borderRadius: 5, bgcolor: '#e5e7eb', '& .MuiLinearProgress-bar': { bgcolor: '#9ca3af' } }} />
-                 </Box>
-
-                 <Typography variant="body2" color="#059669" fontWeight="bold">
-                    +20% above average
-                 </Typography>
-                 <Typography variant="caption" color="text.secondary">
-                    Your venture is performing better than 75% of others.
-                 </Typography>
-              </Paper>
-           </Grid>
         </Grid>
 
       </Container>

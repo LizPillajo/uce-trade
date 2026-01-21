@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import UCE_Trade.demo.model.Transaction;
 import UCE_Trade.demo.repository.TransactionRepository;
 import java.time.LocalDateTime;
+import UCE_Trade.demo.service.NotificationService;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -43,6 +44,9 @@ public class PaymentController {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     // GET /api/payments/invoice/{ventureId}
     @GetMapping("/invoice/{ventureId}")
@@ -69,6 +73,12 @@ public class PaymentController {
             transactionRepository.save(transaction);
 
             User seller = venture.getOwner();
+
+            notificationService.notifySale(
+                seller.getEmail(), 
+                venture.getTitle(), 
+                buyer.getFullName()
+            );            
 
             // 3. Generar PDF
             byte[] pdfBytes = pdfService.generateInvoice(venture, buyer);
