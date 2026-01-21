@@ -1,13 +1,20 @@
 // src/pages/auth/RegisterPage.jsx
 import { useState } from 'react';
-import { Typography, Box, Link, Grid, Container, TextField, MenuItem, Alert } from '@mui/material';
+import { Typography, Box, Link, Grid, Container, TextField, MenuItem, Alert, Divider } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SchoolIcon from '@mui/icons-material/School';
+import GoogleIcon from '@mui/icons-material/Google';
+
+// UI Components
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import AuthBluePanel from '../../components/auth/AuthBluePanel';
-import { registerUser } from '../../services/api'; 
+
+// Services
+import { registerUser, googleLogin } from '../../services/api';
+import { auth, googleProvider } from "../../services/firebase"; 
+import { signInWithPopup } from "firebase/auth"; 
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -28,31 +35,55 @@ const RegisterPage = () => {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value // Actualiza el campo correspondiente
+      [e.target.name]: e.target.value 
     });
   };
 
-  // 3. SEND TO BACKEND
+  // --- GOOGLE SIGN UP ---
+  const handleFirebaseSignUp = async () => {
+    try {
+      setError('');
+      setLoading(true);
+
+      const result = await signInWithPopup(auth, googleProvider);
+      const token = await result.user.getIdToken();
+      const data = await googleLogin(token); // El backend registra si no existe
+
+      const userData = {
+        name: data.name,
+        role: data.role,
+        email: result.user.email,
+        avatar: data.avatar || result.user.photoURL
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Redirigir según rol
+      const targetUrl = data.role === 'ADMIN' ? '/admin/dashboard' : (data.role === 'STUDENT' ? '/student/dashboard' : '/explore');
+      window.location.href = targetUrl;
+
+    } catch (err) {
+      console.error("Firebase Sign Up Error:", err);
+      if (err.code !== 'auth/popup-closed-by-user') {
+          setError("Error registering with Google.");
+      }
+      setLoading(false);
+    }
+  };
+
+  // --- MANUAL SIGN UP ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Simple validations
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
     
-    //if (!formData.email.endsWith('@uce.edu.ec')) {
-      //setError("You must use an institutional email (@uce.edu.ec)");
-      //return;
-    //}
-
     setLoading(true);
 
     try {
-      // Send only what the Backend (User.java) expects
-      // fullName, email, password, faculty
       await registerUser({
         fullName: formData.fullName,
         email: formData.email,
@@ -60,13 +91,11 @@ const RegisterPage = () => {
         faculty: formData.faculty
       });
 
-      // If everything goes well:
       alert('Account created successfully! Now log in.');
       navigate('/login');
 
     } catch (err) {
       console.error(err);
-      // Show the message from the backend or a generic one
       setError(typeof err === 'string' ? err : 'Registration error. Check your data.');
     } finally {
       setLoading(false);
@@ -105,12 +134,36 @@ const RegisterPage = () => {
             Sign up to publish your services
           </Typography>
 
-          {/* ERROR ALERT */}
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
+          {/* BOTÓN GOOGLE */}
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<GoogleIcon />}
+            onClick={handleFirebaseSignUp}
+            disabled={loading}
+            sx={{ 
+                mb: 3, 
+                py: 1.5, 
+                borderColor: '#ddd', 
+                color: '#555', 
+                textTransform: 'none', 
+                fontWeight: 'bold',
+                bgcolor: '#f3f4f6',
+                '&:hover': { bgcolor: '#f3f4f6', borderColor: '#ccc' }
+            }}
+          >
+            Sign up with Google
+          </Button>
+
+          <Box display="flex" alignItems="center" mb={3}>
+             <Divider sx={{ flexGrow: 1 }} />
+             <Typography variant="caption" color="text.secondary" sx={{ mx: 2 }}>OR</Typography>
+             <Divider sx={{ flexGrow: 1 }} />
+          </Box>
+
           <Box component="form" onSubmit={handleSubmit}>
-            {/* NOTE: Added 'name', 'value', and 'onChange' to all inputs */}
-            
             <Input 
                 label="Full Name" 
                 name="fullName"
@@ -167,7 +220,7 @@ const RegisterPage = () => {
                 color="secondary" 
                 fullWidth 
                 size="large" 
-                disabled={loading}
+                disabled={loading} 
                 sx={{ py: 1.5, mt: 2, mb: 3 }}
             >
               {loading ? 'Creating...' : 'Create Account'}
