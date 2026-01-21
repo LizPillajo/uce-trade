@@ -84,4 +84,11 @@ export const fetchUserProfile = async (userId) => {
   return response.data;
 };
 
+// GOOGLE LOGIN: Enviar token de Firebase al Backend
+export const googleLogin = async (token) => {
+  // Enviamos el token en el cuerpo del POST
+  const response = await api.post('/auth/google', { token });
+  return response.data;
+};
+
 export default api;

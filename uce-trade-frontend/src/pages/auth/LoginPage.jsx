@@ -1,51 +1,104 @@
 import { useState } from 'react';
-import { Typography, Box, Link, Grid, Container, Alert } from "@mui/material"; // Added Alert
+import { Typography, Box, Link, Grid, Container, Alert, Divider } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SchoolIcon from "@mui/icons-material/School";
+import GoogleIcon from '@mui/icons-material/Google'; // Asegúrate de tener este icono o usa uno genérico
+
+// UI Components
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import AuthBluePanel from "../../components/auth/AuthBluePanel";
+
+// Context & Services
 import { useAuth } from "../../context/AuthContext";
+import { signInWithPopup } from "firebase/auth"; // <--- Importante
+import { auth, googleProvider } from "../../services/firebase"; // <--- Tu archivo de config
+import { googleLogin } from "../../services/api"; // <--- La función que acabamos de agregar
 
 const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // States for the form
+  // States
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // --- 1. LOGIN MANUAL (Tu código original) ---
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent reload
+    e.preventDefault();
     setError('');
     setIsSubmitting(true);
 
-    // Call login from Context
     const result = await login(email, password);
 
     if (result.success) {
-      // REDIRECTION BASED ON ROLE
-      // Since the 'user' state takes a millisecond to update,
-      // we can trust that AuthContext has already saved the role or do a reload.
-      // For simplicity, navigate to home and let AuthContext redirect later or force here:
-      // Retrieve the newly saved role from localStorage to decide
+      // Recuperamos el usuario guardado por el AuthContext/Login para ver el rol
       const user = JSON.parse(localStorage.getItem('user'));
-      
-      if (user?.role === 'ADMIN') {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/student/dashboard"); // O '/explore'
-      }
+      redirectBasedOnRole(user?.role);
     } else {
       setError("Incorrect credentials or user not registered.");
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
-  // Temporary function for quick tests
+  // --- 2. LOGIN CON GOOGLE (Nuevo) ---
+  const handleFirebaseLogin = async () => {
+    try {
+      setError('');
+      setIsSubmitting(true);
+
+      // A. Abrir ventana de Google
+      const result = await signInWithPopup(auth, googleProvider);
+      
+      // B. Obtener el Token de seguridad de Google
+      const token = await result.user.getIdToken();
+
+      // C. Enviarlo a Spring Boot para validación y asignación de rol
+      const data = await googleLogin(token); 
+
+      // D. Guardar sesión (Simulamos lo que hace el AuthContext)
+      const userData = {
+        name: data.name,
+        role: data.role, // Aquí el backend ya decidió si es STUDENT o CLIENT
+        email: result.user.email,
+        avatar: data.avatar || result.user.photoURL
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // E. Forzar recarga para que el Navbar se actualice y redirigir
+      // Usamos window.location para asegurar que AuthContext recargue el localStorage
+      const targetUrl = getRedirectUrl(data.role);
+      window.location.href = targetUrl;
+
+    } catch (err) {
+      console.error("Firebase Login Error:", err);
+      // Mensajes de error amigables
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError("Login cancelled.");
+      } else {
+        setError("Error logging in with Google. Backend connection might be failing.");
+      }
+      setIsSubmitting(false);
+    }
+  };
+
+  // Helper para decidir a dónde ir
+  const getRedirectUrl = (role) => {
+    if (role === 'ADMIN') return "/admin/dashboard";
+    if (role === 'STUDENT') return "/student/dashboard";
+    return "/explore"; // CLIENT va a explorar
+  };
+
+  const redirectBasedOnRole = (role) => {
+      const url = getRedirectUrl(role);
+      navigate(url);
+  };
+
+  // Quick test function
   const handleQuickTest = async (role) => {
     if(role === 'admin') {
        setEmail('admin@uce.edu.ec'); setPassword('123'); 
@@ -57,6 +110,7 @@ const LoginPage = () => {
   return (
     <Grid container sx={{ minHeight: "100vh", width: "100%", m: 0, alignItems: "stretch" }}>
       
+      {/* IZQUIERDA: Formulario */}
       <Grid size={{ xs: 12, md: 6 }} sx={{ bgcolor: "#f8fafc", p: { xs: 4, md: 6 }, display: "flex", flexDirection: "column", justifyContent: "center", px: { xs: 4, md: 10 }, minHeight: "100vh" }}>
         <Container maxWidth="sm">
           <Box mb={6}>
@@ -71,24 +125,52 @@ const LoginPage = () => {
           </Box>
 
           <Typography variant="h4" fontWeight="bold" color="#0d2149" gutterBottom>Welcome back</Typography>
-          <Typography variant="body1" color="text.secondary" mb={5}>Enter your credentials to access your account.</Typography>
+          <Typography variant="body1" color="text.secondary" mb={4}>Enter your credentials or use Google.</Typography>
 
           {/* Error Message */}
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
+          {/* --- BOTÓN DE GOOGLE --- */}
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<GoogleIcon />}
+            onClick={handleFirebaseLogin}
+            disabled={isSubmitting}
+            sx={{ 
+                mb: 3, 
+                py: 1.5, 
+                borderColor: '#ddd', 
+                color: '#555', 
+                textTransform: 'none', 
+                fontWeight: 'bold',
+                bgcolor: 'white',
+                '&:hover': { bgcolor: '#f1f5f9', borderColor: '#ccc' }
+            }}
+          >
+            Continue with Google
+          </Button>
+
+          <Box display="flex" alignItems="center" mb={3}>
+             <Divider sx={{ flexGrow: 1 }} />
+             <Typography variant="caption" color="text.secondary" sx={{ mx: 2 }}>OR</Typography>
+             <Divider sx={{ flexGrow: 1 }} />
+          </Box>
+
+          {/* --- FORMULARIO MANUAL --- */}
           <Box component="form" onSubmit={handleSubmit}>
             <Input 
                 label="Institutional Email" 
                 placeholder="student@uce.edu.ec" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
             />
             <Input 
                 label="Password" 
                 type="password" 
                 placeholder="••••••••" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
             />
 
             <Box textAlign="right" mb={3}>
@@ -103,7 +185,7 @@ const LoginPage = () => {
                 color="secondary" 
                 fullWidth 
                 size="large" 
-                disabled={isSubmitting}
+                disabled={isSubmitting} 
                 sx={{ py: 1.5, mb: 3 }}
             >
               {isSubmitting ? "Logging in..." : "Log in"}
@@ -118,7 +200,7 @@ const LoginPage = () => {
           </Box>
           
           <br/>
-          {/* Quick test buttons (Optional, very helpful for development) */}
+          {/* Quick test buttons */}
           <Box display="flex" gap={2} justifyContent="center">
              <Button size="small" onClick={() => handleQuickTest('student')} variant="outlined">Fill Student</Button>
              <Button size="small" onClick={() => handleQuickTest('admin')} variant="outlined" color="secondary">Fill Admin</Button>
@@ -127,7 +209,7 @@ const LoginPage = () => {
         </Container>
       </Grid>
 
-      {/* RIGHT: Blue Panel */}
+      {/* DERECHA: Panel Azul */}
       <Grid size={{ xs: 12, md: 6 }} sx={{ display: { xs: "none", md: "flex" }, p: 0, minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
         <AuthBluePanel title="Connect with UCE talent" subtitle="Access hundreds of services..." />
       </Grid>
