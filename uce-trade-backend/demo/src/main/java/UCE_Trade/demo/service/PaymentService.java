@@ -35,7 +35,7 @@ public class PaymentService {
         // 3. Crear parámetros para Stripe
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(amountInCents)
-                .setCurrency("usd") // Ecuador usa Dólares
+                .setCurrency("usd") 
                 .setDescription("Pago por servicio: " + venture.getTitle())
                 .setAutomaticPaymentMethods(
                         PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
