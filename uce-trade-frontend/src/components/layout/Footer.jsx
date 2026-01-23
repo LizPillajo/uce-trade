@@ -13,7 +13,7 @@ const Footer = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <Box display="flex" alignItems="center" mb={2}>
                 <SchoolIcon sx={{ color: '#efb034', mr: 1, fontSize: 30 }} />
-                <Typography variant="h6" fontWeight="bold">UCE Market</Typography>
+                <Typography variant="h6" fontWeight="bold">UCE Trade</Typography>
             </Box>
             <Typography variant="body2" sx={{ opacity: 0.7, maxWidth: 300 }}>
               The official platform for student entrepreneurship at the Central University of Ecuador.
@@ -46,7 +46,7 @@ const Footer = () => {
                 <IconButton sx={{ color: 'white' }}><InstagramIcon /></IconButton>
             </Box>
             <Typography variant="caption" sx={{ opacity: 0.5, mt: 2, display: 'block' }}>
-                © 2024 UCE Market. All rights reserved.
+                © 2024 UCE Trade. All rights reserved.
             </Typography>
           </Grid>
         </Grid>

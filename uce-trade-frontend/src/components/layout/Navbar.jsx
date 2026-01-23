@@ -45,7 +45,7 @@ const Navbar = () => {
           <Box display="flex" alignItems="center" component={RouterLink} to="/" sx={{ textDecoration: 'none', color: 'white' }}>
             <SchoolIcon sx={{ mr: 1.5, color: '#efb034', fontSize: 40 }} />
             <Box>
-              <Typography variant="h5" fontWeight={800} lineHeight={1}>UCE Market</Typography>
+              <Typography variant="h5" fontWeight={800} lineHeight={1}>UCE Trade</Typography>
             </Box>
           </Box>
 
