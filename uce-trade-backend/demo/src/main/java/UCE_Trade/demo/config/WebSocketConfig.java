@@ -14,7 +14,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Punto de conexión para el frontend
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:5173", "http://localhost:3000") // Permite al Front conectarse
+                .setAllowedOrigins("http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173") // Permite al Front conectarse
                 .withSockJS(); // Fallback si el navegador no soporta WS nativo
     }
 

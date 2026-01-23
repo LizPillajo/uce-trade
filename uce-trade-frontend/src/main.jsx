@@ -10,6 +10,7 @@ import { AppTheme } from './theme/AppTheme.js'
 import { HelmetProvider } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import App from './App';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,8 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <CssBaseline />
           <AuthProvider> 
             <BrowserRouter>
-              <AppRouter />
-              <ToastContainer position="bottom-right" autoClose={5000} />
+              <App />
             </BrowserRouter>
           </AuthProvider>
         </ThemeProvider>

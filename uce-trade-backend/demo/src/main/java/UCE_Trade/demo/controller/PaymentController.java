@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import UCE_Trade.demo.model.Transaction;
 import UCE_Trade.demo.repository.TransactionRepository;
 import java.time.LocalDateTime;
+import UCE_Trade.demo.service.NotificationService;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -44,16 +45,19 @@ public class PaymentController {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     // GET /api/payments/invoice/{ventureId}
     @GetMapping("/invoice/{ventureId}")
     public ResponseEntity<byte[]> generateAndSendInvoice(@PathVariable Long ventureId) {
         try {
-            // 1. Obtener datos del comprador (Usuario logueado)
+            // Obtener datos del comprador (Usuario logueado)
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String buyerEmail = auth.getName();
             User buyer = userService.getUserByEmail(buyerEmail);
 
-            // 2. Obtener datos del emprendimiento y vendedor
+            // Obtener datos del emprendimiento y vendedor
             Venture venture = ventureRepository.findById(ventureId)
                     .orElseThrow(() -> new RuntimeException("Venture not found"));
             
@@ -70,10 +74,16 @@ public class PaymentController {
 
             User seller = venture.getOwner();
 
-            // 3. Generar PDF
+            // Generar PDF
             byte[] pdfBytes = pdfService.generateInvoice(venture, buyer);
+
+            // ENVIAR NOTIFICACIÓN WEBSOCKET EN TIEMPO REAL
+            notificationService.notifySale(
+                seller.getEmail(),      // A quién (email del vendedor)
+                venture.getTitle(),     // Qué vendió
+                buyer.getFullName()     // Quién compró
+            );
             
-            // 4. Enviar correos
             // Correo al Comprador
             emailService.sendInvoiceEmail(
                 buyer.getEmail(), 
@@ -90,7 +100,7 @@ public class PaymentController {
                 pdfBytes 
             );
 
-            // 5. Retornar el PDF al navegador para descarga inmediata
+            // Retornar el PDF al navegador para descarga inmediata
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice.pdf")
                     .contentType(MediaType.APPLICATION_PDF)
