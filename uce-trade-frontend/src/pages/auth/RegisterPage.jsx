@@ -124,7 +124,7 @@ const RegisterPage = () => {
 
           <Box display="flex" alignItems="center" mb={2}>
              <SchoolIcon sx={{ color: '#efb034', mr: 1.5, fontSize: 28 }} />
-             <Typography variant="h6" fontWeight="bold" color="#0d2149">UCE Market</Typography>
+             <Typography variant="h6" fontWeight="bold" color="#0d2149">UCE Trade</Typography>
           </Box>
 
           <Typography variant="h4" fontWeight="bold" color="#0d2149" gutterBottom>
