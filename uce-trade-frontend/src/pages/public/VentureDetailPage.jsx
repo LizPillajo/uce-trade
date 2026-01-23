@@ -4,7 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Container, Grid, Box, Typography, Paper, Chip, Avatar, 
-  Stack, Divider, CircularProgress, Alert 
+  Stack, Divider, CircularProgress, Alert, Dialog, DialogContent, DialogActions
 } from '@mui/material';
 
 // Iconos
@@ -20,21 +20,25 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout'; 
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; 
+import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 
 import Button from '../../components/ui/Button';
 import SeoMeta from '../../components/common/SeoMeta';
 import PaymentModal from '../../components/payment/PaymentModal'; 
 import { fetchServiceById, downloadInvoice, confirmPayment } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const VentureDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const processedRef = useRef(false);
+  const { user } = useAuth();
 
   const [openPayment, setOpenPayment] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null); // 'succeeded' | null
   const [downloading, setDownloading] = useState(false); // Status for button loading
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // FUNCTION FOR DOWNLOADING
   const handleDownloadInvoice = async () => {
@@ -77,8 +81,8 @@ const VentureDetailPage = () => {
         confirmPayment(id)
           .then(() => {
              console.log("✅ Pago confirmado: BD actualizada, Correos enviados, Notificación enviada.");
-             // Opcional: Limpiar la URL para que si refresca no se intente procesar de nuevo
-             // window.history.replaceState({}, document.title, window.location.pathname);
+             
+             setShowSuccessModal(true);
           })
           .catch(err => console.error("❌ Error confirmando pago:", err));
       }
@@ -301,6 +305,56 @@ const VentureDetailPage = () => {
 
         </Grid>
       </Container>
+
+      {/* --- POP-UP DE CONFIRMACIÓN DE CORREO --- */}
+      <Dialog 
+        open={showSuccessModal} 
+        onClose={() => setShowSuccessModal(false)}
+        PaperProps={{
+          sx: { borderRadius: '20px', padding: 2, maxWidth: 400 }
+        }}
+      >
+        <DialogContent sx={{ textAlign: 'center', pt: 4 }}>
+          {/* Icono animado o estático grande */}
+          <Box sx={{ 
+            bgcolor: '#ecfdf5', 
+            width: 80, 
+            height: 80, 
+            borderRadius: '50%', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            margin: '0 auto',
+            mb: 2
+          }}>
+            <MarkEmailReadIcon sx={{ fontSize: 40, color: '#10b981' }} />
+          </Box>
+
+          <Typography variant="h5" fontWeight="800" color="#0d2149" gutterBottom>
+            Purchase Successful!
+          </Typography>
+          
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+            Thank you for your purchase. 
+          </Typography>
+
+          <Typography variant="body2" sx={{ bgcolor: '#f3f4f6', p: 1.5, borderRadius: '8px', color: '#4b5563', fontWeight: 500 }}>
+            We have sent the receipt to: <br/>
+            <span style={{ color: '#0d2149', fontWeight: 'bold' }}>{user?.email}</span>
+          </Typography>
+
+        </DialogContent>
+        
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button 
+            variant="contained" 
+            onClick={() => setShowSuccessModal(false)}
+            sx={{ bgcolor: '#0d2149', borderRadius: '12px', px: 4 }}
+          >
+            Great, thanks!
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
