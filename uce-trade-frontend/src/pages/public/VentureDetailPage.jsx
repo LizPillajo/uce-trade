@@ -7,7 +7,6 @@ import {
   Stack, Divider, CircularProgress, Alert, Dialog, DialogContent, DialogActions
 } from '@mui/material';
 
-// Iconos
 import StarIcon from '@mui/icons-material/Star';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
@@ -36,8 +35,8 @@ const VentureDetailPage = () => {
   const { user } = useAuth();
 
   const [openPayment, setOpenPayment] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState(null); // 'succeeded' | null
-  const [downloading, setDownloading] = useState(false); // Status for button loading
+  const [paymentStatus, setPaymentStatus] = useState(null); 
+  const [downloading, setDownloading] = useState(false); 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // FUNCTION FOR DOWNLOADING
@@ -178,19 +177,19 @@ const VentureDetailPage = () => {
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
                 
                 {/* Product header */}
-                <Box display="flex" justifyContent="space-between" mb={1}>
+                <Box display="flex" justifyContent="space-between" mb={2}>
                     <Chip label={venture.category} sx={{ bgcolor: '#0d2149', color: 'white', fontWeight: 'bold', fontSize: '0.7rem', height: 24 }} />
                     <Chip label={ownerFaculty} variant="outlined" size="small" sx={{ height: 24 }} />
                 </Box>
 
-                <Typography variant="h5" fontWeight="800" color="#0d2149" sx={{ mb: 0.5 }}>
+                <Typography variant="h4" fontWeight="800" color="#0d2149" sx={{ mb: 2 }}>
                   {venture.title}
                 </Typography>
 
                 <Box display="flex" alignItems="center" gap={0.5} mb={3}>
                     <StarIcon sx={{ color: '#f59e0b', fontSize: 18 }} />
                     <Typography fontWeight="bold" variant="body2">{venture.rating || 0.0}</Typography>
-                    <Typography variant="caption" color="text.secondary">(New Service)</Typography>
+                    <Typography variant="subtitle2" color="text.secondary">(New Service)</Typography>
                 </Box>
                 
                 {/* ----------------------------------------------------- */}
@@ -268,19 +267,19 @@ const VentureDetailPage = () => {
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Typography variant="caption" color="text.secondary" fontWeight="bold">PROVIDED BY</Typography>
-                    <Button size="small" variant="contained" sx={{ bgcolor: '#0d2149', fontSize: '0.7rem', py: 0.5, minWidth: 'auto' }} onClick={() => navigate(`/profile/${venture.owner.id}`)}>
+                    <Button size="small" variant="contained" sx={{ bgcolor: '#0d2149', fontSize: '0.8rem', py: 0.5, minWidth: 'auto' }} onClick={() => navigate(`/profile/${venture.owner.id}`)}>
                         Profile
                     </Button>
                 </Box>
                 
                 <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar sx={{ width: 48, height: 48, bgcolor: '#efb034' }}>{ownerInitial}</Avatar>
+                    <Avatar sx={{ width: 55, height: 55, bgcolor: '#efb034' }}>{ownerInitial}</Avatar>
                     <Box>
-                        <Typography variant="subtitle1" fontWeight="bold" lineHeight={1.2} display="flex" alignItems="center" gap={0.5}>
+                        <Typography variant="h5" fontWeight="bold" lineHeight={1.2} display="flex" alignItems="center" gap={0.5}>
                             {ownerName}
                             <CheckCircleIcon color="success" sx={{ fontSize: 14 }} />
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" display="block">
+                        <Typography variant="subtitle2" color="text.secondary" display="block">
                             {ownerFaculty}
                         </Typography>
                     </Box>
@@ -291,11 +290,11 @@ const VentureDetailPage = () => {
                 <Stack spacing={1}>
                     <Box display="flex" gap={1} alignItems="center">
                         <AccessTimeIcon fontSize="small" sx={{ color: '#9ca3af', fontSize: 16 }} />
-                        <Typography variant="caption" color="text.secondary">Response time: <b>Fast</b></Typography>
+                        <Typography variant="body1" color="text.secondary">Response time: <b>Fast</b></Typography>
                     </Box>
                     <Box display="flex" gap={1} alignItems="center">
                         <LocationOnIcon fontSize="small" sx={{ color: '#9ca3af', fontSize: 16 }} />
-                        <Typography variant="caption" color="text.secondary">UCE Campus</Typography>
+                        <Typography variant="body1" color="text.secondary">UCE Campus</Typography>
                     </Box>
                 </Stack>
               </Paper>
