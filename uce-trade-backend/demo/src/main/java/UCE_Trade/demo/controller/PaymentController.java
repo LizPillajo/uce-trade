@@ -22,6 +22,7 @@ import UCE_Trade.demo.model.Transaction;
 import UCE_Trade.demo.repository.TransactionRepository;
 import java.time.LocalDateTime;
 import UCE_Trade.demo.service.NotificationService;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -50,18 +51,51 @@ public class PaymentController {
 
     // GET /api/payments/invoice/{ventureId}
     @GetMapping("/invoice/{ventureId}")
-    public ResponseEntity<byte[]> generateAndSendInvoice(@PathVariable Long ventureId) {
+    public ResponseEntity<byte[]> downloadInvoice(@PathVariable Long ventureId) {
         try {
             // Obtener datos del comprador (Usuario logueado)
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            User buyer = userService.getUserByEmail(auth.getName());
+            // Obtener datos del emprendimiento y vendedor
+            Venture venture = ventureRepository.findById(ventureId)
+                    .orElseThrow(() -> new RuntimeException("Venture not found"));
+
+            // Solo generamos el PDF al vuelo
+            byte[] pdfBytes = pdfService.generateInvoice(venture, buyer);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice.pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // --- 1. NUEVO ENDPOINT: CONFIRMAR PAGO (Automático) ---
+    // Esto se llama apenas Stripe dice "Éxito". Registra, Notifica y Envía Correos.
+    @PostMapping("/confirm/{ventureId}")
+    public ResponseEntity<?> confirmPayment(@PathVariable Long ventureId) {
+        try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String buyerEmail = auth.getName();
             User buyer = userService.getUserByEmail(buyerEmail);
 
-            // Obtener datos del emprendimiento y vendedor
             Venture venture = ventureRepository.findById(ventureId)
                     .orElseThrow(() -> new RuntimeException("Venture not found"));
-            
-            // GUARDAR LA TRANSACCIÓN EN BD
+
+            // *** EVITAR DUPLICADOS ***
+            // Verificamos si este usuario ya compró este item recientemente (ej. hoy)
+            boolean alreadyBought = transactionRepository.findByBuyerEmail(buyerEmail).stream()
+                    .anyMatch(t -> t.getVenture().getId().equals(ventureId) && 
+                                   t.getDate().isAfter(LocalDateTime.now().minusMinutes(5)));
+
+            if (alreadyBought) {
+                return ResponseEntity.ok(Map.of("message", "Transacción ya registrada previamente"));
+            }
+
+            // 1. Guardar Transacción
             Transaction transaction = new Transaction();
             transaction.setBuyer(buyer);
             transaction.setVenture(venture);
@@ -69,13 +103,13 @@ public class PaymentController {
             transaction.setDate(LocalDateTime.now());
             transaction.setPaymentMethod("Stripe");
             transaction.setStatus("COMPLETED");
-            
             transactionRepository.save(transaction);
 
             User seller = venture.getOwner();
 
-            // Generar PDF
+            // 2. Generar PDF (Solo para adjuntarlo al correo, no para descargar todavía)
             byte[] pdfBytes = pdfService.generateInvoice(venture, buyer);
+
 
             // ENVIAR NOTIFICACIÓN WEBSOCKET EN TIEMPO REAL
             notificationService.notifySale(
@@ -83,7 +117,7 @@ public class PaymentController {
                 venture.getTitle(),     // Qué vendió
                 buyer.getFullName()     // Quién compró
             );
-            
+
             // Correo al Comprador
             emailService.sendInvoiceEmail(
                 buyer.getEmail(), 
@@ -100,15 +134,11 @@ public class PaymentController {
                 pdfBytes 
             );
 
-            // Retornar el PDF al navegador para descarga inmediata
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice.pdf")
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(pdfBytes);
+            return ResponseEntity.ok(Map.of("message", "Pago confirmado y procesado exitosamente"));
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError().body("Error confirmando pago");
         }
     }
 

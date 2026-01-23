@@ -91,4 +91,9 @@ export const googleLogin = async (token) => {
   return response.data;
 };
 
+// Confirmar pago automáticamente
+export const confirmPayment = async (ventureId) => {
+  const response = await api.post(`/payments/confirm/${ventureId}`);
+  return response.data;
+};
 export default api;

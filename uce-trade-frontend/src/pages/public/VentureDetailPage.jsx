@@ -1,5 +1,5 @@
 // src/pages/public/VentureDetailPage.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -21,20 +21,19 @@ import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; 
 
-import { fetchServiceById } from '../../services/api';
 import Button from '../../components/ui/Button';
 import SeoMeta from '../../components/common/SeoMeta';
 import PaymentModal from '../../components/payment/PaymentModal'; 
-import { downloadInvoice } from '../../services/api';
+import { fetchServiceById, downloadInvoice, confirmPayment } from '../../services/api';
 
 const VentureDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const processedRef = useRef(false);
 
   const [openPayment, setOpenPayment] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null); // 'succeeded' | null
-
   const [downloading, setDownloading] = useState(false); // Status for button loading
 
   // FUNCTION FOR DOWNLOADING
@@ -47,12 +46,11 @@ const VentureDetailPage = () => {
           const url = window.URL.createObjectURL(new Blob([blob]));
           const link = document.createElement('a');
           link.href = url;
-          link.setAttribute('download', `invoice_${venture.title}.pdf`);
+          link.setAttribute('download', `invoice_${venture?.title || 'service'}.pdf`);
           document.body.appendChild(link);
           link.click();
           link.parentNode.removeChild(link);
-            
-          alert("Invoice sent to your email as well.");
+
       } catch (error) {
           console.error("Error downloading invoice", error);
           alert("Error generating invoice.");
@@ -68,11 +66,24 @@ const VentureDetailPage = () => {
 
     if (redirectStatus === 'succeeded') {
       setPaymentStatus('succeeded');
-      
-      // Optional: Clean the URL so it doesn't look messy, but keep the visual state
-      // window.history.replaceState({}, document.title, window.location.pathname);
+
+      // Si no hemos procesado este pago todavía...
+      if (!processedRef.current) {
+        processedRef.current = true; // Marcamos como procesado
+        
+        console.log("💳 Pago detectado. Confirmando en servidor...");
+        
+        // Llamada automática al backend
+        confirmPayment(id)
+          .then(() => {
+             console.log("✅ Pago confirmado: BD actualizada, Correos enviados, Notificación enviada.");
+             // Opcional: Limpiar la URL para que si refresca no se intente procesar de nuevo
+             // window.history.replaceState({}, document.title, window.location.pathname);
+          })
+          .catch(err => console.error("❌ Error confirmando pago:", err));
+      }
     }
-  }, [location]);
+  }, [location, id]);
 
   const { data: venture, isLoading, isError } = useQuery({
     queryKey: ['venture', id],
