@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "users") 
@@ -24,7 +25,7 @@ public class User implements Serializable{
     private String email;
 
     @Column(nullable = false)
-    private String password; // Aquí guardaremos la contraseña encriptada
+    private String password; // Contraseña encriptada
 
     private String fullName;
     
@@ -33,4 +34,14 @@ public class User implements Serializable{
     private String faculty; 
     
     private String role; 
+
+    private LocalDate createdAt;
+
+    // Usuarios NUEVOS que se registren a partir de hoy
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDate.now();
+        }
+    }
 }
