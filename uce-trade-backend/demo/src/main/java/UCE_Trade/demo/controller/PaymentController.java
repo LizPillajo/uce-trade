@@ -111,11 +111,18 @@ public class PaymentController {
             byte[] pdfBytes = pdfService.generateInvoice(venture, buyer);
 
 
-            // ENVIAR NOTIFICACIÓN WEBSOCKET EN TIEMPO REAL
+            // ENVIAR NOTIFICACIÓN WEBSOCKET EN TIEMPO REAL (VENDEDOR)
             notificationService.notifySale(
                 seller.getEmail(),      // A quién (email del vendedor)
                 venture.getTitle(),     // Qué vendió
                 buyer.getFullName()     // Quién compró
+            );
+
+            // ENVIAR NOTIFICACIÓN WEBSOCKET EN TIEMPO REAL (ADMIN)
+            notificationService.notifyAdmin(
+                "Nueva Transacción 💰",
+                "Se vendió: " + venture.getTitle() + " ($" + venture.getPrice() + ")",
+                "NEW_TRANSACTION"
             );
 
             // Correo al Comprador
