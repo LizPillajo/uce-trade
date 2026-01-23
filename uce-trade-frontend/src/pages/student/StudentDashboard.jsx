@@ -26,7 +26,18 @@ const StudentDashboard = () => {
   
   // Line Chart: Sales Income ($) by Date
   const lineChartData = stats?.chartSales 
-    ? Object.keys(stats.chartSales).map(date => ({ name: date, income: stats.chartSales[date] })) 
+    ? Object.keys(stats.chartSales)
+        .map(date => ({ name: date, income: stats.chartSales[date] }))
+        // --- AGREGA ESTE .sort() PARA ORDENAR POR FECHA ---
+        .sort((a, b) => {
+           // Asumimos formato "dd/MM". Lo partimos por la barra '/'
+           const [dayA, monthA] = a.name.split('/');
+           const [dayB, monthB] = b.name.split('/');
+           
+           // Comparamos mes primero, si son iguales, comparamos día
+           if (monthA !== monthB) return monthA - monthB;
+           return dayA - dayB;
+        })
     : [];
 
   // Bar Chart: Sales Count (#) by Category
