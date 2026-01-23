@@ -2,6 +2,8 @@ package UCE_Trade.demo.controller;
 
 import UCE_Trade.demo.model.Venture;
 import UCE_Trade.demo.repository.VentureRepository;
+import UCE_Trade.demo.service.NotificationService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +26,9 @@ public class VentureController {
     
     @Autowired
     private UCE_Trade.demo.service.UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     // 1. ENDPOINT PARA EL HOME (Solo 4 destacados)
     // GET http://localhost:8080/api/ventures/featured
@@ -92,6 +97,12 @@ public class VentureController {
             venture.setRating(0.0);
             
             Venture savedVenture = ventureRepository.save(venture);
+
+            notificationService.notifyAdmin(
+                "Nuevo Emprendimiento 🚀",
+                owner.getFullName() + " publicó: " + savedVenture.getTitle(),
+                "NEW_VENTURE"
+            );
             return ResponseEntity.status(HttpStatus.CREATED).body(savedVenture);
             
         } catch (Exception e) {

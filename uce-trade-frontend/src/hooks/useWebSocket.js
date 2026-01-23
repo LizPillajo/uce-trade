@@ -41,6 +41,17 @@ export const useWebSocket = () => {
             queryClient.invalidateQueries({ queryKey: ['myVentures'] });
           });
         }
+
+        if (user.role === 'ADMIN') {
+          client.subscribe('/topic/admin/notifications', (msg) => {
+            const notif = JSON.parse(msg.body);
+            // Mostrar alerta azul
+            toast.info(`🔔 ${notif.title}: ${notif.body}`);
+            
+            // Recargar Dashboard Admin automáticamente
+            queryClient.invalidateQueries({ queryKey: ['adminStats'] });
+          });
+        }
       },
       onStompError: (frame) => {
         console.error('❌ Error de STOMP:', frame.headers['message']);

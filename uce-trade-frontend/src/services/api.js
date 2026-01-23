@@ -96,4 +96,10 @@ export const confirmPayment = async (ventureId) => {
   const response = await api.post(`/payments/confirm/${ventureId}`);
   return response.data;
 };
+
+// Obtener estadísticas REALES para el Admin
+export const fetchAdminStats = async () => {
+  const response = await api.get('/admin/stats');
+  return response.data;
+};
 export default api;

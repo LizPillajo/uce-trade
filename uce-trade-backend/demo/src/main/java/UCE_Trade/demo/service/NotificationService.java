@@ -30,13 +30,15 @@ public class NotificationService {
         System.out.println("🔔 Notificación enviada a: " + destination);
     }
 
-    // Notificar al Admin de nuevo usuario
-    public void notifyNewUser(String newUserName) {
-        String destination = "/topic/admin/users";
+    // Notificar al Admin (Cualquier evento administrativo)
+    public void notifyAdmin(String title, String body, String type) {
+        // Un solo canal para todo lo del admin
+        String destination = "/topic/admin/notifications";
+        
         Map<String, String> message = Map.of(
-            "title", "Nuevo Usuario Registrado 👤",
-            "body", newUserName + " se ha unido a UCE Trade.",
-            "type", "NEW_USER"
+            "title", title,
+            "body", body,
+            "type", type // Ej: "NEW_USER", "NEW_VENTURE"
         );
         messagingTemplate.convertAndSend(destination, message);
     }

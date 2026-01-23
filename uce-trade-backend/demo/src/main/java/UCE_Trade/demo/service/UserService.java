@@ -5,7 +5,7 @@ import UCE_Trade.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-//import UCE_Trade.demo.service.NotificationService; // Already injected
+import UCE_Trade.demo.service.NotificationService;
 
 import java.util.List;
 
@@ -45,7 +45,11 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         // 5. Notify Admin (WebSocket)
-        notificationService.notifyNewUser(savedUser.getFullName());
+        notificationService.notifyAdmin(
+            "Nuevo Usuario 👤",
+            savedUser.getFullName() + " se ha registrado.",
+            "NEW_USER"
+        );
         
         return savedUser; 
     }
