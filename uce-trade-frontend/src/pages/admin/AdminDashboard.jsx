@@ -1,4 +1,3 @@
-// src/pages/admin/AdminDashboard.jsx
 import { Box, Container, Grid, Paper, Typography, Button, Chip, CircularProgress, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -9,57 +8,48 @@ import WarningIcon from "@mui/icons-material/Warning";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import PersonIcon from "@mui/icons-material/Person";
-import StarIcon from "@mui/icons-material/Star"; // <--- Importante
+import StarIcon from "@mui/icons-material/Star";
 
 // Recharts
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, 
-  BarChart, Bar // <--- Importantes
+  BarChart, Bar, Legend // <--- Agregué Legend
 } from "recharts";
 
-// API & Query
+// API
 import { useQuery } from '@tanstack/react-query';
 import { fetchAdminStats } from '../../services/api';
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#ef4444", "#10b981", "#f59e0b", "#6366f1"];
+const COLORS = ["#0d2149", "#efb034", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
-  // 1. OBTENER DATOS REALES
   const { data: stats, isLoading, isError } = useQuery({
     queryKey: ['adminStats'],
     queryFn: fetchAdminStats
   });
 
   if (isLoading) return <Box display="flex" justifyContent="center" mt={10}><CircularProgress /></Box>;
-  if (isError) return <Container mt={5}><Alert severity="error">Error cargando datos del admin.</Alert></Container>;
+  if (isError) return <Container mt={5}><Alert severity="error">Error conectando con el servidor.</Alert></Container>;
 
-  // 2. PROCESAR DATOS
+  // --- DEBUGGING: MIRA ESTO EN LA CONSOLA (F12) ---
+  console.log("📊 DATOS RECIBIDOS EN DASHBOARD:", stats);
 
-  // A. Growth Data (Gráfica de Líneas)
+  // 1. Procesar Growth (Líneas)
   const growthData = stats?.growthData || [];
 
-  // B. Pie Data (Gráfica de Pastel)
-  const pieData = stats?.pieData 
-    ? Object.keys(stats.pieData).map((key, index) => ({
-        name: key, 
-        value: stats.pieData[key],
-        color: COLORS[index % COLORS.length]
-      }))
-    : [];
+  // 2. Procesar Categorías (Pastel y Barras)
+  // Convertimos el objeto {"Tech": 10} a array [{name: "Tech", value: 10}]
+  const categoriesMap = stats?.pieData || {};
+  const pieData = Object.keys(categoriesMap).map((key, index) => ({
+      name: key || "Otros", // Evitar nulos
+      value: categoriesMap[key],
+      color: COLORS[index % COLORS.length]
+  }));
 
-  // C. Bar Data (Gráfica de Barras) - ESTA FALTABA
-  // Reutilizamos los datos de categorías, pero formateados para la barra
-  const barData = stats?.pieData
-    ? Object.keys(stats.pieData).map((key) => ({
-        name: key,       // Eje Y (Nombre Categoría)
-        value: stats.pieData[key], // Eje X (Cantidad)
-      }))
-    : [];
-
-  // D. KPIs
+  // 3. KPIs
   const kpi = stats?.kpi || { totalVentures: 0, activeUsers: 0, pendingApproval: 0, totalVisits: 0 };
 
   return (
@@ -70,134 +60,114 @@ const AdminDashboard = () => {
         <Box mb={5} display="flex" flexDirection={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} gap={3}>
           <Box>
             <Typography variant="h4" fontWeight="800" color="#0d2149" sx={{ mb: 1 }}>
-              Administration Panel
+              Admin Panel
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Real-time platform monitoring
+              Monitor en tiempo real
             </Typography>
           </Box>
-
           <Box display="flex" gap={2}>
-            <Button variant="outlined" startIcon={<PersonIcon />} onClick={() => navigate("/admin/users")}>
-              Manage Users
-            </Button>
-            <Button variant="contained" startIcon={<FilterListIcon />} onClick={() => navigate("/admin/ventures")} sx={{ bgcolor: "#0d2149" }}>
-              Manage Startups
-            </Button>
+             <Button variant="outlined" startIcon={<PersonIcon />} onClick={() => navigate("/admin/users")}>Users</Button>
+             <Button variant="contained" startIcon={<FilterListIcon />} onClick={() => navigate("/admin/ventures")} sx={{ bgcolor: "#0d2149" }}>Startups</Button>
           </Box>
         </Box>
 
-        {/* 1. KPI CARDS */}
+        {/* 1. KPIs */}
         <Grid container spacing={3} mb={5}>
           <KpiCard title="Total Ventures" value={kpi.totalVentures} badge="Live" icon={<StoreIcon />} color="#3b82f6" />
           <KpiCard title="Active Users" value={kpi.activeUsers} badge="Live" icon={<PeopleIcon />} color="#8b5cf6" />
           <KpiCard title="Pending Review" value={kpi.pendingApproval} badge="ToDo" icon={<WarningIcon />} color="#ef4444" isBad />
-          <KpiCard title="Transactions" value={kpi.totalVisits} badge="Sales" icon={<VisibilityIcon />} color="#10b981" />
+          <KpiCard title="Total Transactions" value={kpi.totalVisits} badge="Sales" icon={<VisibilityIcon />} color="#10b981" />
         </Grid>
 
-        {/* 2. GRÁFICAS SUPERIORES */}
+        {/* 2. GRÁFICAS */}
         <Grid container spacing={3} mb={5}>
-          {/* Platform Growth */}
+          
+          {/* A. GROWTH CHART */}
           <Grid size={{ xs: 12, md: 8 }}>
             <Paper elevation={0} sx={{ p: 4, borderRadius: "16px", border: "1px solid #e5e7eb", height: "100%" }}>
-              <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Platform Growth</Typography>
-              <Box sx={{ width: "100%", height: 300, minHeight: 300, display: 'block' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={growthData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#9ca3af" }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#9ca3af" }} />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="val" stroke="#efb034" strokeWidth={3} dot={{ r: 4, fill: "#efb034" }} />
-                  </LineChart>
-                </ResponsiveContainer>
+              <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>User Growth</Typography>
+              
+              {/* Contenedor Fijo para evitar error width(-1) */}
+              <Box sx={{ width: "99%", height: 350, minHeight: 350 }}>
+                {growthData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={growthData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#9ca3af" }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: "#9ca3af" }} />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="val" stroke="#efb034" strokeWidth={3} dot={{ r: 4, fill: "#efb034" }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Typography align="center" color="text.secondary" mt={10}>No hay datos históricos aún.</Typography>
+                )}
               </Box>
             </Paper>
           </Grid>
 
-          {/* Ventures by Faculty (Pie Chart) */}
+          {/* B. PIE CHART */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Paper elevation={0} sx={{ p: 4, borderRadius: "16px", border: "1px solid #e5e7eb", height: "100%" }}>
-              <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>By Category</Typography>
+              <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Categories</Typography>
               
-              <Box sx={{ width: "100%", height: 250, minHeight: 250, display: "flex", justifyContent: "center" }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={pieData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Box>
-              
-              <Box mt={2}>
-                {pieData.map((d) => (
-                  <Box key={d.name} display="flex" justifyContent="space-between" mb={1}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: d.color }} />
-                      <Typography variant="body2" color="text.secondary">{d.name}</Typography>
-                    </Box>
-                    <Typography variant="body2" fontWeight="bold">{d.value}</Typography>
-                  </Box>
-                ))}
+              <Box sx={{ width: "100%", height: 300, minHeight: 300 }}>
+                {pieData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie 
+                        data={pieData} 
+                        cx="50%" 
+                        cy="50%" 
+                        innerRadius={60} 
+                        outerRadius={80} 
+                        paddingAngle={5} 
+                        dataKey="value"
+                        nameKey="name" // IMPORTANTE
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend verticalAlign="bottom" height={36}/>
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Typography align="center" color="text.secondary" mt={10}>No hay categorías.</Typography>
+                )}
               </Box>
             </Paper>
           </Grid>
         </Grid>
 
-        {/* 3. GRÁFICAS INFERIORES */}
+        {/* 3. BAR CHART INFERIOR */}
         <Grid container spacing={3}>
-          
-          {/* Top Services (Estático por ahora, para no romper) */}
-          <Grid size={{ xs: 12, md: 6 }}>
+           <Grid size={{ xs: 12 }}>
             <Paper elevation={0} sx={{ p: 4, borderRadius: "16px", border: "1px solid #e5e7eb" }}>
-              <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Top-Rated Services</Typography>
-              {[
-                { name: "Math Classes", cat: "Science", rate: 4.9 },
-                { name: "UCE Homemade Lunch", cat: "Gastronomy", rate: 4.9 },
-              ].map((item, i) => (
-                <Box key={i} sx={{ display: "flex", justifyContent: "space-between", p: 2, mb: 1, bgcolor: "#f9fafb", borderRadius: "12px" }}>
-                  <Box>
-                    <Typography fontWeight="bold" color="#0d2149">{item.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">{item.cat}</Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center" gap={0.5}>
-                    <StarIcon sx={{ color: "#f59e0b", fontSize: 18 }} />
-                    <Typography fontWeight="bold">{item.rate}</Typography>
-                  </Box>
-                </Box>
-              ))}
-            </Paper>
-          </Grid>
-
-          {/* Most Popular Categories (Bar Chart) - AHORA SÍ FUNCIONA */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Paper elevation={0} sx={{ p: 4, borderRadius: "16px", border: "1px solid #e5e7eb", height: "100%" }}>
-              <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Category Popularity</Typography>
-              
-              <Box sx={{ width: "100%", height: 300, minHeight: 300, display: 'block' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart layout="vertical" data={barData} margin={{ left: 40 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
-                    <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: "#6b7280", fontSize: 12 }} width={100} />
-                    <Tooltip cursor={{ fill: "transparent" }} />
-                    <Bar dataKey="value" fill="#0d2149" radius={[0, 4, 4, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Category Details</Typography>
+              <Box sx={{ width: "99%", height: 300, minHeight: 300 }}>
+                 <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={pieData} layout="vertical" margin={{ left: 40 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                      <XAxis type="number" hide />
+                      <YAxis dataKey="name" type="category" width={100} tick={{fontSize: 12}} />
+                      <Tooltip cursor={{fill: 'transparent'}} />
+                      <Bar dataKey="value" fill="#0d2149" radius={[0, 4, 4, 0]} barSize={20} />
+                    </BarChart>
+                 </ResponsiveContainer>
               </Box>
             </Paper>
-          </Grid>
-
+           </Grid>
         </Grid>
+
       </Container>
     </Box>
   );
 };
 
+// Componente KpiCard
 const KpiCard = ({ title, value, badge, icon, color, isBad }) => (
   <Grid size={{ xs: 12, sm: 6, md: 3 }}>
     <Paper elevation={0} sx={{ p: 3, borderRadius: "16px", border: "1px solid #e5e7eb" }}>
