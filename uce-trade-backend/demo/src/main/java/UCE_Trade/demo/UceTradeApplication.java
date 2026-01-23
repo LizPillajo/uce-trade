@@ -12,4 +12,4 @@ public class UceTradeApplication {
     public static void main(String[] args) {
         SpringApplication.run(UceTradeApplication.class, args);
     }
-}
+} 

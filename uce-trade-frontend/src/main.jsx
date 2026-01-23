@@ -5,10 +5,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { AuthProvider } from './context/AuthContext'; 
-import { AppRouter } from './routes/AppRouter';
 import { AppTheme } from './theme/AppTheme.js'
 import { HelmetProvider } from 'react-helmet-async';
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import App from './App';
 
