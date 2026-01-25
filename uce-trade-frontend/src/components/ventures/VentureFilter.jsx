@@ -1,40 +1,42 @@
 // src/components/ventures/VentureFilter.jsx
 import { useState, useEffect } from "react";
-import {Box,Paper,MenuItem,Select,IconButton,Divider,Typography,Autocomplete, TextField} from "@mui/material";
+import {Box,Paper,MenuItem,Select,IconButton,Divider,Typography,Autocomplete, TextField, Chip, Button} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import { fetchSuggestions } from "../../services/api"; 
+import { useDebounce } from "../../hooks/useDebounce";
 
 const VentureFilter = ({
-  searchTerm,
-  setSearchTerm,
-  category,
-  setCategory,
-  sort,
-  setSort,
-  viewMode, 
-  setViewMode
+  searchTerm, setSearchTerm,
+  category, setCategory,
+  sort, setSort,
+  viewMode, setViewMode
 }) => {
   
   const [options, setOptions] = useState([]);
+  const debouncedSuggestionTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
     let active = true;
-
-    if (searchTerm === "") {
+    if (debouncedSuggestionTerm === "") {
       setOptions([]);
       return undefined;
     }
-
-    fetchSuggestions(searchTerm).then((results) => {
-      if (active) {
-        setOptions(results);
-      }
+    fetchSuggestions(debouncedSuggestionTerm).then((results) => {
+      if (active) setOptions(results);
     });
-
     return () => { active = false; };
-  }, [searchTerm]);
+  }, [debouncedSuggestionTerm]);
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setCategory('All');
+    setSort('recent');
+  };
+
+  const hasActiveFilters = category !== 'All' || sort !== 'recent' || searchTerm !== '';
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -42,6 +44,18 @@ const VentureFilter = ({
         <Typography variant="h4" fontWeight="bold" color="#0d2149" sx={{ mb: 2 }}>
           Explore Business
         </Typography>
+
+        {hasActiveFilters && (
+            <Button 
+                startIcon={<FilterAltOffIcon />} 
+                onClick={handleClearFilters}
+                color="error"
+                size="small"
+                sx={{ fontWeight: 'bold' }}
+            >
+                Clear Filters
+            </Button>
+        )}
       </Box>
 
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2, width: '100%', flexWrap: 'wrap' }}>
@@ -92,6 +106,7 @@ const VentureFilter = ({
         </Paper>
     
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, width: { xs: '100%', md: 'auto' }, flexWrap: 'wrap' }}>
+          
           {/* 2. SELECTOR DE CATEGORÍA */}
           <Select
             value={category}
@@ -100,9 +115,12 @@ const VentureFilter = ({
             sx={{ 
               height: 50, 
               minWidth: { xs: '100%', sm: 180 }, 
-              bgcolor: "white", 
               borderRadius: "8px",
-              width: { xs: '100%', sm: 'auto' }
+              width: { xs: '100%', sm: 'auto' },
+              bgcolor: category !== 'All' ? '#e3f2fd' : 'white',
+              border: category !== 'All' ? '1px solid #1976d2' : 'none',
+              fontWeight: category !== 'All' ? 'bold' : 'normal',
+              color: category !== 'All' ? '#1565c0' : 'inherit'
             }}
           >
             <MenuItem value="All">All categories</MenuItem>
@@ -123,9 +141,12 @@ const VentureFilter = ({
             sx={{ 
               height: 50, 
               minWidth: { xs: '100%', sm: 180 }, 
-              bgcolor: "white", 
               borderRadius: "8px",
-              width: { xs: '100%', sm: 'auto' }
+              width: { xs: '100%', sm: 'auto' },
+              bgcolor: sort !== 'recent' ? '#fff8e1' : 'white',
+              border: sort !== 'recent' ? '1px solid #f57c00' : 'none',
+              fontWeight: sort !== 'recent' ? 'bold' : 'normal',
+              color: sort !== 'recent' ? '#e65100' : 'inherit'
             }}
           >
             <MenuItem value="recent">Most recent</MenuItem>
