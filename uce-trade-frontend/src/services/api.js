@@ -116,4 +116,17 @@ export const fetchSuggestions = async (query) => {
   return response.data; 
 };
 
+// Obtener comentarios
+export const fetchReviews = async (ventureId) => {
+  const response = await api.get(`/ventures/${ventureId}/reviews`);
+  return response.data;
+};
+
+// Publicar comentario
+export const postReview = async (ventureId, reviewData) => {
+  // reviewData = { rating: 5, comment: "Excelente!" }
+  const response = await api.post(`/ventures/${ventureId}/reviews`, reviewData);
+  return response.data;
+};
+
 export default api;

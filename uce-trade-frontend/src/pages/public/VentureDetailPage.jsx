@@ -26,6 +26,7 @@ import SeoMeta from '../../components/common/SeoMeta';
 import PaymentModal from '../../components/payment/PaymentModal'; 
 import { fetchServiceById, downloadInvoice, confirmPayment } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import ReviewSection from '../../components/ventures/ReviewSection';
 
 const VentureDetailPage = () => {
   const { id } = useParams();
@@ -305,8 +306,14 @@ const VentureDetailPage = () => {
 
             </Stack>
           </Grid>
-
         </Grid>
+
+        {/* --- SECCIÓN DE COMENTARIOS --- */}
+         <Grid container spacing={4} mt={1}>
+            <Grid size={{ xs: 12, lg: 12 }}>
+                <ReviewSection ventureId={id} />
+            </Grid>
+         </Grid>
       </Container>
 
       {/* --- POP-UP DE CONFIRMACIÓN DE CORREO --- */}
