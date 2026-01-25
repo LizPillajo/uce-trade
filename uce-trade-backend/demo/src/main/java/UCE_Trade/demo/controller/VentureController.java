@@ -159,7 +159,7 @@ public class VentureController {
             
             reviewRepository.save(review);
 
-            // 3. MAGIA: Recalcular Promedio del Emprendimiento
+            // 3. Recalcular Promedio del Emprendimiento
             List<Review> allReviews = reviewRepository.findByVentureIdOrderByDateDesc(id);
             double avg = allReviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
             
@@ -168,6 +168,15 @@ public class VentureController {
             
             venture.setRating(roundedAvg);
             ventureRepository.save(venture);
+
+            if (!venture.getOwner().getEmail().equals(email)) {
+                notificationService.notifyUser(
+                    venture.getOwner().getEmail(),
+                    "New Review! ⭐",
+                    "Received " + review.getRating() + " stars on '" + venture.getTitle() + "'",
+                    "REVIEW"
+                );
+            }
 
             return ResponseEntity.ok(review);
 

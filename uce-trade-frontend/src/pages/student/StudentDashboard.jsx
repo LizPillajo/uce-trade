@@ -144,12 +144,25 @@ const StudentDashboard = () => {
         {/* 4. BOTTOM LIST (Static for now) */}
         <Grid container spacing={4}>
            <Grid size={{ xs: 12 }}>
-              <Paper sx={{ p: 4, borderRadius: '24px', border: '1px solid #e5e7eb' }} elevation={0}>
-                 <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Top Performance</Typography>
+             <Paper sx={{ p: 4, borderRadius: '24px', border: '1px solid #e5e7eb' }} elevation={0}>
+                 <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>Top Performance (Best Rated)</Typography>
+                 
                  <Stack spacing={3}>
-                    <ServiceItem rank={1} title="Your Best Seller" visits="Top 1" growth="High" />
+                    {stats.topServices && stats.topServices.length > 0 ? (
+                        stats.topServices.map((service, index) => (
+                            <ServiceItem 
+                                key={index} 
+                                rank={index + 1} 
+                                title={service.title} 
+                                details={`${service.category} • ${service.sales} Sales`} 
+                                rating={service.rating}
+                            />
+                        ))
+                    ) : (
+                        <Typography color="text.secondary">No ventures yet.</Typography>
+                    )}
                  </Stack>
-              </Paper>
+             </Paper>
            </Grid>
         </Grid>
 
@@ -173,21 +186,27 @@ const StatsCard = ({ title, value, percent, icon, color }) => (
   </Paper>
 );
 
-const ServiceItem = ({ rank, title, visits, growth }) => (
-  <Box display="flex" alignItems="center" justifyContent="space-between">
-     <Box display="flex" alignItems="center" gap={2}>
-        <Avatar sx={{ bgcolor: rank === 1 ? '#efb034' : '#f3f4f6', color: rank === 1 ? 'white' : '#374151', width: 32, height: 32, fontWeight: 'bold', fontSize: '0.9rem' }}>
+const ServiceItem = ({ rank, title, details, rating }) => (
+  <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ borderBottom: '1px solid #f0f0f0', pb: 2, '&:last-child': { borderBottom: 'none' } }}>
+      <Box display="flex" alignItems="center" gap={2}>
+        <Avatar sx={{ 
+            bgcolor: rank === 1 ? '#efb034' : '#f3f4f6', 
+            color: rank === 1 ? 'white' : '#374151', 
+            width: 36, height: 36, fontWeight: 'bold', fontSize: '0.9rem' 
+        }}>
             {rank}
         </Avatar>
         <Box>
             <Typography fontWeight="bold" color="#0d2149">{title}</Typography>
-            <Typography variant="caption" color="text.secondary">{visits}</Typography>
+            <Typography variant="caption" color="text.secondary">{details}</Typography>
         </Box>
-     </Box>
-     <Box bgcolor={'#ecfdf5'} color={'#059669'} px={1.5} py={0.5} borderRadius="8px" fontSize="0.75rem" fontWeight="bold">
-        {growth}
-     </Box>
- </Box>
+      </Box>
+      
+      {/* Badge de Estrellas */}
+      <Box bgcolor={'#fffbeb'} color={'#b45309'} px={1.5} py={0.5} borderRadius="8px" fontSize="0.85rem" fontWeight="bold" display="flex" alignItems="center" gap={0.5}>
+        <StarIcon sx={{ fontSize: 16 }} /> {rating}
+      </Box>
+  </Box>
 );
 
 export default StudentDashboard;

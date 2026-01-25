@@ -14,10 +14,6 @@ public class NotificationService {
 
     // Notificar al Vendedor de una venta
     public void notifySale(String sellerEmail, String productName, String buyerName) {
-        // En un sistema real, usaríamos "/queue/user/{email}", pero por simplicidad
-        // usaremos un topic público filtrado en el front o un topic específico por email.
-        // Vamos a usar un topic específico por usuario: /topic/sales/{email}
-        
         String destination = "/topic/sales/" + sellerEmail;
         
         Map<String, String> message = Map.of(
@@ -28,6 +24,20 @@ public class NotificationService {
         
         messagingTemplate.convertAndSend(destination, message);
         System.out.println("🔔 Notificación enviada a: " + destination);
+    }
+
+    // Método Genérico para notificar a un usuario específico
+    public void notifyUser(String email, String title, String body, String type) {
+        String destination = "/topic/sales/" + email;
+        
+        Map<String, String> message = Map.of(
+            "title", title,
+            "body", body,
+            "type", type
+        );
+        
+        messagingTemplate.convertAndSend(destination, message);
+        System.out.println("🔔 Notificación enviada a: " + email);
     }
 
     // Notificar al Admin (Cualquier evento administrativo)

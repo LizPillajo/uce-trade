@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -43,11 +44,10 @@ public class DashboardController {
         double avgRating = myVentures.stream().mapToDouble(v -> v.getRating() != null ? v.getRating() : 0).average().orElse(0);
 
         // 3. Preparar datos para Gráfica de Línea (Ventas por Fecha)
-        // Agrupamos ventas por día (ej: "Mon", "Tue" o fecha completa)
         Map<String, Double> salesByDate = sales.stream()
                 .collect(Collectors.groupingBy(
-                        t -> t.getDate().format(DateTimeFormatter.ofPattern("dd/MM")), // Eje X: Día/Mes
-                        Collectors.summingDouble(t -> t.getAmount().doubleValue())     // Eje Y: Dinero
+                        t -> t.getDate().format(DateTimeFormatter.ofPattern("dd/MM")), 
+                        Collectors.summingDouble(t -> t.getAmount().doubleValue())    
                 ));
 
         // 4. Preparar datos para Gráfica de Barras (Ventas por Categoría)
@@ -57,6 +57,26 @@ public class DashboardController {
                         Collectors.counting()
                 ));
 
+        // 5. TOP PERFORMANCE (Ordenado por Rating y contando ventas)
+        List<Map<String, Object>> topServices = myVentures.stream()
+                // Ordenar por Rating descendente (los nulos al final)
+                .sorted(Comparator.comparing(Venture::getRating, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(5) 
+                .map(v -> {
+                    long salesCount = sales.stream()
+                            .filter(t -> t.getVenture().getId().equals(v.getId()))
+                            .count();
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("title", v.getTitle());
+                    map.put("rating", v.getRating() != null ? v.getRating() : 0.0);
+                    map.put("sales", salesCount);
+                    map.put("category", v.getCategory());
+                    return map;
+                })
+                .collect(Collectors.toList());
+
+        // 6. Armar Respuesta Final
         Map<String, Object> response = new HashMap<>();
         response.put("kpi", Map.of(
                 "earnings", totalEarnings,
@@ -64,8 +84,9 @@ public class DashboardController {
                 "products", totalProducts,
                 "rating", Math.round(avgRating * 10.0) / 10.0
         ));
-        response.put("chartSales", salesByDate);     // Para LineChart
-        response.put("chartCategory", salesByCategory); // Para BarChart
+        response.put("chartSales", salesByDate);
+        response.put("chartCategory", salesByCategory);
+        response.put("topServices", topServices); 
 
         return ResponseEntity.ok(response);
     }
