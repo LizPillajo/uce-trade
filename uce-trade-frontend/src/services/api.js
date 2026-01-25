@@ -50,7 +50,7 @@ export const fetchServices = async (page = 1, search = '', category = 'All', sor
 
   params.append('page', pageParam);
   params.append('size', 12);
-  
+
   if (search) params.append('search', search);
   if (category && category !== 'All') params.append('category', category);
   if (sort) params.append('sort', sort);
@@ -108,4 +108,12 @@ export const fetchAdminStats = async () => {
   const response = await api.get('/admin/stats');
   return response.data;
 };
+
+// Obtener sugerencias de búsqueda
+export const fetchSuggestions = async (query) => {
+  if (!query) return [];
+  const response = await api.get(`/ventures/suggestions?query=${query}`);
+  return response.data; 
+};
+
 export default api;

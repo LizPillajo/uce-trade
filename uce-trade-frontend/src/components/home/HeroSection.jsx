@@ -1,19 +1,41 @@
 // src/components/home/HeroSection.jsx
-import { Box, Container, Typography, Paper, InputBase } from "@mui/material";
+import { Box, Container, Typography, Paper, Autocomplete, TextField, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import Button from "../ui/Button";
-import { useState } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom'; 
+import { fetchSuggestions } from "../../services/api";
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [inputValue, setInputValue] = useState("");
+  const [options, setOptions] = useState([]);
 
-  const handleSearch = () => {
-    if (searchTerm.trim()) {
-      navigate(`/explore?search=${encodeURIComponent(searchTerm)}`);
+  // Efecto para buscar sugerencias mientras el usuario escribe
+  useEffect(() => {
+    let active = true;
+
+    if (inputValue === "") {
+      setOptions([]);
+      return undefined;
+    }
+
+    // Llamamos al backend (puedes agregar debounce aquí si quieres optimizar más)
+    fetchSuggestions(inputValue).then((results) => {
+      if (active) {
+        setOptions(results);
+      }
+    });
+
+    return () => { active = false; };
+  }, [inputValue]);
+
+  const handleSearch = (searchTerm) => {
+    const term = searchTerm || inputValue;
+    if (term) {
+      navigate(`/explore?search=${encodeURIComponent(term)}`);
     } else {
-        navigate('/explore');
+      navigate('/explore');
     }
   };
 
@@ -24,7 +46,6 @@ const HeroSection = () => {
   return (
     <Box
       sx={{
-        // Full window height (minus navbar approx)
         minHeight: "calc(110vh - 64px)",
         display: "flex",
         alignItems: "center",
@@ -82,62 +103,54 @@ const HeroSection = () => {
 
         {/* 2. SEARCH BAR (pill) + separate button - centered */}
         <Box sx={{ display: "flex", justifyContent: "center", mt: 2, mb: 4 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              width: { xs: "100%", md: 900 },
-              px: { xs: 2, md: 0 },
-            }}
-          >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: { xs: "100%", md: 900 }, px: { xs: 2, md: 0 } }}>
+            
             <Paper
               elevation={6}
               sx={{
-                p: "15px",
+                p: "4px", 
                 display: "flex",
                 alignItems: "center",
                 borderRadius: "50px",
                 flex: 1,
                 boxShadow: "0 12px 50px rgba(0,0,0,0.25)",
-                height: 56,
+                bgcolor: 'white'
               }}
             >
-              <Box
-                sx={{
-                  pl: 3,
-                  pr: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  color: "text.secondary",
-                }}
-              >
+              <Box sx={{ pl: 2, pr: 1, color: "text.secondary", display: 'flex' }}>
                 <SearchIcon />
               </Box>
-              <InputBase
-                sx={{
-                  ml: 1,
-                  flex: 1,
-                  fontSize: "1.05rem",
-                  color: "text.primary",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
+
+              <Autocomplete
+                freeSolo 
+                fullWidth
+                options={options}
+                inputValue={inputValue}
+                onInputChange={(event, newInputValue) => {
+                  setInputValue(newInputValue);
                 }}
-                placeholder="Buscar servicios, tutorías, productos..."
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)} 
-                onKeyDown={handleKeyPress}
-                inputProps={{
-                  "aria-label": "search services",
-                  style: { color: "#0d2149" },
+                onChange={(event, newValue) => {
+                    handleSearch(newValue);
                 }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Search for services, tutorials..."
+                    variant="standard" 
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                      style: { fontSize: '1.05rem', padding: '8px' }
+                    }}
+                  />
+                )}
               />
             </Paper>
 
             <Button
               variant="contained"
               color="secondary"
+              onClick={() => handleSearch()}
               sx={{
                 borderRadius: "50px",
                 px: 4,
@@ -147,7 +160,6 @@ const HeroSection = () => {
                 height: 56,
                 color: "white",
               }}
-              onClick={handleSearch}
             >
               Search
             </Button>
