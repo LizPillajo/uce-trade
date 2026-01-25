@@ -9,7 +9,6 @@ export const useWebSocket = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // 1. ESTE LOG DEBE SALIR SI O SI
   console.log("🔄 Hook useWebSocket ejecutándose. Usuario actual:", user);
 
   useEffect(() => {
@@ -22,7 +21,7 @@ export const useWebSocket = () => {
 
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-      debug: (str) => console.log('🕵️ STOMP:', str), // <--- ESTO MUESTRA EL ERROR REAL
+      debug: (str) => console.log('🕵️ STOMP:', str), 
       reconnectDelay: 5000,
       onConnect: () => {
         console.log('✅ CONEXIÓN EXITOSA AL SOCKET');
