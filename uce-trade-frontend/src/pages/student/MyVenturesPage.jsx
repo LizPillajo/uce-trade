@@ -16,15 +16,13 @@ import StarIcon from "@mui/icons-material/Star";
 import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
 
-// --- LOGIC IMPORTS ---
 import { useQuery } from '@tanstack/react-query';
 import { fetchMyVentures } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 const MyVenturesPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Logged-in user data
-
+  const { user } = useAuth();
   // FETCH REAL DATA FROM BACKEND
   const { data: ventures, isLoading, isError } = useQuery({
     queryKey: ['myVentures'],

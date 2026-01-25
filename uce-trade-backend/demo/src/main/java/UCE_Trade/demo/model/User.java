@@ -35,9 +35,15 @@ public class User implements Serializable{
     
     private String role; 
 
+    private String phoneNumber;
+
+    @Column(length = 1000)
+    private String description;
+
+    private String githubUser;
+
     private LocalDate createdAt;
 
-    // Usuarios NUEVOS que se registren a partir de hoy
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
