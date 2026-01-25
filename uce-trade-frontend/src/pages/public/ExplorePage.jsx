@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import { fetchServices } from '../../services/api';
 import VentureCard from '../../components/ventures/VentureCard';
 import VentureFilter from '../../components/ventures/VentureFilter';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const ExplorePage = () => {
   const [searchParams] = useSearchParams();
@@ -14,6 +15,7 @@ const ExplorePage = () => {
   const [category, setCategory] = useState(searchParams.get('category') || 'All');
   const [sort, setSort] = useState('recent');
   const [viewMode, setViewMode] = useState('grid');
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   // Efecto para actualizar si la URL cambia
   useEffect(() => {
@@ -27,8 +29,8 @@ const ExplorePage = () => {
   // Query with Pagination
   // The 'key' includes 'page' so that when the page changes, TanStack Query fetches again
   const { data, isLoading } = useQuery({
-    queryKey: ['ventures', page, searchTerm, category, sort], 
-    queryFn: () => fetchServices(page, searchTerm, category, sort), 
+    queryKey: ['ventures', page, debouncedSearch, category, sort], 
+    queryFn: () => fetchServices(page, debouncedSearch, category, sort),
     keepPreviousData: true,
   });
 
