@@ -1,4 +1,5 @@
 // src/components/ventures/VentureCard.jsx
+import { useState } from 'react';
 import { Card, CardMedia, CardContent, Typography, Box, Chip, Rating } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -7,6 +8,12 @@ import { useNavigate } from 'react-router-dom';
 
 const VentureCard = ({ data }) => {
   const navigate = useNavigate();
+
+  const [imgSrc, setImgSrc] = useState(data.imageUrl);
+
+  const handleImageError = () => {
+    setImgSrc('https://placehold.co/600x400/0d2149/FFF?text=UCE+Trade');
+  };
 
   return (
     <Card sx={{ 
@@ -28,8 +35,9 @@ const VentureCard = ({ data }) => {
         <CardMedia
           component="img"
           height="180"
-          image={data.imageUrl}
+          image={imgSrc}
           alt={data.title}
+          onError={handleImageError}
           sx={{ objectFit: 'cover' }}
         />
         {/* Category Chip (Bottom Left) */}
