@@ -21,8 +21,11 @@ public interface VentureRepository extends JpaRepository<Venture, Long> {
 
     // 3. Búsqueda Avanzada (Texto + Categoría + Paginación)
     @Query("SELECT v FROM Venture v WHERE " +
-           "(:category IS NULL OR :category = '' OR v.category = :category) AND " +
-           "(:search IS NULL OR :search = '' OR LOWER(v.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(v.description) LIKE LOWER(CONCAT('%', :search, '%')))")
+           "(:category IS NULL OR :category = '' OR :category = 'All' OR v.category = :category) AND " +
+           "(:search IS NULL OR :search = '' OR " +
+           "LOWER(v.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(v.description) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(v.category) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Venture> searchVentures(@Param("search") String search, 
                                  @Param("category") String category, 
                                  Pageable pageable);
