@@ -9,12 +9,12 @@ import EmailIcon from '@mui/icons-material/Email';
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import VentureCard from '../../components/ventures/VentureCard';
 import Button from '../../components/ui/Button';
-import StatsCard from '../../components/ui/StatsCard'; // Asegúrate que este componente exista en UI
+import StatsCard from '../../components/ui/StatsCard';
 import Avatar from '../../components/ui/Avatar';
-import { fetchUserProfile } from '../../services/api'; // <--- Importamos la función
+import { fetchUserProfile } from '../../services/api'; 
 
 const SellerProfilePage = () => {
-  const { id } = useParams(); // Obtenemos el ID de la URL
+  const { id } = useParams(); // ID de la URL
 
   // Consultar datos reales del usuario y sus emprendimientos
   const { data, isLoading, isError } = useQuery({
@@ -27,6 +27,24 @@ const SellerProfilePage = () => {
   if (isError || !data) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">User not found</Alert></Box>;
 
   const { user, ventures } = data; // Desestructuramos la respuesta del backend
+
+  // Datos hardcodeados temporalmente para el ejemplo
+  const profileUser = {
+      name: "Liz Pillajo",
+      phone: "593983780341", 
+      email: "ldpillajo@uce.edu.ec"
+  };
+
+  const handleWhatsApp = () => {
+      const message = `Hello ${profileUser.name}, I saw your profile on UCE Trade and I'd like to contact you.`;
+      window.open(`https://wa.me/${profileUser.phone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const handleEmail = () => {
+      const subject = `Contact from UCE Trade Profile`;
+      const body = `Hello ${profileUser.name},\n\nI am interested in purchasing your service`;
+      window.location.href = `mailto:${profileUser.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
 
   return (
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
@@ -76,14 +94,14 @@ const SellerProfilePage = () => {
               {/* Contact (Botón mailto dinámico) */}
               <Box flex={0.2} minWidth={250} sx={{ textAlign: { xs: 'left', md: 'center' }, display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', md: 'center' }, justifyContent: 'center', height: '100%' }}>
                 <Typography variant="h6" fontWeight="bold" color="#222" sx={{ mb: 1, mt:8 }}>Contact</Typography>
-                <Button size="large" variant="contained" startIcon={<WhatsAppIcon />} sx={{ bgcolor: '#25D366', '&:hover': { bgcolor: '#20bd5a' }, py: 1, fontSize: '0.9rem', mb: 2, minWidth: 200, maxWidth: 200, borderRadius: '12px' }}>WhatsApp</Button>
+                <Button size="large" variant="contained" startIcon={<WhatsAppIcon />} onClick={handleWhatsApp} sx={{ bgcolor: '#25D366', '&:hover': { bgcolor: '#20bd5a' }, py: 1, fontSize: '0.9rem', mb: 2, minWidth: 200, maxWidth: 200, borderRadius: '12px' }}>WhatsApp</Button>
                 
                 {/* El botón de email ahora abre el correo del usuario real */}
                 <Button 
                     size="large" 
                     variant="outlined" 
                     startIcon={<EmailIcon />} 
-                    onClick={() => window.location.href = `mailto:${user.email}`}
+                    onClick={handleEmail}
                     sx={{ borderColor: '#e5e7eb', color: '#374151', py: 1, fontSize: '0.9rem', mb:-1, minWidth: 200, maxWidth: 200, borderRadius: '12px' }}
                 >
                     Email
