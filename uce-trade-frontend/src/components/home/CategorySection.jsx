@@ -10,13 +10,13 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 const categories = [
-  { id: 'tutorials', name: 'Tutorials', icon: SchoolIcon, color: '#e3f2fd', iconColor: '#1565c0', count: 120 },
-  { id: 'food', name: 'Food', icon: RestaurantIcon, color: '#fff8e1', iconColor: '#ff8f00', count: 85 },
-  { id: 'clothes', name: 'Clothes', icon: CheckroomIcon, color: '#fce4ec', iconColor: '#c2185b', count: 64 },
-  { id: 'design', name: 'Design', icon: BrushIcon, color: '#f3e5f5', iconColor: '#7b1fa2', count: 72 },
-  { id: 'tech', name: 'Technology', icon: LaptopMacIcon, color: '#e8f5e9', iconColor: '#2e7d32', count: 45 },
-  { id: 'photo', name: 'Photography', icon: CameraAltIcon, color: '#ffebee', iconColor: '#c62828', count: 38 },
-  { id: 'others', name: 'Others', icon: MoreHorizIcon, color: '#f5f5f5', iconColor: '#616161', count: 156 },
+  { id: 'Tutorials', name: 'Tutorials', icon: SchoolIcon, color: '#e3f2fd', iconColor: '#1565c0', count: 120 },
+  { id: 'Food', name: 'Food', icon: RestaurantIcon, color: '#fff8e1', iconColor: '#ff8f00', count: 85 },
+  { id: 'Clothes', name: 'Clothes', icon: CheckroomIcon, color: '#fce4ec', iconColor: '#c2185b', count: 64 },
+  { id: 'Design', name: 'Design', icon: BrushIcon, color: '#f3e5f5', iconColor: '#7b1fa2', count: 72 },
+  { id: 'Technology', name: 'Technology', icon: LaptopMacIcon, color: '#e8f5e9', iconColor: '#2e7d32', count: 45 },
+  { id: 'Photography', name: 'Photography', icon: CameraAltIcon, color: '#ffebee', iconColor: '#c62828', count: 38 },
+  { id: 'Others', name: 'Others', icon: MoreHorizIcon, color: '#f5f5f5', iconColor: '#616161', count: 156 },
 ];
 
 const CategorySection = () => {
