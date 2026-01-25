@@ -1,6 +1,6 @@
 // src/pages/public/ExplorePage.jsx
 import { useState, useEffect } from 'react';
-import { Container, Grid, Box, Typography, Pagination, CircularProgress } from '@mui/material';
+import { Container, Grid, Box, Typography, Pagination, CircularProgress, Stack} from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { fetchServices } from '../../services/api';
