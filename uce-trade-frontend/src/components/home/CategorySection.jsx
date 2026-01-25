@@ -16,7 +16,7 @@ const categories = [
   { id: 'Design', name: 'Design', icon: BrushIcon, color: '#f3e5f5', iconColor: '#7b1fa2', count: 72 },
   { id: 'Technology', name: 'Technology', icon: LaptopMacIcon, color: '#e8f5e9', iconColor: '#2e7d32', count: 45 },
   { id: 'Photography', name: 'Photography', icon: CameraAltIcon, color: '#ffebee', iconColor: '#c62828', count: 38 },
-  { id: 'Others', name: 'Others', icon: MoreHorizIcon, color: '#f5f5f5', iconColor: '#616161', count: 156 },
+  { id: 'Other', name: 'Others', icon: MoreHorizIcon, color: '#f5f5f5', iconColor: '#616161', count: 156 },
 ];
 
 const CategorySection = () => {
