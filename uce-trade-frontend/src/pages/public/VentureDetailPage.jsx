@@ -20,8 +20,8 @@ import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; 
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
-
 import Button from '../../components/ui/Button';
+import { toast } from 'react-toastify';
 import SeoMeta from '../../components/common/SeoMeta';
 import PaymentModal from '../../components/payment/PaymentModal'; 
 import { fetchServiceById, downloadInvoice, confirmPayment } from '../../services/api';
@@ -103,6 +103,11 @@ const VentureDetailPage = () => {
   const ownerFaculty = venture.owner?.faculty || "UCE Faculty";
   const ownerInitial = ownerName.charAt(0).toUpperCase();
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.info("Link copied to clipboard! 📋");
+  };
+
   return (
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
 
@@ -148,8 +153,7 @@ const VentureDetailPage = () => {
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
               />
               <Box sx={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 1 }}>
-                <Box sx={{ bgcolor: 'white', p: 1, borderRadius: '50%', cursor: 'pointer' }}><FavoriteBorderIcon fontSize="small" /></Box>
-                <Box sx={{ bgcolor: 'white', p: 1, borderRadius: '50%', cursor: 'pointer' }}><ShareIcon fontSize="small" /></Box>
+                <Box onClick={handleShare} sx={{ bgcolor: 'white', p: 1, borderRadius: '50%', cursor: 'pointer' }}><ShareIcon fontSize="small" /></Box>
               </Box>
             </Box>
 
@@ -314,7 +318,6 @@ const VentureDetailPage = () => {
         }}
       >
         <DialogContent sx={{ textAlign: 'center', pt: 4 }}>
-          {/* Icono animado o estático grande */}
           <Box sx={{ 
             bgcolor: '#ecfdf5', 
             width: 80, 

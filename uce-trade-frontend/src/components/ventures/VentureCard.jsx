@@ -54,15 +54,6 @@ const VentureCard = ({ data }) => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }} 
         />
-        {/* Heart Icon (Top Right) */}
-        <Box sx={{ 
-            position: 'absolute', top: 10, right: 10, 
-            bgcolor: 'white', borderRadius: '50%', p: 0.5, display: 'flex',
-            cursor: 'pointer',
-            '&:hover': { color: 'red' }
-        }}>
-            <FavoriteBorderIcon fontSize="small" />
-        </Box>
       </Box>
 
       {/* 2. CONTENT */}
