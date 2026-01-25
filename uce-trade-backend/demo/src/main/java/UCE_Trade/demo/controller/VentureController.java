@@ -41,18 +41,25 @@ public class VentureController {
     }
 
     // 2. ENDPOINT PARA EL EXPLORER (Con paginación real)
-    // GET http://localhost:8080/api/ventures?page=0&size=12
+    // GET http://localhost:8080/api/ventures?page=0&size=12&search=math&category=Tutorials
     @GetMapping
     public Page<Venture> getAllVentures(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size, // Traeremos de 12 en 12
-            @RequestParam(defaultValue = "createDate") String sortBy // Opcional: ordenar
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String search,   
+            @RequestParam(required = false) String category, 
+            @RequestParam(defaultValue = "recent") String sort  
     ) {
-        // Creamos la solicitud de página (página X, tamaño Y, ordenado por ID descendente para ver los nuevos)
-        return ventureRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending()));
+        // Ordenamiento básico
+        Sort sorting = Sort.by("createdDate").descending();
+        if ("rating".equals(sort)) sorting = Sort.by("rating").descending();
+        if ("price_low".equals(sort)) sorting = Sort.by("price").ascending();
+
+        // Búsqueda avanzada
+        return ventureRepository.searchVentures(search, category, PageRequest.of(page, size, sorting));
     }
     
-    // GET Individual (Ya lo tenías, mantenlo o agrégalo si falta)
+    // GET Individual 
     @GetMapping("/{id}")
     public ResponseEntity<Venture> getVentureById(@PathVariable Long id) {
         return ventureRepository.findById(id)
