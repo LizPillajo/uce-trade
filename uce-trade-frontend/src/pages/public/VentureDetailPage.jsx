@@ -40,6 +40,31 @@ const VentureDetailPage = () => {
   const [downloading, setDownloading] = useState(false); 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const handleWhatsApp = () => {
+    // Obtener número
+    const phone = venture.owner?.phoneNumber; 
+    
+    if (!phone) {
+        alert("The seller has not registered a phone number.");
+        return;
+    }
+
+    // Crear mensaje
+    const message = `Hello ${ownerName}, I'm interested in your service "${venture.title}" that I saw on UCE Trade.`;
+    
+    // Abrir link
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
+
+  const handleEmail = () => {
+    const email = venture.owner?.email;
+    const subject = `Inquiry about: ${venture.title}`;
+    const body = `Hello ${ownerName},\n\nI am interested in purchasing your service "${venture.title}".\n\nPlease let me know if it is available.\n\nThanks!`;
+    
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
   // FUNCTION FOR DOWNLOADING
   const handleDownloadInvoice = async () => {
       try {
@@ -257,12 +282,12 @@ const VentureDetailPage = () => {
                     <Typography variant="caption" color="text.secondary">OR CONTACT SELLER</Typography>
                 </Divider>
 
-                {/* CONTACT AREA (ALWAYS VISIBLE) */}
+                {/* CONTACT AREA*/}
                 <Box display="flex" gap={1}>
-                    <Button fullWidth variant="contained" startIcon={<WhatsAppIcon />} sx={{ bgcolor: '#25D366', color: 'white', borderRadius: '8px', '&:hover': { bgcolor: '#20bd5a' } }}>
+                    <Button fullWidth variant="contained" startIcon={<WhatsAppIcon />} onClick={handleWhatsApp} sx={{ bgcolor: '#25D366', color: 'white', borderRadius: '8px', '&:hover': { bgcolor: '#20bd5a' } }}>
                         WhatsApp
                     </Button>
-                    <Button fullWidth variant="contained" startIcon={<EmailIcon />} sx={{ bgcolor: '#f3f4f6', color: '#1f2937', borderRadius: '8px', boxShadow: 'none', '&:hover': { bgcolor: '#e5e7eb' } }}>
+                    <Button fullWidth variant="contained" startIcon={<EmailIcon />} onClick={handleEmail} sx={{ bgcolor: '#f3f4f6', color: '#1f2937', borderRadius: '8px', boxShadow: 'none', '&:hover': { bgcolor: '#e5e7eb' } }}>
                         Email
                     </Button>                     
                 </Box>
