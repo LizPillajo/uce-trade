@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -32,4 +33,11 @@ public interface VentureRepository extends JpaRepository<Venture, Long> {
 
     @Query(value = "SELECT title FROM ventures WHERE LOWER(title) LIKE LOWER(CONCAT('%', :query, '%')) LIMIT 5", nativeQuery = true)
     List<String> findTitlesByQuery(@Param("query") String query);
+
+    // Top 4 más vendidos en los últimos 7 días
+    @Query("SELECT v FROM Transaction t JOIN t.venture v " +
+           "WHERE t.date >= :startDate " +
+           "GROUP BY v " +
+           "ORDER BY COUNT(t) DESC")
+    List<Venture> findTopSellingVentures(@Param("startDate") LocalDateTime startDate, Pageable pageable);
 }

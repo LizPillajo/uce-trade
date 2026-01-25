@@ -37,14 +37,27 @@ public class VentureController {
     @Autowired
     private UCE_Trade.demo.repository.ReviewRepository reviewRepository;
 
-    // 1. ENDPOINT PARA EL HOME (Solo 4 destacados)
+    // 1. ENDPOINT PARA 4 destacados
     // GET http://localhost:8080/api/ventures/featured
     @GetMapping("/featured")
-    @Cacheable(value = "featured_ventures") 
+    // @Cacheable(value = "featured_ventures") 
     public List<Venture> getFeaturedVentures() {
-        // Simular lentitud para que notes la diferencia la primera vez (opcional)
-        // Thread.sleep(2000); 
-        return ventureRepository.findTop4ByOrderByRatingDesc();
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        List<Venture> bestSellers = ventureRepository.findTopSellingVentures(sevenDaysAgo, PageRequest.of(0, 4));
+
+        // Si no hay suficientes ventas, rellenamos con los mejor calificados
+        if (bestSellers.size() < 4) {
+            List<Venture> topRated = ventureRepository.findTop4ByOrderByRatingDesc();
+            
+            for (Venture v : topRated) {
+                if (bestSellers.size() >= 4) break;
+                if (!bestSellers.contains(v)) {
+                    bestSellers.add(v);
+                }
+            }
+        }
+        
+        return bestSellers;
     }
 
     // 2. ENDPOINT PARA EL EXPLORER (Con paginación real)
