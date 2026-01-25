@@ -14,12 +14,10 @@ import GridViewIcon from "@mui/icons-material/GridView";
 import ViewListIcon from "@mui/icons-material/ViewList";
 
 const VentureFilter = ({
-  searchTerm,
-  setSearchTerm,
-  category,
-  setCategory,
-  sort,
-  setSort,
+  searchTerm, setSearchTerm,
+  category, setCategory,
+  sort, setSort,
+  viewMode, setViewMode 
 }) => {
   return (
     <Box sx={{ mb: 4 }}>
@@ -116,10 +114,16 @@ const VentureFilter = ({
 
           {/* 4. VIEW BUTTONS */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color="primary">
+            <IconButton 
+                color={viewMode === 'grid' ? "primary" : "default"} 
+                onClick={() => setViewMode('grid')}
+            >
               <GridViewIcon />
             </IconButton>
-            <IconButton color="default">
+            <IconButton 
+                color={viewMode === 'list' ? "primary" : "default"} 
+                onClick={() => setViewMode('list')}
+            >
               <ViewListIcon />
             </IconButton>
           </Box>
