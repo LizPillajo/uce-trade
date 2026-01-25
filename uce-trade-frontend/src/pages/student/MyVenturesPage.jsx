@@ -1,4 +1,5 @@
 // src/pages/student/MyVenturesPage.jsx
+import { useState } from "react";
 import {
   Box, Container, Grid, Paper, Typography, Avatar, Chip, IconButton, 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
@@ -17,13 +18,15 @@ import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchMyVentures } from '../../services/api';
+import { fetchMyVentures, fetchUserProfile } from '../../services/api';
+import EditProfileModal from '../../components/profile/EditProfileModal';
 import { useAuth } from '../../context/AuthContext';
 
 const MyVenturesPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  // FETCH REAL DATA FROM BACKEND
+  const [openModal, setOpenModal] = useState(false);
+  
   const { data: ventures, isLoading, isError } = useQuery({
     queryKey: ['myVentures'],
     queryFn: fetchMyVentures,

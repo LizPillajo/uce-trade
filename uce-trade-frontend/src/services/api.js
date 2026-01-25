@@ -129,4 +129,10 @@ export const postReview = async (ventureId, reviewData) => {
   return response.data;
 };
 
+// Actualizar perfil
+export const updateUserProfile = async (userData) => {
+  const response = await api.put('/users/profile', userData);
+  return response.data;
+};
+
 export default api;

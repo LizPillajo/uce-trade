@@ -7,6 +7,8 @@ import UCE_Trade.demo.repository.VentureRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,5 +39,25 @@ public class UserController {
         response.put("ventures", ventures);
 
         return ResponseEntity.ok(response);
+    }
+
+    // PUT /api/users/profile
+    @PutMapping("/profile")
+    public ResponseEntity<User> updateProfile(@RequestBody Map<String, String> updates) {
+        // Obtener usuario actual del token
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Actualizar solo lo que venga en el JSON
+        if (updates.containsKey("fullName")) user.setFullName(updates.get("fullName"));
+        if (updates.containsKey("phoneNumber")) user.setPhoneNumber(updates.get("phoneNumber"));
+        if (updates.containsKey("description")) user.setDescription(updates.get("description"));
+        if (updates.containsKey("githubUser")) user.setGithubUser(updates.get("githubUser"));
+        if (updates.containsKey("faculty")) user.setFaculty(updates.get("faculty"));
+
+        User updatedUser = userRepository.save(user);
+        
+        return ResponseEntity.ok(updatedUser);
     }
 }

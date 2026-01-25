@@ -40,19 +40,16 @@ public class AuthController {
         String password = credentials.get("password");
 
         try {
-            // 1. Verificar credenciales con Spring Security
+            // Verificar credenciales con Spring Security
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
             );
 
-            // 2. Si pasa, obtener usuario y generar token
-            // NOTA: Necesitamos buscar el usuario para saber su rol. 
-            // Por ahora asumiremos que el login fue exitoso y buscaremos el usuario en la BD.
-            User user = userService.getUserByEmail(email); // Necesitas crear este método en UserService
+            User user = userService.getUserByEmail(email); 
             
             String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
-            // 3. CREAR LA COOKIE (El requisito del Inge)
+            // CREAR LA COOKIE 
             Cookie cookie = new Cookie("jwt_token", token);
             cookie.setHttpOnly(true); // ¡Importante! JS no puede leerla (seguridad)
             cookie.setSecure(false);  // false para localhost, true en producción (AWS)
@@ -73,21 +70,19 @@ public class AuthController {
         String idTokenString = payload.get("token");
 
         try {
-            // 1. VERIFICAR TOKEN CON FIREBASE ADMIN
-            // Esto valida la firma y que el token venga de TU proyecto Firebase
+            // VERIFICAR TOKEN CON FIREBASE ADMIN
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idTokenString);
             
-            // 2. Extraer datos seguros
+            // Extraer datos seguros
             String email = decodedToken.getEmail();
             String name = decodedToken.getName();
             String pictureUrl = decodedToken.getPicture();
 
-            // 3. Lógica de Negocio (Igual que antes)
+            // Lógica de Negocio
             User user;
             try {
                 user = userService.getUserByEmail(email);
             } catch (RuntimeException e) {
-                // Registro automático
                 user = new User();
                 user.setEmail(email);
                 user.setFullName(name);
@@ -96,7 +91,7 @@ public class AuthController {
                 user = userService.registerStudent(user); // Aquí se asigna el rol (Student/Client)
             }
 
-            // 4. Generar TU Token JWT (Cookie)
+            // Generar Token JWT (Cookie)
             String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
             Cookie cookie = new Cookie("jwt_token", token);
@@ -110,7 +105,12 @@ public class AuthController {
                 "message", "Google Login exitoso", 
                 "role", user.getRole(), 
                 "name", user.getFullName(),
-                "avatar", user.getAvatarUrl()
+                "avatar", user.getAvatarUrl(),
+                "email", user.getEmail(), 
+                "faculty", user.getFaculty() != null ? user.getFaculty() : "",
+                "phoneNumber", user.getPhoneNumber() != null ? user.getPhoneNumber() : "", 
+                "description", user.getDescription() != null ? user.getDescription() : "", 
+                "githubUser", user.getGithubUser() != null ? user.getGithubUser() : ""
             ));
 
         } catch (Exception e) {
