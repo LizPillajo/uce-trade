@@ -12,8 +12,6 @@ const api = axios.create({
 // LOGIN
 export const loginUser = async (credentials) => {
   try {
-    // credentials is { email: "...", password: "..." }
-    // The backend will return { message: "...", role: "...", name: "..." } and the Cookie alone
     const response = await api.post('/auth/login', credentials);
     return response.data;
   } catch (error) {
@@ -45,12 +43,20 @@ export const fetchFeaturedServices = async () => {
   }
 };
 
-// 2. For Explorer: Get PAGINATED list
-// Receives the page number (starts at 0 in Java)
-export const fetchServices = async (page = 1) => {
+// For Explorer: Get PAGINATED list
+export const fetchServices = async (page = 1, search = '', category = 'All', sort = 'recent') => {
   const pageParam = page - 1; 
-  const response = await api.get(`/ventures?page=${pageParam}&size=12`);
-  return response.data; // This now returns an object { content: [], totalPages: ..., etc }
+  const params = new URLSearchParams();
+
+  params.append('page', pageParam);
+  params.append('size', 12);
+  
+  if (search) params.append('search', search);
+  if (category && category !== 'All') params.append('category', category);
+  if (sort) params.append('sort', sort);
+
+  const response = await api.get(`/ventures?${params.toString()}`);
+  return response.data;
 };
 
 export const fetchServiceById = async (id) => {
