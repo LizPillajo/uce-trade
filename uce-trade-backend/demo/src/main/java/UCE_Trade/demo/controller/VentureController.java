@@ -1,8 +1,10 @@
 package UCE_Trade.demo.controller;
 
+import UCE_Trade.demo.model.User;
 import UCE_Trade.demo.model.Venture;
 import UCE_Trade.demo.repository.VentureRepository;
 import UCE_Trade.demo.service.NotificationService;
+import UCE_Trade.demo.model.Review;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,7 +16,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpStatus;
-import UCE_Trade.demo.model.User;
+import java.time.LocalDateTime;
+import java.util.Map;
+
 import java.util.List;
 
 @RestController
@@ -29,6 +33,9 @@ public class VentureController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private UCE_Trade.demo.repository.ReviewRepository reviewRepository;
 
     // 1. ENDPOINT PARA EL HOME (Solo 4 destacados)
     // GET http://localhost:8080/api/ventures/featured
@@ -91,6 +98,12 @@ public class VentureController {
         }
     }
 
+    // GET: Obtener Reviews de un Emprendimiento
+    @GetMapping("/{id}/reviews")
+    public List<Review> getReviews(@PathVariable Long id) {
+        return reviewRepository.findByVentureIdOrderByDateDesc(id);
+    }
+
     // POST http://localhost:8080/api/ventures
     @PostMapping
     public ResponseEntity<?> createVenture(@RequestBody Venture venture) {
@@ -122,6 +135,44 @@ public class VentureController {
         } catch (Exception e) {
             e.printStackTrace(); 
             return ResponseEntity.badRequest().body("Error interno: " + e.getMessage());
+        }
+    }
+
+    // POST: Crear una Review (Rating + Comentario)
+    @PostMapping("/{id}/reviews")
+    public ResponseEntity<?> addReview(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            
+            // 1. Validar Usuario y Venture
+            User user = userService.getUserByEmail(email);
+            Venture venture = ventureRepository.findById(id).orElseThrow();
+
+            // 2. Crear Review
+            Review review = new Review();
+            review.setRating((Integer) payload.get("rating"));
+            review.setComment((String) payload.get("comment"));
+            review.setDate(LocalDateTime.now());
+            review.setUser(user);
+            review.setVenture(venture);
+            
+            reviewRepository.save(review);
+
+            // 3. MAGIA: Recalcular Promedio del Emprendimiento
+            List<Review> allReviews = reviewRepository.findByVentureIdOrderByDateDesc(id);
+            double avg = allReviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
+            
+            // Redondear a 1 decimal
+            double roundedAvg = Math.round(avg * 10.0) / 10.0;
+            
+            venture.setRating(roundedAvg);
+            ventureRepository.save(venture);
+
+            return ResponseEntity.ok(review);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error saving review");
         }
     }
 }
