@@ -2,8 +2,25 @@
 import { Box, Container, Typography, Paper, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import Button from "../ui/Button";
+import { useState } from 'react'; 
+import { useNavigate } from 'react-router-dom'; 
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      navigate(`/explore?search=${encodeURIComponent(searchTerm)}`);
+    } else {
+        navigate('/explore');
+    }
+  };
+
+  const handleKeyPress = (e) => {
+      if(e.key === 'Enter') handleSearch();
+  };
+
   return (
     <Box
       sx={{
@@ -108,6 +125,9 @@ const HeroSection = () => {
                   alignItems: "center",
                 }}
                 placeholder="Buscar servicios, tutorías, productos..."
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                onKeyDown={handleKeyPress}
                 inputProps={{
                   "aria-label": "search services",
                   style: { color: "#0d2149" },
@@ -127,6 +147,7 @@ const HeroSection = () => {
                 height: 56,
                 color: "white",
               }}
+              onClick={handleSearch}
             >
               Search
             </Button>
