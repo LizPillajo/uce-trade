@@ -58,6 +58,13 @@ public class VentureController {
         // Búsqueda avanzada
         return ventureRepository.searchVentures(search, category, PageRequest.of(page, size, sorting));
     }
+
+    // GET /api/ventures/suggestions?query=te
+    @GetMapping("/suggestions")
+    public List<String> getSuggestions(@RequestParam String query) {
+        // Retornamos títulos que coincidan (limitado a 5)
+        return ventureRepository.findTitlesByQuery(query);
+    }
     
     // GET Individual 
     @GetMapping("/{id}")

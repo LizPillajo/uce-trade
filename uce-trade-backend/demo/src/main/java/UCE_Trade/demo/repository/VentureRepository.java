@@ -29,4 +29,7 @@ public interface VentureRepository extends JpaRepository<Venture, Long> {
     Page<Venture> searchVentures(@Param("search") String search, 
                                  @Param("category") String category, 
                                  Pageable pageable);
+
+    @Query(value = "SELECT title FROM ventures WHERE LOWER(title) LIKE LOWER(CONCAT('%', :query, '%')) LIMIT 5", nativeQuery = true)
+    List<String> findTitlesByQuery(@Param("query") String query);
 }
