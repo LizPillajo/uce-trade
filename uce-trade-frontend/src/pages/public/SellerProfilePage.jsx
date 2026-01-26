@@ -1,5 +1,4 @@
-// src/pages/public/SellerProfilePage.jsx
-import { useParams } from 'react-router-dom'; // <--- IMPORTANTE: Para leer el ID
+import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Container, Grid, Typography, Stack, Paper, CircularProgress, Alert } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
@@ -11,7 +10,7 @@ import VentureCard from '../../components/ventures/VentureCard';
 import Button from '../../components/ui/Button';
 import StatsCard from '../../components/ui/StatsCard';
 import Avatar from '../../components/ui/Avatar';
-import { fetchUserProfile } from '../../services/api'; 
+import { fetchUserProfile } from '../../services/api';
 
 const SellerProfilePage = () => {
   const { id } = useParams(); // ID de la URL
@@ -26,31 +25,38 @@ const SellerProfilePage = () => {
   if (isLoading) return <Box sx={{ pt: 15, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>;
   if (isError || !data) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">User not found</Alert></Box>;
 
-  const { user, ventures } = data; // Desestructuramos la respuesta del backend
+  const { user, ventures } = data; // Datos REALES del backend
 
-  // Datos hardcodeados temporalmente para el ejemplo
-  const profileUser = {
-      name: "Liz Pillajo",
-      phone: "593983780341", 
-      email: "ldpillajo@uce.edu.ec"
-  };
-
+  // --- LÓGICA INTELIGENTE PARA WHATSAPP (Datos reales) ---
   const handleWhatsApp = () => {
-      const message = `Hello ${profileUser.name}, I saw your profile on UCE Trade and I'd like to contact you.`;
-      window.open(`https://wa.me/${profileUser.phone}?text=${encodeURIComponent(message)}`, '_blank');
+      let phone = user.phoneNumber;
+      
+      if (!phone) {
+          alert("This seller hasn't registered a WhatsApp number yet.");
+          return;
+      }
+      
+      // Limpiar numero
+      phone = phone.replace(/\D/g, '');
+      if (phone.startsWith('09')) phone = '593' + phone.substring(1);
+      else if (phone.startsWith('9')) phone = '593' + phone;
+
+      const message = `Hello ${user.fullName}, I saw your profile on UCE Trade and I'd like to contact you.`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
+  // --- LÓGICA PARA EMAIL (Datos reales) ---
   const handleEmail = () => {
       const subject = `Contact from UCE Trade Profile`;
-      const body = `Hello ${profileUser.name},\n\nI am interested in purchasing your service`;
-      window.location.href = `mailto:${profileUser.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const body = `Hello ${user.fullName},\n\nI am interested in purchasing your service...`;
+      window.location.href = `mailto:${user.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   return (
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
       <Container maxWidth="xl">
         
-        {/* 1. PROFILE HEADER (Tu diseño original) */}
+        {/* 1. PROFILE HEADER (Tu diseño original restaurado) */}
         <Paper elevation={0} sx={{ borderRadius: "24px", overflow: "hidden", mb: 4, border: "1px solid #e5e7eb" }}>
           {/* Yellow Banner */}
           <Box sx={{ height: 80, bgcolor: "#efb034" }} />
@@ -60,15 +66,16 @@ const SellerProfilePage = () => {
               {/* Profile Photo */}
               <Grid size="auto">
                 <Avatar 
-                  src={user.avatarUrl} 
-                  fallback={user.fullName}
+                  src={user.avatarUrl} // FOTO REAL
+                  alt={user.fullName}
+                  fallback={user.fullName} // Si falla, usa iniciales
                   sx={{
                     width: 150,
                     height: 150,
                     border: "4px solid white",
                     bgcolor: "#0d2149",
                     fontSize: "3rem",
-                    mt: -25 // Ajuste de margen negativo original
+                    mt: -25 // Margen negativo original
                   }}
                 />
               </Grid>
@@ -79,7 +86,7 @@ const SellerProfilePage = () => {
                   <Box>
                     <br /><br />
                     <Typography variant="h4" fontWeight="800" color="#0d2149" sx={{mb:2}}>
-                      {user.fullName}
+                      {user.fullName} {/* NOMBRE REAL */}
                     </Typography>
                     <Typography variant="body1" color="text.secondary" fontWeight="500" sx={{mb:2}}>
                       {user.faculty || "UCE Community Member"}
@@ -91,12 +98,11 @@ const SellerProfilePage = () => {
                 </Box>                
               </Grid>
               
-              {/* Contact (Botón mailto dinámico) */}
+              {/* Contact (Botones funcionales con diseño original) */}
               <Box flex={0.2} minWidth={250} sx={{ textAlign: { xs: 'left', md: 'center' }, display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', md: 'center' }, justifyContent: 'center', height: '100%' }}>
                 <Typography variant="h6" fontWeight="bold" color="#222" sx={{ mb: 1, mt:8 }}>Contact</Typography>
                 <Button size="large" variant="contained" startIcon={<WhatsAppIcon />} onClick={handleWhatsApp} sx={{ bgcolor: '#25D366', '&:hover': { bgcolor: '#20bd5a' }, py: 1, fontSize: '0.9rem', mb: 2, minWidth: 200, maxWidth: 200, borderRadius: '12px' }}>WhatsApp</Button>
                 
-                {/* El botón de email ahora abre el correo del usuario real */}
                 <Button 
                     size="large" 
                     variant="outlined" 
@@ -114,7 +120,7 @@ const SellerProfilePage = () => {
               <Box display="flex" alignItems="center" gap={1}>
                 <StarIcon sx={{ color: "#f59e0b" }} />
                 <Typography fontWeight="bold">5.0</Typography>
-                <Typography color="text.secondary">(New Seller)</Typography>
+                <Typography color="text.secondary">(Seller Rating)</Typography>
               </Box>
               <Box display="flex" alignItems="center" gap={1} color="text.secondary">
                 <LocationOnIcon fontSize="small" />
@@ -128,33 +134,55 @@ const SellerProfilePage = () => {
           </Box>
         </Paper>
 
-        {/* ABOUT ME (Estático por ahora, o podrías agregar campo 'bio' en el backend) */}
+        {/* ABOUT ME (Con datos reales) */}
         <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #e5e7eb', mb: 5 }}>
           <Typography variant="h6" fontWeight="bold" color="#0d2149" gutterBottom>About me</Typography>
           <Typography variant="body1" color="text.secondary" paragraph>
-            Student passionate about technology and entrepreneurship. Offering services to the UCE community.
+            {user.description || "Student passionate about technology and entrepreneurship. Offering services to the UCE community."}
           </Typography>
-          {/* Aquí podrías mostrar redes sociales si las tuvieras en la BD */}
+          
+          <Box display="flex" gap={7} alignItems="center">
+             {/* GitHub Dinámico */}
+             {user.githubUser && (
+                <Typography variant="body2" component="a" href={`https://github.com/${user.githubUser}`} target="_blank" sx={{ color: '#0d2149', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width={18} style={{ marginRight: 4 }} /> 
+                  github.com/{user.githubUser}
+                </Typography>
+             )}
+          </Box>
         </Paper>
 
-        {/* VENTURES DEL USUARIO (Dinámicos) */}
+        {/* VENTURES DEL VENDEDOR (Datos reales) */}
         <Box mb={2}>
-          <Typography variant="h5" fontWeight="800" color="#0d2149" gutterBottom>My ventures</Typography>
-          <Typography variant="body2" color="text.secondary" mb={4}>Discover the services offered by {user.fullName.split(' ')[0]}</Typography>
+          <Typography variant="h5" fontWeight="800" color="#0d2149">My ventures</Typography>
+          <Typography variant="body2" color="text.secondary" mb={2}>Discover the services offered by {user.fullName}</Typography>
 
-          {/* Si no tiene productos */}
-          {ventures.length === 0 ? (
-             <Box textAlign="center" py={5}>
-                 <Typography color="text.secondary">This user hasn't published any services yet.</Typography>
-             </Box>
-          ) : (
-            <Grid container spacing={3}>
+        {/* STATS CARDS - Calculados al vuelo con datos reales */}
+        <Grid container spacing={3} mb={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <StatsCard icon="services" label="Active Services" value={ventures?.length || 0} />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <StatsCard icon="views" label="Role" value={user.role} />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <StatsCard icon="rating" label="Average Rating" value={5.0} />
+          </Grid>
+        </Grid>
+
+          {/* Grilla de productos reales */}
+          {ventures && ventures.length > 0 ? (
+              <Grid container spacing={3}>
                 {ventures.map((venture) => (
-                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={venture.id}>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={venture.id}>
                     <VentureCard data={venture} />
-                </Grid>
+                  </Grid>
                 ))}
-            </Grid>
+              </Grid>
+          ) : (
+              <Box textAlign="center" py={5}>
+                  <Typography color="text.secondary">This user hasn't published any services yet.</Typography>
+              </Box>
           )}
         </Box>
       </Container>
