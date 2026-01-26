@@ -41,20 +41,25 @@ const VentureDetailPage = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleWhatsApp = () => {
-    // Obtener número
-    const phone = venture.owner?.phoneNumber; 
+    let phone = venture.owner?.phoneNumber;
     
     if (!phone) {
         alert("The seller has not registered a phone number.");
         return;
     }
 
-    // Crear mensaje
+    phone = phone.replace(/\D/g, '');
+
+    if (phone.startsWith('09')) {
+        phone = '593' + phone.substring(1);
+    } else if (phone.startsWith('9')) {
+        phone = '593' + phone;
+    }
+
     const message = `Hello ${ownerName}, I'm interested in your service "${venture.title}" that I saw on UCE Trade.`;
     
-    // Abrir link
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleEmail = () => {
