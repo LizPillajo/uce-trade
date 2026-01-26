@@ -48,6 +48,17 @@ const MyVenturesPage = () => {
   const isLoading = loadingVentures; 
   const isError = isErrorVentures;
 
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  };
+
+  const isUrl = user?.avatar 
+    && (user.avatar.startsWith('http') || user.avatar.startsWith('data:'))
+    && !user.avatar.includes('ui-avatars.com');
+
   return (
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
       
@@ -67,16 +78,18 @@ const MyVenturesPage = () => {
               {/* Foto */}
               <Grid size="auto">
                 <Avatar 
-                  src={user?.avatar || ""} 
+                  src={isUrl ? user?.avatar : null}
                   alt={user?.name}
                   sx={{
                     width: 150, height: 150,
                     border: "4px solid white",
                     bgcolor: "#0d2149",
+                    color: "white",
                     fontSize: "3rem",
+                    fontWeight: "bold"
                   }}
                 >
-                  {user?.name?.charAt(0) || "U"}
+                  {!isUrl ? getInitials(user?.name) : null}
                 </Avatar>
               </Grid>
 

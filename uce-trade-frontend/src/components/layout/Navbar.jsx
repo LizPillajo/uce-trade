@@ -7,7 +7,7 @@ import Button from '../ui/Button';
 import { useAuth } from '../../context/AuthContext'; 
 
 const Navbar = () => {
-  const { user, logout } = useAuth(); 
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -16,7 +16,7 @@ const Navbar = () => {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
   const isTransparent = isHome && !trigger;
   
-  // Define links according to the role
+  // Definir links según rol
   let links = [{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }];
   
   if (user?.role === 'STUDENT') {
@@ -30,6 +30,19 @@ const Navbar = () => {
     logout();
     navigate('/login');
   };
+
+  // --- NUEVA LÓGICA DE INICIALES ---
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    // Toma la primera letra de la primera palabra y la primera de la segunda
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  };
+
+  const isUrl = user?.avatar 
+    && (user.avatar.startsWith('http') || user.avatar.startsWith('data:'))
+    && !user.avatar.includes('ui-avatars.com');
 
   return (
     <AppBar position="fixed" sx={{ 
@@ -45,11 +58,11 @@ const Navbar = () => {
           <Box display="flex" alignItems="center" component={RouterLink} to="/" sx={{ textDecoration: 'none', color: 'white' }}>
             <SchoolIcon sx={{ mr: 1.5, color: '#efb034', fontSize: 40 }} />
             <Box>
-              <Typography variant="h5" fontWeight={800} lineHeight={1}>UCE Trade</Typography>
+              <Typography variant="h5" fontWeight={800} lineHeight={1}>UCE Market</Typography>
             </Box>
           </Box>
 
-          {/* DYNAMIC CENTRAL MENU */}
+          {/* MENÚ CENTRAL */}
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 3 }}>
             {links.map((link) => (
               <Button 
@@ -64,10 +77,10 @@ const Navbar = () => {
             ))}
           </Box>
 
-          {/* USER AREA */}
+          {/* ÁREA DE USUARIO */}
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             {!user ? (
-              // PUBLIC VIEW (NOT LOGGED IN)
+              // VISTA PÚBLICA
               <>
                 <Button component={RouterLink} to="/login" variant="text" sx={{ color: 'white', fontWeight: 600 }}>
                   Log in
@@ -77,13 +90,19 @@ const Navbar = () => {
                 </Button>
               </>
             ) : (
-              // LOGGED IN VIEW (Avatar Menu)
+              // VISTA LOGUEADO
               <>
                 <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0 }}>
-                  <Avatar sx={{ bgcolor: '#efb034', color: '#0d2149', fontWeight: 'bold' }}>
-                    {user.avatar}
+                  <Avatar 
+                    src={isUrl ? user.avatar : null} 
+                    alt={user.name}
+                    sx={{ bgcolor: '#efb034', color: '#0d2149', fontWeight: 'bold' }}
+                  >
+                    {!isUrl ? getInitials(user.name) : null}
                   </Avatar>
+
                 </IconButton>
+                
                 <Menu
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
@@ -96,9 +115,11 @@ const Navbar = () => {
                   </Box>
                   <Divider />
                   
-                  {/* Link to Personal Profile (Only if student) */}
                   {user.role === 'STUDENT' && (
                       <MenuItem onClick={() => { navigate('/student/my-ventures'); setAnchorEl(null); }}>My Profile</MenuItem>
+                  )}
+                  {user.role === 'ADMIN' && (
+                      <MenuItem onClick={() => { navigate('/admin/dashboard'); setAnchorEl(null); }}>Dashboard</MenuItem>
                   )}
                   
                   <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>Log out</MenuItem>
