@@ -21,11 +21,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await loginUser({ email, password });
       
-      // Guardamos TODO lo que viene del backend
       const userData = {
         name: data.name,
         role: data.role,
-        email: data.email, // Asegúrate que tu backend devuelva esto
+        email: data.email, 
         avatar: data.avatar || data.name.charAt(0).toUpperCase(),
         faculty: data.faculty,
         phoneNumber: data.phoneNumber,

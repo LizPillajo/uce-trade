@@ -170,7 +170,7 @@ const MyVenturesPage = () => {
                     onClick={() => user?.phoneNumber ? window.open(`https://wa.me/${user.phoneNumber.replace(/\D/g,'')}`, '_blank') : alert('Please edit your profile to add a WhatsApp number.')}
                     sx={{ bgcolor: "#25D366", borderRadius: "12px", opacity: user?.phoneNumber ? 1 : 0.6 }}
                 >
-                  {user?.phoneNumber ? "WhatsApp Me" : "No WhatsApp"}
+                  {user?.phoneNumber ? "WhatsApp" : "No WhatsApp"}
                 </Button>
                 
                 {/* Muestra el correo real o un texto si no hay */}

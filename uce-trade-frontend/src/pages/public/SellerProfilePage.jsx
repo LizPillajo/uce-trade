@@ -27,6 +27,13 @@ const SellerProfilePage = () => {
 
   const { user, ventures } = data; // Datos REALES del backend
 
+  const calculateAvgRating = () => {
+      if (!ventures || ventures.length === 0) return "0.0";
+      const total = ventures.reduce((acc, curr) => acc + (curr.rating || 0), 0);
+      return (total / ventures.length).toFixed(1);
+  };
+  const avgRating = calculateAvgRating();
+
   // --- LÓGICA INTELIGENTE PARA WHATSAPP (Datos reales) ---
   const handleWhatsApp = () => {
       let phone = user.phoneNumber;
@@ -166,7 +173,7 @@ const SellerProfilePage = () => {
             <StatsCard icon="views" label="Role" value={user.role} />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <StatsCard icon="rating" label="Average Rating" value={5.0} />
+            <StatsCard icon="rating" label="Average Rating" value={avgRating} />
           </Grid>
         </Grid>
 

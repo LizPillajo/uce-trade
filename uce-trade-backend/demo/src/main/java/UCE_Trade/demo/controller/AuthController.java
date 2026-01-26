@@ -58,7 +58,17 @@ public class AuthController {
 
             response.addCookie(cookie);
 
-            return ResponseEntity.ok(Map.of("message", "Login exitoso", "role", user.getRole(), "name", user.getFullName()));
+            return ResponseEntity.ok(Map.of(
+                "message", "Login exitoso",
+                "role", user.getRole(),
+                "name", user.getFullName(),
+                "email", user.getEmail(),
+                "faculty", user.getFaculty() != null ? user.getFaculty() : "", 
+                "phoneNumber", user.getPhoneNumber() != null ? user.getPhoneNumber() : "", 
+                "description", user.getDescription() != null ? user.getDescription() : "", 
+                "githubUser", user.getGithubUser() != null ? user.getGithubUser() : "", 
+                "avatar", user.getAvatarUrl() != null ? user.getAvatarUrl() : "" 
+            ));
 
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Credenciales incorrectas");

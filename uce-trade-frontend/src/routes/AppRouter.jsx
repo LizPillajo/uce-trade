@@ -36,7 +36,6 @@ export const AppRouter = () => {
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/student/my-ventures" element={<MyVenturesPage />} />
             <Route path="/student/create-venture" element={<CreateVenturePage />} />
-            {/* Personal profile reuses MyVentures for now */}
             <Route path="/profile" element={<MyVenturesPage />} />
         </Route>
 
