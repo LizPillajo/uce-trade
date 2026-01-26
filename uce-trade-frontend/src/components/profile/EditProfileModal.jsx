@@ -3,13 +3,14 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Grid, Inp
 import GitHubIcon from '@mui/icons-material/GitHub';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import Button from '../ui/Button';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { updateUserProfile } from '../../services/api';
+import { useAuth } from '../../context/AuthContext'; // Importamos el contexto
 import { toast } from 'react-toastify';
 
 const EditProfileModal = ({ open, handleClose, user }) => {
-  const queryClient = useQueryClient();
-  
+  const { updateUserSession } = useAuth(); // Usamos la nueva función
+
   const [formData, setFormData] = useState({
     fullName: '',
     faculty: '',
@@ -18,6 +19,7 @@ const EditProfileModal = ({ open, handleClose, user }) => {
     description: ''
   });
 
+  // Rellenar datos al abrir
   useEffect(() => {
     if (user) {
       setFormData({
@@ -34,27 +36,21 @@ const EditProfileModal = ({ open, handleClose, user }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Mutación para guardar
   const mutation = useMutation({
     mutationFn: updateUserProfile,
     onSuccess: (updatedUser) => {
-      // Actualizar el AuthContext (localStorage) para que el Navbar cambie si cambiaste el nombre
-      const storedUser = JSON.parse(localStorage.getItem('user'));
-      const newUserData = { 
-          ...storedUser, 
-          name: updatedUser.fullName,
-          faculty: updatedUser.faculty 
-      };
-      localStorage.setItem('user', JSON.stringify(newUserData));
-      
-      // Refrescar las queries de la página
-      queryClient.invalidateQueries(['studentStats']); // Para actualizar el dashboard
-      
+      // 1. ACTUALIZAR EL CONTEXTO INMEDIATAMENTE
+      // El backend devuelve el objeto User actualizado. Lo mapeamos para el frontend.
+      updateUserSession({
+        name: updatedUser.fullName,
+        faculty: updatedUser.faculty,
+        phoneNumber: updatedUser.phoneNumber,
+        description: updatedUser.description,
+        githubUser: updatedUser.githubUser
+      });
+
       toast.success("Profile updated successfully!");
       handleClose();
-      
-      // Recargar página para reflejar cambios profundos
-      window.location.reload();
     },
     onError: () => {
       toast.error("Failed to update profile.");
@@ -79,7 +75,7 @@ const EditProfileModal = ({ open, handleClose, user }) => {
                 label="WhatsApp Number" 
                 name="phoneNumber" 
                 placeholder="593991234567"
-                helperText="Include country code (e.g., 593 for Ecuador) without '+'"
+                helperText="Format: 593..."
                 value={formData.phoneNumber} 
                 onChange={handleChange} 
                 InputProps={{
@@ -93,7 +89,7 @@ const EditProfileModal = ({ open, handleClose, user }) => {
                 fullWidth 
                 label="GitHub Username" 
                 name="githubUser" 
-                placeholder="LizPillajo"
+                placeholder="Username"
                 value={formData.githubUser} 
                 onChange={handleChange} 
                 InputProps={{
@@ -109,7 +105,7 @@ const EditProfileModal = ({ open, handleClose, user }) => {
                 name="description" 
                 multiline 
                 rows={3} 
-                placeholder="Tell us about your skills..."
+                placeholder="Tell us about yourself..."
                 value={formData.description} 
                 onChange={handleChange} 
             />

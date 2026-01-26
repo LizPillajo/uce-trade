@@ -105,12 +105,12 @@ public class AuthController {
                 "message", "Google Login exitoso", 
                 "role", user.getRole(), 
                 "name", user.getFullName(),
-                "avatar", user.getAvatarUrl(),
-                "email", user.getEmail(), 
-                "faculty", user.getFaculty() != null ? user.getFaculty() : "",
-                "phoneNumber", user.getPhoneNumber() != null ? user.getPhoneNumber() : "", 
-                "description", user.getDescription() != null ? user.getDescription() : "", 
-                "githubUser", user.getGithubUser() != null ? user.getGithubUser() : ""
+                "email", user.getEmail(),
+                "faculty", user.getFaculty() != null ? user.getFaculty() : "UCE Student",
+                "phoneNumber", user.getPhoneNumber() != null ? user.getPhoneNumber() : "",
+                "description", user.getDescription() != null ? user.getDescription() : "",
+                "githubUser", user.getGithubUser() != null ? user.getGithubUser() : "",
+                "avatar", user.getAvatarUrl() != null ? user.getAvatarUrl() : ""
             ));
 
         } catch (Exception e) {

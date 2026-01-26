@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On page load, check if a user was already saved in localStorage
+  // Cargar usuario al inicio
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -16,39 +16,48 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // REAL LOGIN FUNCTION
+  // Login
   const login = async (email, password) => {
     try {
-      // 1. Call the Backend
       const data = await loginUser({ email, password });
       
-      // 2. If we get here, the backend has already set the HttpOnly Cookie automatically.
-      // We only save the visible data (Name, Role) for the UI.
+      // Guardamos TODO lo que viene del backend
       const userData = {
         name: data.name,
-        role: data.role, 
-        email: email,
-        avatar: data.name.charAt(0).toUpperCase() 
+        role: data.role,
+        email: data.email, // Asegúrate que tu backend devuelva esto
+        avatar: data.avatar || data.name.charAt(0).toUpperCase(),
+        faculty: data.faculty,
+        phoneNumber: data.phoneNumber,
+        description: data.description,
+        githubUser: data.githubUser
       };
 
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData)); // Visual persistence
+      localStorage.setItem('user', JSON.stringify(userData));
       return { success: true };
-
     } catch (error) {
       return { success: false, message: error.message || "Login failed" };
     }
   };
 
+  // Logout
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    // Note: To delete the HttpOnly cookie, we should call a /logout endpoint in the backend
-    // For now, this only clears the visual session.
+  };
+
+  // --- NUEVA FUNCIÓN: ACTUALIZAR USUARIO EN VIVO ---
+  // Esto arreglará que "guardas y no pasa nada"
+  const updateUserSession = (newUserData) => {
+    // Mezclamos los datos viejos con los nuevos
+    const updatedUser = { ...user, ...newUserData };
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUserSession, isAuthenticated: !!user, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
