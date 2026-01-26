@@ -17,19 +17,36 @@ import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchMyVentures } from '../../services/api';
+import { fetchMyVentures, fetchStudentStats } from '../../services/api'; 
 import EditProfileModal from '../../components/profile/EditProfileModal';
 import { useAuth } from '../../context/AuthContext';
 
 const MyVenturesPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Ahora 'user' se actualizará automáticamente
+  const { user } = useAuth();
   const [openModal, setOpenModal] = useState(false);
   
-  const { data: ventures, isLoading, isError } = useQuery({
+  // 1. QUERY: Mis Emprendimientos (Lista de la tabla)
+  // AQUÍ ESTABA EL ERROR: Agregamos isError: isErrorVentures
+  const { 
+    data: ventures, 
+    isLoading: loadingVentures, 
+    isError: isErrorVentures 
+  } = useQuery({
     queryKey: ['myVentures'],
     queryFn: fetchMyVentures,
   });
+
+  // 2. QUERY: Estadísticas (Para los KPIs de Ventas y Rating Real)
+  // Usamos 'studentStats' que es la misma del dashboard, así el socket la actualiza sola
+  const { data: stats } = useQuery({
+    queryKey: ['studentStats'],
+    queryFn: fetchStudentStats,
+  });
+
+  // Consolidamos estados de carga y error
+  const isLoading = loadingVentures; 
+  const isError = isErrorVentures;
 
   return (
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
@@ -94,16 +111,17 @@ const MyVenturesPage = () => {
               </Grid>
             </Grid>
 
-            {/* Stats Rápidas (Estáticas por diseño, se ven bonitas) */}
+            {/* Stats Rápidas Header */}
             <Box display="flex" gap={4} mt={3}>
               <Box display="flex" alignItems="center" gap={1}>
                 <StarIcon sx={{ color: "#f59e0b" }} />
-                <Typography fontWeight="bold">5.0</Typography>
+                {/* DATO REAL: Rating promedio traído del backend */}
+                <Typography fontWeight="bold">{stats?.kpi?.rating || "0.0"}</Typography>
                 <Typography color="text.secondary">(Seller Rating)</Typography>
               </Box>
               <Box display="flex" alignItems="center" gap={1} color="text.secondary">
                 <LocationOnIcon fontSize="small" />
-                <Typography variant="body2">UCE Campus</Typography>
+                <Typography variant="body2">UCE Central Campus</Typography>
               </Box>
               <Box display="flex" alignItems="center" gap={1} color="text.secondary">
                 <CalendarTodayIcon fontSize="small" />
@@ -113,7 +131,7 @@ const MyVenturesPage = () => {
           </Box>
         </Paper>
 
-        {/* 2. FILA INFO + CONTACTO (Diseño limpio restaurado) */}
+        {/* 2. FILA INFO + CONTACTO */}
         <Grid container spacing={4} mb={6}>
           {/* About Me */}
           <Grid size={{ xs: 12, md: 8 }}>
@@ -121,24 +139,18 @@ const MyVenturesPage = () => {
               <Typography variant="h6" fontWeight="bold" color="#0d2149" gutterBottom>
                 About me
               </Typography>
-              
               <Typography variant="body1" color="text.secondary" paragraph>
-                {/* Aquí mostramos la descripción. Si no hay, texto por defecto limpio. */}
                 {user?.description || "Hello! I am a student at Universidad Central del Ecuador. I'm here to offer my services and help the community."}
               </Typography>
               
               <Box display="flex" gap={7} alignItems="center">
-                 {/* Si tiene Github, mostramos el link. Si no, mostramos un genérico no clicable o nada */}
                  {user?.githubUser ? (
-                    <Typography variant="body2" component="a" href={`https://github.com/${user.githubUser}`} target="_blank" sx={{ color: '#0d2149', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography variant="body2" component="a" href={`https://github.com/${user.githubUser}`} target="_blank" rel="noreferrer" sx={{ color: '#0d2149', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width={18} style={{ marginRight: 4 }} /> 
                       github.com/{user.githubUser}
                     </Typography>
                  ) : (
-                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width={18} style={{ marginRight: 4, filter: 'grayscale(100%)' }} /> 
-                        No GitHub linked
-                    </Typography>
+                    <Typography variant="body2" color="text.secondary">No GitHub linked</Typography>
                  )}
               </Box>
             </Paper>
@@ -155,13 +167,15 @@ const MyVenturesPage = () => {
                     fullWidth 
                     variant="contained" 
                     startIcon={<WhatsAppIcon />} 
-                    onClick={() => user?.phoneNumber ? window.open(`https://wa.me/${user.phoneNumber}`, '_blank') : alert('Please edit your profile to add a WhatsApp number.')}
+                    onClick={() => user?.phoneNumber ? window.open(`https://wa.me/${user.phoneNumber.replace(/\D/g,'')}`, '_blank') : alert('Please edit your profile to add a WhatsApp number.')}
                     sx={{ bgcolor: "#25D366", borderRadius: "12px", opacity: user?.phoneNumber ? 1 : 0.6 }}
                 >
-                  {user?.phoneNumber ? "WhatsApp" : "No WhatsApp"}
+                  {user?.phoneNumber ? "WhatsApp Me" : "No WhatsApp"}
                 </Button>
+                
+                {/* Muestra el correo real o un texto si no hay */}
                 <Button fullWidth variant="outlined" startIcon={<EmailIcon />} sx={{ borderRadius: "12px", borderColor: "#e5e7eb", color: "#374151" }}>
-                  {user?.email}
+                  {user?.email || "No Email"}
                 </Button>
               </Stack>
             </Paper>
@@ -186,11 +200,15 @@ const MyVenturesPage = () => {
           </Button>
         </Box>
 
-        {/* Mini KPI */}
+        {/* Mini KPI REALES CONECTADOS AL BACKEND */}
         <Grid container spacing={3} mb={4}>
           <MiniStat label="Active Services" value={ventures?.length || 0} icon="📦" />
-          <MiniStat label="Total Views" value="0" icon="📈" />
-          <MiniStat label="Average Rating" value="0.0" icon="⭐" />
+          
+          {/* DATO REAL: Total Ventas del backend */}
+          <MiniStat label="Total Sales" value={stats?.kpi?.sales || 0} icon="📈" />
+          
+          {/* DATO REAL: Rating promedio del backend */}
+          <MiniStat label="Average Rating" value={stats?.kpi?.rating || 0.0} icon="⭐" />
         </Grid>
 
         {/* Tabla */}

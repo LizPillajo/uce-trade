@@ -12,7 +12,7 @@ export const useWebSocket = () => {
   console.log("🔄 Hook useWebSocket ejecutándose. Usuario actual:", user);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !user.email) {
         console.warn("⚠️ No hay usuario logueado, no se conecta el socket.");
         return;
     }
