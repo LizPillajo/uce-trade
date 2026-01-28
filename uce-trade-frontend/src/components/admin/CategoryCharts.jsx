@@ -1,5 +1,6 @@
 // src/components/admin/CategoryCharts.jsx
-import { Paper, Typography, Box, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Paper, Typography, Box } from "@mui/material";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 
 const CategoryCharts = ({ pieData }) => {
   return (

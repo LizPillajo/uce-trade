@@ -46,16 +46,16 @@ const AdminDashboard = () => {
           </Box>
         </Box>
 
-        {/* 1. KPIs REFACTORIZADOS */}
+        {/* 1. KPIs */}
         <AdminKpiGroup kpi={stats?.kpi} />
 
         <Grid container spacing={3}>
-          {/* 2. GROWTH CHART REFACTORIZADO */}
+          {/* 2. GROWTH CHART  */}
           <Grid size={{ xs: 12, md: 8 }}>
             <GrowthChart data={stats?.growthData || []} />
           </Grid>
 
-          {/* 3. CATEGORY CHARTS REFACTORIZADOS */}
+          {/* 3. CATEGORY CHARTS */}
           <Grid size={{ xs: 12, md: 4 }}>
             <CategoryCharts pieData={pieData} />
           </Grid>
