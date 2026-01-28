@@ -3,30 +3,25 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
-  Container, Grid, Box, Typography, Paper, Chip, Avatar, 
-  Stack, Divider, CircularProgress, Alert, Dialog, DialogContent, DialogActions
+  Container, Grid, Box, Typography, Paper, 
+  CircularProgress, Alert, Dialog, DialogContent, DialogActions 
 } from '@mui/material';
-
-import StarIcon from '@mui/icons-material/Star';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import EmailIcon from '@mui/icons-material/Email';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import ShareIcon from '@mui/icons-material/Share';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout'; 
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; 
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
+
+// 1. IMPORTACIÓN DE TUS NUEVOS COMPONENTES REFACTORIZADOS
+import VentureHero from '../../components/ventures/VentureHero';
+import PurchaseSidebar from '../../components/ventures/PurchaseSidebar';
+import OwnerCard from '../../components/ventures/OwnerCard';
+import ReviewSection from '../../components/ventures/ReviewSection';
+
+// UI e Infraestructura
 import Button from '../../components/ui/Button';
 import { toast } from 'react-toastify';
 import SeoMeta from '../../components/common/SeoMeta';
 import PaymentModal from '../../components/payment/PaymentModal'; 
 import { fetchServiceById, downloadInvoice, confirmPayment } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import ReviewSection from '../../components/ventures/ReviewSection';
 
 const VentureDetailPage = () => {
   const { id } = useParams();
@@ -40,82 +35,50 @@ const VentureDetailPage = () => {
   const [downloading, setDownloading] = useState(false); 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // --- LÓGICA DE NEGOCIO (Se queda aquí porque usa el estado de la página) ---
+  
   const handleWhatsApp = () => {
     let phone = venture.owner?.phoneNumber;
-    
-    if (!phone) {
-        alert("The seller has not registered a phone number.");
-        return;
-    }
-
+    if (!phone) { alert("The seller has not registered a phone number."); return; }
     phone = phone.replace(/\D/g, '');
+    if (phone.startsWith('09')) phone = '593' + phone.substring(1);
+    else if (phone.startsWith('9')) phone = '593' + phone;
 
-    if (phone.startsWith('09')) {
-        phone = '593' + phone.substring(1);
-    } else if (phone.startsWith('9')) {
-        phone = '593' + phone;
-    }
-
-    const message = `Hello ${ownerName}, I'm interested in your service "${venture.title}" that I saw on UCE Trade.`;
-    
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const message = `Hello ${venture.owner?.fullName}, I'm interested in your service "${venture.title}" that I saw on UCE Trade.`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleEmail = () => {
     const email = venture.owner?.email;
     const subject = `Inquiry about: ${venture.title}`;
-    const body = `Hello ${ownerName},\n\nI am interested in purchasing your service "${venture.title}".\n\nPlease let me know if it is available.\n\nThanks!`;
-    
+    const body = `Hello ${venture.owner?.fullName},\n\nI am interested in purchasing your service "${venture.title}".`;
     window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
-  // FUNCTION FOR DOWNLOADING
   const handleDownloadInvoice = async () => {
       try {
           setDownloading(true);
           const blob = await downloadInvoice(id); 
-            
-          // To download Blob in the browser
           const url = window.URL.createObjectURL(new Blob([blob]));
           const link = document.createElement('a');
           link.href = url;
-          link.setAttribute('download', `invoice_${venture?.title || 'service'}.pdf`);
+          link.setAttribute('download', `invoice_${venture?.title}.pdf`);
           document.body.appendChild(link);
           link.click();
           link.parentNode.removeChild(link);
-
       } catch (error) {
-          console.error("Error downloading invoice", error);
-          alert("Error generating invoice.");
+          toast.error("Error generating invoice.");
       } finally {
           setDownloading(false);
       }
   };
 
-  // DETECT IF WE COME FROM A SUCCESSFUL STRIPE PAYMENT
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const redirectStatus = query.get('redirect_status');
-
-    if (redirectStatus === 'succeeded') {
+    if (query.get('redirect_status') === 'succeeded' && !processedRef.current) {
+      processedRef.current = true;
       setPaymentStatus('succeeded');
-
-      // Si no hemos procesado este pago todavía...
-      if (!processedRef.current) {
-        processedRef.current = true; // Marcamos como procesado
-        
-        console.log("💳 Pago detectado. Confirmando en servidor...");
-        
-        // Llamada automática al backend
-        confirmPayment(id)
-          .then(() => {
-             console.log("✅ Pago confirmado: BD actualizada, Correos enviados, Notificación enviada.");
-             
-             setShowSuccessModal(true);
-          })
-          .catch(err => console.error("❌ Error confirmando pago:", err));
-      }
+      confirmPayment(id).then(() => setShowSuccessModal(true));
     }
   }, [location, id]);
 
@@ -126,13 +89,7 @@ const VentureDetailPage = () => {
   });
 
   if (isLoading) return <Box sx={{ pt: 15, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>;
-  if (isError || !venture) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">Service not found or deleted.</Alert></Box>;
-
-  // Safe data
-  const mainImage = venture.imageUrl || "https://placehold.co/600x400?text=No+Image";
-  const ownerName = venture.owner?.fullName || "UCE Student";
-  const ownerFaculty = venture.owner?.faculty || "UCE Faculty";
-  const ownerInitial = ownerName.charAt(0).toUpperCase();
+  if (isError || !venture) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">Service not found.</Alert></Box>;
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -141,257 +98,77 @@ const VentureDetailPage = () => {
 
   return (
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
-
-      <SeoMeta title={venture.title} description={(venture.description || "").substring(0, 150)} />
-
-      {/* PAYMENT MODAL RENDER (Invisible until activated by the button) */}
-      <PaymentModal 
-        open={openPayment} 
-        handleClose={() => setOpenPayment(false)} 
-        ventureId={id}
-        price={venture.price}
-      />
+      <SeoMeta title={venture.title} description={venture.description?.substring(0, 150)} />
 
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
-        
-        {/* Back Button */}
         <Button variant="text" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 3, color: 'text.secondary' }}>
             Back
         </Button>
 
-        {/* MAIN GRID */}
         <Grid container spacing={4}>
-          
-          {/* LEFT COLUMN: IMAGE AND DESCRIPTION */}
+          {/* COLUMNA IZQUIERDA: DISEÑO PRINCIPAL */}
           <Grid size={{ xs: 12, lg: 8 }}>
-            
-            {/* 1. Main Image */}
-            <Box 
-              sx={{ 
-                position: 'relative',
-                width: '100%', 
-                height: { xs: 300, md: 500 }, 
-                borderRadius: '16px', 
-                overflow: 'hidden', 
-                mb: 2,
-                bgcolor: '#e5e7eb',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-              }}
-            >
-              <img 
-                src={mainImage} 
-                alt={venture.title} 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-              />
-              <Box sx={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 1 }}>
-                <Box onClick={handleShare} sx={{ bgcolor: 'white', p: 1, borderRadius: '50%', cursor: 'pointer' }}><ShareIcon fontSize="small" /></Box>
-              </Box>
-            </Box>
+            {/* USANDO EL NUEVO COMPONENTE HERO */}
+            <VentureHero 
+              imageUrl={venture.imageUrl} 
+              title={venture.title} 
+              onShare={handleShare} 
+            />
 
-              {/* 2. Description */}
             <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom color="#0d2149">
-                Description
-              </Typography>
-              
-              <Typography variant="body1" paragraph sx={{ color: '#4b5563', lineHeight: 1.7, mb: 4, whiteSpace: 'pre-line' }}>
+              <Typography variant="h5" fontWeight="bold" gutterBottom color="#0d2149">Description</Typography>
+              <Typography variant="body1" sx={{ color: '#4b5563', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
                 {venture.description}
-              </Typography>
-
-              <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 2 }}>
-                Service published on: {venture.createdDate}
               </Typography>
             </Paper>
           </Grid>
 
-          {/* RIGHT COLUMN: SIDEBAR (INFO + PAYMENT + CONTACT) */}
+          {/* COLUMNA DERECHA: SIDEBAR */}
           <Grid size={{ xs: 12, lg: 4 }}>
-            <Stack spacing={3}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* USANDO EL NUEVO COMPONENTE DE COMPRA */}
+              <PurchaseSidebar 
+                venture={venture}
+                paymentStatus={paymentStatus}
+                downloading={downloading}
+                onBuy={() => setOpenPayment(true)}
+                onDownload={handleDownloadInvoice}
+                onWhatsApp={handleWhatsApp}
+                onEmail={handleEmail}
+              />
 
-              {/* CARD 1: MAIN ACTION (INFO + PAYMENT + CONTACT) */}
-              <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
-                
-                {/* Product header */}
-                <Box display="flex" justifyContent="space-between" mb={2}>
-                    <Chip label={venture.category} sx={{ bgcolor: '#0d2149', color: 'white', fontWeight: 'bold', fontSize: '0.7rem', height: 24 }} />
-                    <Chip label={ownerFaculty} variant="outlined" size="small" sx={{ height: 24 }} />
-                </Box>
-
-                <Typography variant="h4" fontWeight="800" color="#0d2149" sx={{ mb: 2 }}>
-                  {venture.title}
-                </Typography>
-
-                <Box display="flex" alignItems="center" gap={0.5} mb={3}>
-                    <StarIcon sx={{ color: '#f59e0b', fontSize: 18 }} />
-                    <Typography fontWeight="bold" variant="body2">{venture.rating || 0.0}</Typography>
-                    <Typography variant="subtitle2" color="text.secondary">(New Service)</Typography>
-                </Box>
-                
-                {/* ----------------------------------------------------- */}
-                {/* CONDITIONAL LOGIC: ALREADY PAID OR NEEDS TO PAY?      */}
-                {/* ----------------------------------------------------- */}
-                {paymentStatus === 'succeeded' ? (
-                   // CASE A: ALREADY PAID -> SHOW SUCCESS MESSAGE AND INVOICE BUTTON
-                   <Box sx={{ bgcolor: '#ecfdf5', p: 3, borderRadius: '12px', mb: 3, border: '1px solid #10b981', textAlign: 'center' }}>
-                      <CheckCircleOutlineIcon sx={{ fontSize: 50, color: '#10b981', mb: 1 }} />
-                      <Typography variant="h6" fontWeight="bold" color="#065f46">
-                        Payment Successful!
-                      </Typography>
-                      <Typography variant="body2" color="#047857" mb={2}>
-                        Your order has been registered.
-                      </Typography>
-                      
-                      <Button 
-                          fullWidth 
-                          variant="outlined" 
-                          startIcon={downloading ? <CircularProgress size={20}/> : <PictureAsPdfIcon />}
-                          disabled={downloading}
-                          onClick={handleDownloadInvoice} 
-                          sx={{ borderColor: '#059669', color: '#059669', bgcolor: 'white', fontWeight: 'bold' }}
-                      >
-                          {downloading ? "Generating..." : "Download Invoice"}
-                      </Button>
-                   </Box>
-                ) : (
-                   // CASE B: NOT PAID YET -> SHOW PRICE AND BUY BUTTON
-                   <Box sx={{ bgcolor: '#f8fafc', p: 2, borderRadius: '12px', mb: 3, border: '1px dashed #cbd5e1' }}>
-                      <Typography variant="caption" color="text.secondary" fontWeight="bold">TOTAL PRICE</Typography>
-                      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                          <Typography variant="h3" fontWeight="900" color="#0d2149">
-                              ${venture.price}
-                          </Typography>
-                      </Box>
-                      <Button 
-                        fullWidth 
-                        variant="contained" 
-                        size="large"
-                        startIcon={<ShoppingCartCheckoutIcon />}
-                        sx={{ 
-                          bgcolor: '#efb034', 
-                          color: '#0d2149', 
-                          fontSize: '1.1rem',
-                          boxShadow: '0 4px 14px rgba(239, 176, 52, 0.4)',
-                          '&:hover': { bgcolor: '#f0b94e', transform: 'translateY(-2px)' }
-                        }}
-                        onClick={() => setOpenPayment(true)}
-                      >
-                        Buy Now
-                      </Button>
-                      <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={1}>
-                          Secure payment via Stripe • Invoice included
-                      </Typography>
-                   </Box>
-                )}
-
-                <Divider sx={{ my: 3 }}>
-                    <Typography variant="caption" color="text.secondary">OR CONTACT SELLER</Typography>
-                </Divider>
-
-                {/* CONTACT AREA*/}
-                <Box display="flex" gap={1}>
-                    <Button fullWidth variant="contained" startIcon={<WhatsAppIcon />} onClick={handleWhatsApp} sx={{ bgcolor: '#25D366', color: 'white', borderRadius: '8px', '&:hover': { bgcolor: '#20bd5a' } }}>
-                        WhatsApp
-                    </Button>
-                    <Button fullWidth variant="contained" startIcon={<EmailIcon />} onClick={handleEmail} sx={{ bgcolor: '#f3f4f6', color: '#1f2937', borderRadius: '8px', boxShadow: 'none', '&:hover': { bgcolor: '#e5e7eb' } }}>
-                        Email
-                    </Button>                     
-                </Box>
-              </Paper>
-
-              {/* CARD 2: PROVIDER INFO */}
-              <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="caption" color="text.secondary" fontWeight="bold">PROVIDED BY</Typography>
-                    <Button size="small" variant="contained" sx={{ bgcolor: '#0d2149', fontSize: '0.8rem', py: 0.5, minWidth: 'auto' }} onClick={() => navigate(`/profile/${venture.owner.id}`)}>
-                        Profile
-                    </Button>
-                </Box>
-                
-                <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar sx={{ width: 55, height: 55, bgcolor: '#efb034' }}>{ownerInitial}</Avatar>
-                    <Box>
-                        <Typography variant="h5" fontWeight="bold" lineHeight={1.2} display="flex" alignItems="center" gap={0.5}>
-                            {ownerName}
-                            <CheckCircleIcon color="success" sx={{ fontSize: 14 }} />
-                        </Typography>
-                        <Typography variant="subtitle2" color="text.secondary" display="block">
-                            {ownerFaculty}
-                        </Typography>
-                    </Box>
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Stack spacing={1}>
-                    <Box display="flex" gap={1} alignItems="center">
-                        <AccessTimeIcon fontSize="small" sx={{ color: '#9ca3af', fontSize: 16 }} />
-                        <Typography variant="body1" color="text.secondary">Response time: <b>Fast</b></Typography>
-                    </Box>
-                    <Box display="flex" gap={1} alignItems="center">
-                        <LocationOnIcon fontSize="small" sx={{ color: '#9ca3af', fontSize: 16 }} />
-                        <Typography variant="body1" color="text.secondary">UCE Campus</Typography>
-                    </Box>
-                </Stack>
-              </Paper>
-
-            </Stack>
+              {/* USANDO EL NUEVO COMPONENTE DEL DUEÑO */}
+              <OwnerCard 
+                owner={venture.owner} 
+                onNavigate={() => navigate(`/profile/${venture.owner.id}`)} 
+              />
+            </Box>
           </Grid>
         </Grid>
 
-        {/* --- SECCIÓN DE COMENTARIOS --- */}
-         <Grid container spacing={4} mt={1}>
-            <Grid size={{ xs: 12, lg: 12 }}>
-                <ReviewSection ventureId={id} />
-            </Grid>
-         </Grid>
+        <Box mt={4}>
+          <ReviewSection ventureId={id} />
+        </Box>
       </Container>
 
-      {/* --- POP-UP DE CONFIRMACIÓN DE CORREO --- */}
-      <Dialog 
-        open={showSuccessModal} 
-        onClose={() => setShowSuccessModal(false)}
-        PaperProps={{
-          sx: { borderRadius: '20px', padding: 2, maxWidth: 400 }
-        }}
-      >
-        <DialogContent sx={{ textAlign: 'center', pt: 4 }}>
-          <Box sx={{ 
-            bgcolor: '#ecfdf5', 
-            width: 80, 
-            height: 80, 
-            borderRadius: '50%', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            margin: '0 auto',
-            mb: 2
-          }}>
-            <MarkEmailReadIcon sx={{ fontSize: 40, color: '#10b981' }} />
-          </Box>
+      {/* MODALES */}
+      <PaymentModal 
+        open={openPayment} 
+        handleClose={() => setOpenPayment(false)} 
+        ventureId={id} 
+        price={venture.price} 
+      />
 
-          <Typography variant="h5" fontWeight="800" color="#0d2149" gutterBottom>
-            Purchase Successful!
+      <Dialog open={showSuccessModal} onClose={() => setShowSuccessModal(false)} PaperProps={{ sx: { borderRadius: '20px', p: 2 } }}>
+        <DialogContent sx={{ textAlign: 'center' }}>
+          <MarkEmailReadIcon sx={{ fontSize: 60, color: '#10b981', mb: 2 }} />
+          <Typography variant="h5" fontWeight="bold">Purchase Successful!</Typography>
+          <Typography variant="body2" sx={{ mt: 2, bgcolor: '#f3f4f6', p: 2, borderRadius: '8px' }}>
+            Receipt sent to: <b>{user?.email}</b>
           </Typography>
-          
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-            Thank you for your purchase. 
-          </Typography>
-
-          <Typography variant="body2" sx={{ bgcolor: '#f3f4f6', p: 1.5, borderRadius: '8px', color: '#4b5563', fontWeight: 500 }}>
-            We have sent the receipt to: <br/>
-            <span style={{ color: '#0d2149', fontWeight: 'bold' }}>{user?.email}</span>
-          </Typography>
-
         </DialogContent>
-        
         <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-          <Button 
-            variant="contained" 
-            onClick={() => setShowSuccessModal(false)}
-            sx={{ bgcolor: '#0d2149', borderRadius: '12px', px: 4 }}
-          >
-            Great, thanks!
-          </Button>
+          <Button onClick={() => setShowSuccessModal(false)}>Great, thanks!</Button>
         </DialogActions>
       </Dialog>
     </Box>
