@@ -1,192 +1,75 @@
+// src/pages/student/MyVenturesPage.jsx
 import { useState } from "react";
-import {
-  Box, Container, Grid, Paper, Typography, Avatar, Chip, IconButton, 
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-  Stack, CircularProgress, Alert
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import { Box, Container, Grid, Paper, Typography, CircularProgress, Alert, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import EmailIcon from "@mui/icons-material/Email";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import StarIcon from "@mui/icons-material/Star";
-import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchMyVentures, fetchStudentStats } from '../../services/api'; 
 import EditProfileModal from '../../components/profile/EditProfileModal';
 import { useAuth } from '../../context/AuthContext';
+
+import StudentProfileHeader from "../../components/student/StudentProfileHeader";
+import MyVenturesTable from "../../components/student/MyVenturesTable";
+import Button from "../../components/ui/Button";
 
 const MyVenturesPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [openModal, setOpenModal] = useState(false);
   
-  // 1. QUERY: Mis Emprendimientos (Lista de la tabla)
-  // AQUÍ ESTABA EL ERROR: Agregamos isError: isErrorVentures
-  const { 
-    data: ventures, 
-    isLoading: loadingVentures, 
-    isError: isErrorVentures 
-  } = useQuery({
+  const { data: ventures, isLoading: loadingVentures, isError: isErrorVentures } = useQuery({
     queryKey: ['myVentures'],
     queryFn: fetchMyVentures,
   });
 
-  // 2. QUERY: Estadísticas (Para los KPIs de Ventas y Rating Real)
-  // Usamos 'studentStats' que es la misma del dashboard, así el socket la actualiza sola
   const { data: stats } = useQuery({
     queryKey: ['studentStats'],
     queryFn: fetchStudentStats,
   });
 
-  // Consolidamos estados de carga y error
-  const isLoading = loadingVentures; 
-  const isError = isErrorVentures;
-
-  const getInitials = (name) => {
-    if (!name) return "U";
-    const parts = name.trim().split(" ");
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
-  };
-
-  const isUrl = user?.avatar 
-    && (user.avatar.startsWith('http') || user.avatar.startsWith('data:'))
-    && !user.avatar.includes('ui-avatars.com');
+  if (loadingVentures) return <Box display="flex" justifyContent="center" pt={20}><CircularProgress /></Box>;
+  if (isErrorVentures) return <Alert severity="error">Error loading data.</Alert>;
 
   return (
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
-      
-      <EditProfileModal 
-        open={openModal} 
-        handleClose={() => setOpenModal(false)} 
-        user={user} 
-      />
+      <EditProfileModal open={openModal} handleClose={() => setOpenModal(false)} user={user} />
 
       <Container maxWidth="xl">
-        
-        {/* 1. HEADER DEL PERFIL */}
-        <Paper elevation={0} sx={{borderRadius: "24px", overflow: "hidden", mb: 4, border: "1px solid #e5e7eb"}}>
-          <Box sx={{ height: 80, bgcolor: "#efb034" }} />
-          <Box px={4} pb={4}>
-            <Grid container alignItems="flex-end" spacing={3} sx={{ mt: -6 }}>
-              {/* Foto */}
-              <Grid size="auto">
-                <Avatar 
-                  src={isUrl ? user?.avatar : null}
-                  alt={user?.name}
-                  sx={{
-                    width: 150, height: 150,
-                    border: "4px solid white",
-                    bgcolor: "#0d2149",
-                    color: "white",
-                    fontSize: "3rem",
-                    fontWeight: "bold"
-                  }}
-                >
-                  {!isUrl ? getInitials(user?.name) : null}
-                </Avatar>
-              </Grid>
+        {/* 1. HEADER (REFACTORIZADO) */}
+        <StudentProfileHeader user={user} stats={stats} onEditClick={() => setOpenModal(true)} />
 
-              {/* Info Texto */}
-              <Grid size="grow">
-                <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                  <Box>
-                    <br/><br/> 
-                    <Typography variant="h4" fontWeight="800" color="#0d2149">
-                      {user?.name || "Estudiante UCE"}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary" fontWeight="500">
-                      {user?.faculty || "UCE Member"} • {user?.email}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Active Member
-                    </Typography>
-                  </Box>
-                  
-                  <Box flex={0.2} minWidth={250} sx={{ textAlign: { xs: 'left', md: 'center' }, display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', md: 'center' }, justifyContent: 'center', height: '100%' }}>                              
-                    <Button 
-                        size="large" 
-                        variant="contained" 
-                        startIcon={<EditIcon />} 
-                        onClick={() => setOpenModal(true)} 
-                        sx={{ borderColor: '#e5e7eb', color: 'white', bgcolor: '#0d2149', py: 1, fontSize: '0.9rem', minWidth: 200, maxWidth: 200, borderRadius: '12px', mt: 7 }}
-                    >
-                        Edit Profile
-                    </Button>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
-
-            {/* Stats Rápidas Header */}
-            <Box display="flex" gap={4} mt={3}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <StarIcon sx={{ color: "#f59e0b" }} />
-                {/* DATO REAL: Rating promedio traído del backend */}
-                <Typography fontWeight="bold">{stats?.kpi?.rating || "0.0"}</Typography>
-                <Typography color="text.secondary">(Seller Rating)</Typography>
-              </Box>
-              <Box display="flex" alignItems="center" gap={1} color="text.secondary">
-                <LocationOnIcon fontSize="small" />
-                <Typography variant="body2">UCE Central Campus</Typography>
-              </Box>
-              <Box display="flex" alignItems="center" gap={1} color="text.secondary">
-                <CalendarTodayIcon fontSize="small" />
-                <Typography variant="body2">Member</Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Paper>
-
-        {/* 2. FILA INFO + CONTACTO */}
+        {/* 2. FILA INFO + CONTACTO (Mantenemos el Grid original para que no se dañe el diseño) */}
         <Grid container spacing={4} mb={6}>
-          {/* About Me */}
           <Grid size={{ xs: 12, md: 8 }}>
             <Paper elevation={0} sx={{ p: 4, borderRadius: "24px", border: "1px solid #e5e7eb", height: "100%" }}>
-              <Typography variant="h6" fontWeight="bold" color="#0d2149" gutterBottom>
-                About me
-              </Typography>
+              <Typography variant="h6" fontWeight="bold" color="#0d2149" gutterBottom>About me</Typography>
               <Typography variant="body1" color="text.secondary" paragraph>
-                {user?.description || "Hello! I am a student at Universidad Central del Ecuador. I'm here to offer my services and help the community."}
+                {user?.description || "Hello! I am a student at Universidad Central del Ecuador."}
               </Typography>
-              
               <Box display="flex" gap={7} alignItems="center">
-                 {user?.githubUser ? (
-                    <Typography variant="body2" component="a" href={`https://github.com/${user.githubUser}`} target="_blank" rel="noreferrer" sx={{ color: '#0d2149', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width={18} style={{ marginRight: 4 }} /> 
+                 {user?.githubUser && (
+                    <Typography variant="body2" component="a" href={`https://github.com/${user.githubUser}`} target="_blank" sx={{ color: '#0d2149', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width={18} /> 
                       github.com/{user.githubUser}
                     </Typography>
-                 ) : (
-                    <Typography variant="body2" color="text.secondary">No GitHub linked</Typography>
                  )}
               </Box>
             </Paper>
           </Grid>
 
-          {/* Contact Info */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Paper elevation={0} sx={{ p: 4, borderRadius: "24px", border: "1px solid #e5e7eb", height: "100%" }}>
-              <Typography variant="h6" fontWeight="bold" color="#0d2149" gutterBottom>
-                Contact
-              </Typography>
+              <Typography variant="h6" fontWeight="bold" color="#0d2149" gutterBottom>Contact</Typography>
               <Stack spacing={2}>
                 <Button 
-                    fullWidth 
-                    variant="contained" 
-                    startIcon={<WhatsAppIcon />} 
-                    onClick={() => user?.phoneNumber ? window.open(`https://wa.me/${user.phoneNumber.replace(/\D/g,'')}`, '_blank') : alert('Please edit your profile to add a WhatsApp number.')}
+                    fullWidth variant="contained" startIcon={<WhatsAppIcon />} 
+                    onClick={() => user?.phoneNumber ? window.open(`https://wa.me/${user.phoneNumber.replace(/\D/g,'')}`, '_blank') : alert('No phone number available')}
                     sx={{ bgcolor: "#25D366", borderRadius: "12px", opacity: user?.phoneNumber ? 1 : 0.6 }}
                 >
                   {user?.phoneNumber ? "WhatsApp" : "No WhatsApp"}
                 </Button>
-                
-                {/* Muestra el correo real o un texto si no hay */}
                 <Button fullWidth variant="outlined" startIcon={<EmailIcon />} sx={{ borderRadius: "12px", borderColor: "#e5e7eb", color: "#374151" }}>
                   {user?.email || "No Email"}
                 </Button>
@@ -195,17 +78,14 @@ const MyVenturesPage = () => {
           </Grid>
         </Grid>
 
-        {/* 3. SECTION: MY VENTURES */}
+        {/* 3. SECCIÓN TÍTULO + BOTÓN NEW PRODUCT */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box>
             <Typography variant="h5" fontWeight="800" color="#0d2149">My ventures</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Manage your published ventures and services
-            </Typography>
+            <Typography variant="body2" color="text.secondary">Manage your published ventures</Typography>
           </Box>
           <Button
-            startIcon={<AddIcon />}
-            variant="contained"
+            startIcon={<AddIcon />} variant="contained"
             onClick={() => navigate("/student/create-venture")}
             sx={{ bgcolor: "#0d2149", borderRadius: "20px" }}
           >
@@ -213,81 +93,15 @@ const MyVenturesPage = () => {
           </Button>
         </Box>
 
-        {/* Mini KPI REALES CONECTADOS AL BACKEND */}
+        {/* 4. KPI CARDS */}
         <Grid container spacing={3} mb={4}>
           <MiniStat label="Active Services" value={ventures?.length || 0} icon="📦" />
-          
-          {/* DATO REAL: Total Ventas del backend */}
           <MiniStat label="Total Sales" value={stats?.kpi?.sales || 0} icon="📈" />
-          
-          {/* DATO REAL: Rating promedio del backend */}
           <MiniStat label="Average Rating" value={stats?.kpi?.rating || 0.0} icon="⭐" />
         </Grid>
 
-        {/* Tabla */}
-        {isLoading ? (
-            <Box display="flex" justifyContent="center" py={5}><CircularProgress /></Box>
-        ) : isError ? (
-            <Alert severity="error">Error loading data.</Alert>
-        ) : (
-            <TableContainer component={Paper} elevation={0} sx={{ borderRadius: "24px", border: "1px solid #e5e7eb" }}>
-            <Table>
-                <TableHead sx={{ bgcolor: "#f9fafb" }}>
-                <TableRow>
-                    <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Service</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Category</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Price</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Rating</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: "bold", color: "#6b7280" }}>Actions</TableCell>
-                </TableRow>
-                </TableHead>
-                <TableBody>
-                {ventures?.length === 0 ? (
-                    <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                            <Typography color="text.secondary">You haven't published any services yet.</Typography>
-                        </TableCell>
-                    </TableRow>
-                ) : (
-                    ventures.map((row) => (
-                        <TableRow key={row.id} hover>
-                        <TableCell>
-                            <Box display="flex" alignItems="center" gap={2}>
-                            <Avatar variant="rounded" src={row.imageUrl} sx={{ width: 50, height: 50 }} />
-                            <Box>
-                                <Typography fontWeight="bold" color="#0d2149">{row.title}</Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                    Created: {row.createdDate || 'Recently'}
-                                </Typography>
-                            </Box>
-                            </Box>
-                        </TableCell>
-                        <TableCell><Chip label={row.category} size="small" /></TableCell>
-                        <TableCell fontWeight="bold">${row.price}</TableCell>
-                        <TableCell>
-                            <Chip label="Active" size="small" sx={{ bgcolor: "#dcfce7", color: "#166534", fontWeight: "bold" }} />
-                        </TableCell>
-                        <TableCell>
-                            <Box display="flex" alignItems="center" gap={0.5}>
-                            <StarIcon fontSize="small" sx={{ color: "#f59e0b" }} />
-                            {row.rating || 0.0}
-                            </Box>
-                        </TableCell>
-                        <TableCell align="right">
-                            <IconButton size="small" onClick={() => navigate(`/venture/${row.id}`)}>
-                                <VisibilityOutlinedIcon fontSize="small" />
-                            </IconButton>
-                            <IconButton size="small"><EditIcon fontSize="small" /></IconButton>
-                            <IconButton size="small" color="error"><DeleteOutlineIcon fontSize="small" /></IconButton>
-                        </TableCell>
-                        </TableRow>
-                    ))
-                )}
-                </TableBody>
-            </Table>
-            </TableContainer>
-        )}
+        {/* 5. TABLA (REFACTORIZADA) */}
+        <MyVenturesTable ventures={ventures} />
       </Container>
     </Box>
   );
