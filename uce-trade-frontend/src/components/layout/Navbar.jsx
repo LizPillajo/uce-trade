@@ -1,8 +1,11 @@
-// src/components/layout/Navbar.jsx
 import { useState } from 'react';
-import { AppBar, Toolbar, Box, Typography, IconButton, Avatar, Menu, MenuItem, useScrollTrigger, Container, Divider } from '@mui/material';
+import { 
+  AppBar, Toolbar, Box, Typography, IconButton, Avatar, Menu, MenuItem, 
+  useScrollTrigger, Container, Divider, Drawer, List, ListItem, ListItemButton, ListItemText 
+} from '@mui/material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
+import MenuIcon from '@mui/icons-material/Menu'; // Icono hamburguesa
 import Button from '../ui/Button'; 
 import { useAuth } from '../../context/AuthContext'; 
 
@@ -10,7 +13,10 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Estados para menús
   const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false); // Nuevo estado para menú móvil
   
   const isHome = location.pathname === '/';
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
@@ -27,16 +33,58 @@ const Navbar = () => {
 
   const handleLogout = () => {
     setAnchorEl(null);
+    setMobileOpen(false);
     logout();
     navigate('/login');
   };
 
-  // --- NUEVA LÓGICA DE INICIALES ---
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  // --- DRAWER (MENÚ LATERAL MÓVIL) ---
+  const drawer = (
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
+      <Box py={2} display="flex" alignItems="center" justifyContent="center">
+         <SchoolIcon sx={{ mr: 1, color: '#efb034' }} />
+         <Typography variant="h6" sx={{ my: 2, fontWeight:'bold', color: '#0d2149' }}>
+            UCE Trade
+         </Typography>
+      </Box>
+      <Divider />
+      <List>
+        {links.map((item) => (
+          <ListItem key={item.name} disablePadding>
+            <ListItemButton component={RouterLink} to={item.path} sx={{ textAlign: 'center' }}>
+              <ListItemText primary={item.name} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+        {/* Botones de Auth en Móvil si no está logueado */}
+        {!user && (
+            <>
+                <Divider sx={{ my:1 }}/>
+                <ListItem disablePadding>
+                    <ListItemButton component={RouterLink} to="/login" sx={{ textAlign: 'center' }}>
+                        <ListItemText primary="Log in" />
+                    </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                    <ListItemButton component={RouterLink} to="/register" sx={{ textAlign: 'center', bgcolor:'#efb034', color: '#0d2149' }}>
+                        <ListItemText primary="Sign up" primaryTypographyProps={{fontWeight:'bold'}} />
+                    </ListItemButton>
+                </ListItem>
+            </>
+        )}
+      </List>
+    </Box>
+  );
+
+  // Lógica de Avatar / Iniciales
   const getInitials = (name) => {
     if (!name) return "U";
     const parts = name.trim().split(" ");
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    // Toma la primera letra de la primera palabra y la primera de la segunda
     return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
   };
 
@@ -45,6 +93,7 @@ const Navbar = () => {
     && !user.avatar.includes('ui-avatars.com');
 
   return (
+    <>
     <AppBar position="fixed" sx={{ 
        background: isTransparent ? 'transparent' : (theme) => `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
        boxShadow: isTransparent ? 'none' : 4,
@@ -52,17 +101,28 @@ const Navbar = () => {
        py: 1 
     }}>
       <Container maxWidth="xl">
-        <Toolbar disableGutters sx={{ justifyContent: 'space-between', minHeight: '85px' }}>
+        <Toolbar disableGutters sx={{ justifyContent: 'space-between', minHeight: '70px' }}>
           
+          {/* 1. ICONO HAMBURGUESA (SOLO MÓVIL) */}
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }} // Oculto en pantallas sm o mayores
+          >
+            <MenuIcon />
+          </IconButton>
+
           {/* LOGO */}
-          <Box display="flex" alignItems="center" component={RouterLink} to="/" sx={{ textDecoration: 'none', color: 'white' }}>
-            <SchoolIcon sx={{ mr: 1.5, color: '#efb034', fontSize: 40 }} />
+          <Box display="flex" alignItems="center" component={RouterLink} to="/" sx={{ textDecoration: 'none', color: 'white', flexGrow: {xs: 1, sm: 0} }}>
+            <SchoolIcon sx={{ mr: 1.5, color: '#efb034', fontSize: { xs: 30, md: 40 } }} />
             <Box>
-              <Typography variant="h5" fontWeight={800} lineHeight={1}>UCE Market</Typography>
+              <Typography variant="h5" fontWeight={800} lineHeight={1} sx={{ fontSize: { xs: '1.2rem', md: '1.5rem' } }}>UCE Trade</Typography>
             </Box>
           </Box>
 
-          {/* MENÚ CENTRAL */}
+          {/* MENÚ CENTRAL (SOLO ESCRITORIO) */}
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 3 }}>
             {links.map((link) => (
               <Button 
@@ -80,17 +140,17 @@ const Navbar = () => {
           {/* ÁREA DE USUARIO */}
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             {!user ? (
-              // VISTA PÚBLICA
-              <>
+              // VISTA PÚBLICA (ESCRITORIO) - En móvil se ocultan
+              <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2 }}>
                 <Button component={RouterLink} to="/login" variant="text" sx={{ color: 'white', fontWeight: 600 }}>
                   Log in
                 </Button>
                 <Button component={RouterLink} to="/register" variant="contained" color="secondary">
                   Sign up
                 </Button>
-              </>
+              </Box>
             ) : (
-              // VISTA LOGUEADO
+              // VISTA LOGUEADO (Avatar siempre visible)
               <>
                 <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0 }}>
                   <Avatar 
@@ -100,7 +160,6 @@ const Navbar = () => {
                   >
                     {!isUrl ? getInitials(user.name) : null}
                   </Avatar>
-
                 </IconButton>
                 
                 <Menu
@@ -116,7 +175,7 @@ const Navbar = () => {
                   <Divider />
                   
                   {user.role === 'STUDENT' && (
-                      <MenuItem onClick={() => { navigate('/student/my-ventures'); setAnchorEl(null); }}>My Profile</MenuItem>
+                      <MenuItem onClick={() => { navigate('/profile'); setAnchorEl(null); }}>My Profile</MenuItem>
                   )}
                   {user.role === 'ADMIN' && (
                       <MenuItem onClick={() => { navigate('/admin/dashboard'); setAnchorEl(null); }}>Dashboard</MenuItem>
@@ -131,6 +190,23 @@ const Navbar = () => {
         </Toolbar>
       </Container>
     </AppBar>
+
+    {/* COMPONENTE DRAWER PARA MÓVIL */}
+    <Box component="nav">
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{ keepMounted: true }} // Mejora rendimiento en móvil
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
+          }}
+        >
+          {drawer}
+        </Drawer>
+    </Box>
+    </>
   );
 };
 export default Navbar;

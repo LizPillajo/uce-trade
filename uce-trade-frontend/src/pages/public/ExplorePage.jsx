@@ -7,6 +7,7 @@ import { fetchServices } from '../../services/api';
 import VentureCard from '../../components/ventures/VentureCard';
 import VentureFilter from '../../components/ventures/VentureFilter';
 import { useDebounce } from '../../hooks/useDebounce';
+import VentureSkeletonCard from '../../components/ventures/VentureSkeletonCard';
 
 const ExplorePage = () => {
   const [searchParams] = useSearchParams();
@@ -27,7 +28,6 @@ const ExplorePage = () => {
   }, [searchParams]);
 
   // Query with Pagination
-  // The 'key' includes 'page' so that when the page changes, TanStack Query fetches again
   const { data, isLoading } = useQuery({
     queryKey: ['ventures', page, debouncedSearch, category, sort], 
     queryFn: () => fetchServices(page, debouncedSearch, category, sort),
@@ -61,7 +61,13 @@ const ExplorePage = () => {
           </Typography>
 
           {isLoading ? (
-            <Box display="flex" justifyContent="center" py={10}><CircularProgress /></Box>
+            <Grid container spacing={3}>
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={n}>
+                  <VentureSkeletonCard />
+                </Grid>
+              ))}
+            </Grid>
           ) : venturesList.length > 0 ? (
             
             viewMode === 'grid' ? (
