@@ -1,12 +1,12 @@
 // src/pages/student/StudentDashboard.jsx
-import { Box, Container, Typography, CircularProgress, Alert } from '@mui/material';
+import { Box, Container, Typography, CircularProgress, Alert,Grid } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStudentStats } from '../../services/api';
 import { useWebSocket } from '../../hooks/useWebSocket';
 
 // Componentes Refactorizados
 import StudentKpiCards from '../../components/student/StudentKpiCards';
-import StudentCharts from '../../components/student/StudentCharts';
+import { IncomeHistoryChart, CategoryBarChart } from '../../components/student/StudentCharts';
 import StudentPerformanceList from '../../components/student/StudentPerformanceList';
 
 const StudentDashboard = () => {
@@ -52,22 +52,28 @@ const StudentDashboard = () => {
         
         {/* HEADER */}
         <Box mb={6}>
-          <Typography variant="h4" fontWeight="800" color="#0d2149">Student Dashboard</Typography>
-          <Typography variant="body1" color="text.secondary">
-            Keep track of your entrepreneurial growth at UCE.
-          </Typography>
+          <Typography variant="h4" fontWeight="800" color="#0d2149">Dashboard</Typography>
+          <Typography variant="body1" color="text.secondary">Resumen de tu actividad comercial en la UCE.</Typography>
         </Box>
 
-        {/* 1. KPIs Section */}
+        {/* 1. KPIs SUPERIORES */}
         <StudentKpiCards kpi={stats.kpi} />
 
-        {/* 2. Charts Section (Income & Categories) */}
-        <StudentCharts lineData={lineChartData} barData={barChartData} />
+        {/* 2. GRÁFICA PRINCIPAL (ANCHO COMPLETO) */}
+        <IncomeHistoryChart lineData={lineChartData} />
 
-        {/* 3. Performance Section (¡La que faltaba!) */}
-        <Box mt={4}>
-          <StudentPerformanceList topServices={stats.topServices} />
-        </Box>
+        {/* 3. SECCIÓN INFERIOR (COMPARTIDA) */}
+        <Grid container spacing={4}>
+          {/* Gráfico de Barras */}
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <CategoryBarChart barData={barChartData} />
+          </Grid>
+
+          {/* Lista de Top Performance */}
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <StudentPerformanceList topServices={stats.topServices} />
+          </Grid>
+        </Grid>
 
       </Container>
     </Box>
