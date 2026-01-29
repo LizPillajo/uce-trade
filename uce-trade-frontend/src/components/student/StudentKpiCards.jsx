@@ -18,13 +18,23 @@ const StatsCard = ({ title, value, percent, icon, color }) => (
   </Paper>
 );
 
-const StudentKpiCards = ({ kpi }) => (
-  <Grid container spacing={3} mb={6}>
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}><StatsCard title="Total Earnings" value={`$${kpi.earnings}`} percent="Revenue" icon={<TrendingUpIcon sx={{ color: 'white' }} />} color="#10b981" /></Grid>
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}><StatsCard title="Active Services" value={kpi.products} percent="Published" icon={<InventoryIcon sx={{ color: 'white' }} />} color="#8b5cf6" /></Grid>
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}><StatsCard title="Total Sales" value={kpi.sales} percent="Orders" icon={<MessageIcon sx={{ color: 'white' }} />} color="#3b82f6" /></Grid>
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}><StatsCard title="Avg Rating" value={kpi.rating} percent="Stars" icon={<StarIcon sx={{ color: 'white' }} />} color="#f59e0b" /></Grid>
-  </Grid>
-);
+const StudentKpiCards = ({ kpi }) => {
+  const data = [
+    { title: "Total Earnings", value: `$${kpi?.earnings || 0}`, percent: "Revenue", icon: <TrendingUpIcon sx={{ color: 'white' }} />, color: "#10b981" },
+    { title: "Active Services", value: kpi?.products || 0, percent: "Published", icon: <InventoryIcon sx={{ color: 'white' }} />, color: "#8b5cf6" },
+    { title: "Total Sales", value: kpi?.sales || 0, percent: "Orders", icon: <MessageIcon sx={{ color: 'white' }} />, color: "#3b82f6" },
+    { title: "Avg Rating", value: kpi?.rating || "0.0", percent: "Stars", icon: <StarIcon sx={{ color: 'white' }} />, color: "#f59e0b" },
+  ];
+
+  return (
+    <Grid container spacing={3} mb={6}>
+      {data.map((item, index) => (
+        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
+          <StatsCard {...item} />
+        </Grid>
+      ))}
+    </Grid>
+  );
+};
 
 export default StudentKpiCards;
