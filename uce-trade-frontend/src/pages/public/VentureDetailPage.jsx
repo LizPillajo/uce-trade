@@ -34,8 +34,6 @@ const VentureDetailPage = () => {
   const [paymentStatus, setPaymentStatus] = useState(null); 
   const [downloading, setDownloading] = useState(false); 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  // --- LÓGICA DE NEGOCIO (Se queda aquí porque usa el estado de la página) ---
   
   const handleWhatsApp = () => {
     let phone = venture.owner?.phoneNumber;

@@ -9,8 +9,12 @@ const KpiCard = ({ title, value, badge, icon, color, isBad }) => (
   <Grid size={{ xs: 12, sm: 6, md: 3 }}>
     <Paper elevation={0} sx={{ p: 3, borderRadius: "16px", border: "1px solid #e5e7eb" }}>
       <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
-        <Box sx={{ bgcolor: `${color}20`, p: 1.5, borderRadius: "12px", color: color }}>{icon}</Box>
-        <Chip label={badge} size="small" sx={{ bgcolor: isBad ? "#fef2f2" : "#ecfdf5", color: isBad ? "#ef4444" : "#10b981", fontWeight: "bold" }} />
+        <Box sx={{ bgcolor: `${color}20`, p: 1.5, borderRadius: "12px", color: color, display: 'flex' }}>{icon}</Box>
+        <Chip 
+          label={badge} 
+          size="small" 
+          sx={{ bgcolor: isBad ? "#fef2f2" : "#ecfdf5", color: isBad ? "#ef4444" : "#10b981", fontWeight: "bold" }} 
+        />
       </Box>
       <Typography variant="h4" fontWeight="800" color="#0d2149">{value}</Typography>
       <Typography variant="body2" color="text.secondary">{title}</Typography>
