@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
-import MenuIcon from '@mui/icons-material/Menu'; // Icono hamburguesa
+import MenuIcon from '@mui/icons-material/Menu';
 import Button from '../ui/Button'; 
 import { useAuth } from '../../context/AuthContext'; 
 
@@ -16,7 +16,7 @@ const Navbar = () => {
   
   // Estados para menús
   const [anchorEl, setAnchorEl] = useState(null);
-  const [mobileOpen, setMobileOpen] = useState(false); // Nuevo estado para menú móvil
+  const [mobileOpen, setMobileOpen] = useState(false); 
   
   const isHome = location.pathname === '/';
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
