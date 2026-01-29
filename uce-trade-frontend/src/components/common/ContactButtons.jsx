@@ -5,20 +5,21 @@ import Button from '../ui/Button';
 
 const ContactButtons = ({ phoneNumber, email, fullName, ventureTitle = "", variant = "vertical" }) => {
   
-  const handleWhatsApp = () => {
-    let phone = phoneNumber?.replace(/\D/g, '');
-    if (!phone) return alert("No phone number available");
+    const handleWhatsApp = () => {
+    let phone = venture.owner?.phoneNumber;
+    if (!phone) { alert("The seller has not registered a phone number."); return; }
+    phone = phone.replace(/\D/g, '');
     if (phone.startsWith('09')) phone = '593' + phone.substring(1);
-    const message = ventureTitle 
-      ? `Hola ${fullName}, estoy interesado en tu servicio "${ventureTitle}" visto en UCE Trade.`
-      : `Hola ${fullName}, vi tu perfil en UCE Trade y me gustaría contactarte.`;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    else if (phone.startsWith('9')) phone = '593' + phone;
+
+    const message = `Hello ${venture.owner?.fullName}, I'm interested in your service "${venture.title}" that I saw on UCE Trade.`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleEmail = () => {
-    if (!email) return;
-    const subject = ventureTitle ? `Consulta sobre ${ventureTitle}` : `Contacto desde UCE Trade`;
-    const body = `Hola ${fullName},\n\nTe contacto desde la plataforma UCE Trade...`;
+    const email = venture.owner?.email;
+    const subject = `Inquiry about: ${venture.title}`;
+    const body = `Hello ${venture.owner?.fullName},\n\nI am interested in purchasing your service "${venture.title}".`;
     window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
