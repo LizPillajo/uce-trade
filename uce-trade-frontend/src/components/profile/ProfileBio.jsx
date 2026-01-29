@@ -1,4 +1,4 @@
-import { Paper, Typography, Box, Stack } from '@mui/material';
+import { Paper, Typography, Box, Stack, Grid } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
 import Button from '../ui/Button';
