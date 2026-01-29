@@ -9,13 +9,11 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 
-// 1. IMPORTACIÓN DE TUS NUEVOS COMPONENTES REFACTORIZADOS
 import VentureHero from '../../components/ventures/VentureHero';
 import PurchaseSidebar from '../../components/ventures/PurchaseSidebar';
 import OwnerCard from '../../components/ventures/OwnerCard';
 import ReviewSection from '../../components/ventures/ReviewSection';
 
-// UI e Infraestructura
 import Button from '../../components/ui/Button';
 import { toast } from 'react-toastify';
 import SeoMeta from '../../components/common/SeoMeta';
@@ -35,23 +33,7 @@ const VentureDetailPage = () => {
   const [downloading, setDownloading] = useState(false); 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   
-  const handleWhatsApp = () => {
-    let phone = venture.owner?.phoneNumber;
-    if (!phone) { alert("The seller has not registered a phone number."); return; }
-    phone = phone.replace(/\D/g, '');
-    if (phone.startsWith('09')) phone = '593' + phone.substring(1);
-    else if (phone.startsWith('9')) phone = '593' + phone;
-
-    const message = `Hello ${venture.owner?.fullName}, I'm interested in your service "${venture.title}" that I saw on UCE Trade.`;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleEmail = () => {
-    const email = venture.owner?.email;
-    const subject = `Inquiry about: ${venture.title}`;
-    const body = `Hello ${venture.owner?.fullName},\n\nI am interested in purchasing your service "${venture.title}".`;
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
+  // --- 🗑️ LÓGICA DE CONTACTO ELIMINADA (Ya está en ContactButtons) ---
 
   const handleDownloadInvoice = async () => {
       try {
@@ -104,9 +86,8 @@ const VentureDetailPage = () => {
         </Button>
 
         <Grid container spacing={4}>
-          {/* COLUMNA IZQUIERDA: DISEÑO PRINCIPAL */}
+          {/* COLUMNA IZQUIERDA */}
           <Grid size={{ xs: 12, lg: 8 }}>
-            {/* USANDO EL NUEVO COMPONENTE HERO */}
             <VentureHero 
               imageUrl={venture.imageUrl} 
               title={venture.title} 
@@ -121,21 +102,20 @@ const VentureDetailPage = () => {
             </Paper>
           </Grid>
 
-          {/* COLUMNA DERECHA: SIDEBAR */}
+          {/* COLUMNA DERECHA */}
           <Grid size={{ xs: 12, lg: 4 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* USANDO EL NUEVO COMPONENTE DE COMPRA */}
+              
+              {/* COMPONENTE DE COMPRA + CONTACTO INTEGRADO */}
               <PurchaseSidebar 
                 venture={venture}
                 paymentStatus={paymentStatus}
                 downloading={downloading}
                 onBuy={() => setOpenPayment(true)}
                 onDownload={handleDownloadInvoice}
-                onWhatsApp={handleWhatsApp}
-                onEmail={handleEmail}
+                // Ya no pasamos onWhatsApp ni onEmail
               />
 
-              {/* USANDO EL NUEVO COMPONENTE DEL DUEÑO */}
               <OwnerCard 
                 owner={venture.owner} 
                 onNavigate={() => navigate(`/profile/${venture.owner.id}`)} 

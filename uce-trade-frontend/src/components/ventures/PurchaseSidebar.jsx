@@ -1,16 +1,13 @@
-import { Paper, Box, Typography, Chip, Divider, Stack, CircularProgress } from '@mui/material';
+// src/components/ventures/PurchaseSidebar.jsx
+import { Paper, Box, Typography, Chip, Divider, CircularProgress } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import EmailIcon from '@mui/icons-material/Email';
 import Button from '../ui/Button';
+import ContactButtons from '../common/ContactButtons'; 
 
-const PurchaseSidebar = ({ 
-  venture, paymentStatus, downloading, 
-  onBuy, onDownload, onWhatsApp, onEmail 
-}) => {
+const PurchaseSidebar = ({ venture, paymentStatus, downloading, onBuy, onDownload }) => {
   return (
     <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #e5e7eb', bgcolor: 'white' }}>
       <Box display="flex" justifyContent="space-between" mb={2}>
@@ -28,6 +25,7 @@ const PurchaseSidebar = ({
         <Typography variant="subtitle2" color="text.secondary">(Service)</Typography>
       </Box>
 
+      {/* LÓGICA DE PAGO / DESCARGA */}
       {paymentStatus === 'succeeded' ? (
         <Box sx={{ bgcolor: '#ecfdf5', p: 3, borderRadius: '12px', mb: 3, border: '1px solid #10b981', textAlign: 'center' }}>
           <CheckCircleOutlineIcon sx={{ fontSize: 50, color: '#10b981', mb: 1 }} />
@@ -58,10 +56,13 @@ const PurchaseSidebar = ({
 
       <Divider sx={{ my: 3 }}><Typography variant="caption" color="text.secondary">CONTACT</Typography></Divider>
 
-      <Stack direction="row" gap={1}>
-        <Button fullWidth variant="contained" startIcon={<WhatsAppIcon />} onClick={onWhatsApp} sx={{ bgcolor: '#25D366' }}>WhatsApp</Button>
-        <Button fullWidth variant="contained" startIcon={<EmailIcon />} onClick={onEmail} sx={{ bgcolor: '#f3f4f6', color: '#1f2937' }}>Email</Button>
-      </Stack>
+      <ContactButtons 
+        phoneNumber={venture.owner?.phoneNumber}
+        email={venture.owner?.email}
+        fullName={venture.owner?.fullName}
+        ventureTitle={venture.title}
+        variant="horizontal" 
+      />
     </Paper>
   );
 };
