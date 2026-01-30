@@ -2,10 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Container, Grid, Box, Typography, Paper, 
-  CircularProgress, Alert, Dialog, DialogContent, DialogActions 
-} from '@mui/material';
+import { Container, Grid, Box, Typography, Paper, CircularProgress, Alert, Dialog, DialogContent, DialogActions } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 

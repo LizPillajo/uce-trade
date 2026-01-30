@@ -1,35 +1,12 @@
 // src/components/ventures/VentureFilter.jsx
-import { useState, useEffect } from "react";
-import {Box,Paper,MenuItem,Select,IconButton,Divider,Typography,Autocomplete, TextField, Chip, Button} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Box, MenuItem, Select, IconButton, Divider, Typography, Button } from "@mui/material";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
-import { fetchSuggestions } from "../../services/api"; 
-import { useDebounce } from "../../hooks/useDebounce";
+import VentureSearchBar from "./VentureSearchBar"; 
 
-const VentureFilter = ({
-  searchTerm, setSearchTerm,
-  category, setCategory,
-  sort, setSort,
-  viewMode, setViewMode
-}) => {
+const VentureFilter = ({searchTerm, setSearchTerm, category, setCategory, sort, setSort, viewMode, setViewMode}) => {
   
-  const [options, setOptions] = useState([]);
-  const debouncedSuggestionTerm = useDebounce(searchTerm, 300);
-
-  useEffect(() => {
-    let active = true;
-    if (debouncedSuggestionTerm === "") {
-      setOptions([]);
-      return undefined;
-    }
-    fetchSuggestions(debouncedSuggestionTerm).then((results) => {
-      if (active) setOptions(results);
-    });
-    return () => { active = false; };
-  }, [debouncedSuggestionTerm]);
-
   const handleClearFilters = () => {
     setSearchTerm('');
     setCategory('All');
@@ -40,8 +17,9 @@ const VentureFilter = ({
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold" color="#0d2149" sx={{ mb: 2 }}>
+      {/* TÍTULO Y BOTÓN DE LIMPIAR */}
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" fontWeight="bold" color="#0d2149">
           Explore Business
         </Typography>
 
@@ -58,52 +36,11 @@ const VentureFilter = ({
         )}
       </Box>
 
+      {/* BARRA DE HERRAMIENTAS */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2, width: '100%', flexWrap: 'wrap' }}>
         
-        {/* Barra de Herramientas */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: "2px 4px", 
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            borderRadius: "10px",
-            border: "1px solid #eaecf0",
-            flexGrow: 1,
-            minWidth: 280, 
-            bgcolor: "#f9fafb"
-          }}
-        >
-          {/* Ícono de Lupa fijo a la izquierda */}
-          <Box sx={{ pl: 2, display: 'flex', color: "text.secondary" }}>
-            <SearchIcon />
-          </Box>
-
-          {/* AUTOCOMPLETE REEMPLAZANDO AL INPUTBASE */}
-          <Autocomplete
-            freeSolo
-            fullWidth
-            options={options}        
-            inputValue={searchTerm}
-            onInputChange={(event, newInputValue) => {
-              setSearchTerm(newInputValue);
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder="Search for businesses or services..."
-                variant="standard" 
-                InputProps={{
-                  ...params.InputProps,
-                  disableUnderline: true, 
-                  style: { fontSize: '1rem' } 
-                }}
-                sx={{'& .MuiInputBase-root': { py: 0.5, px: 1 }}}
-              />
-            )}
-          />
-        </Paper>
+        {/* 1. Componente de Búsqueda Extraído */}
+        <VentureSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
     
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, width: { xs: '100%', md: 'auto' }, flexWrap: 'wrap' }}>
           
@@ -154,11 +91,7 @@ const VentureFilter = ({
             <MenuItem value="price_low">Lowest Price</MenuItem>
           </Select>
 
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ display: { xs: "none", md: "block" } }}
-          />
+          <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", md: "block" } }} />
 
           {/* 4. BOTONES DE VISTA */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
