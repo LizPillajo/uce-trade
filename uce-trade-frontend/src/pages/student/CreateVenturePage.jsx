@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useQueryClient } from '@tanstack/react-query'; // <--- 1. IMPORTANTE
-import { toast } from 'react-toastify';               // <--- 2. IMPORTANTE
+import { useQueryClient } from '@tanstack/react-query'; 
+import { toast } from 'react-toastify';              
 
 import { supabase } from '../../services/supabaseClient';
 import api from '../../services/api';
@@ -25,7 +25,7 @@ const ventureSchema = z.object({
 
 const CreateVenturePage = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient(); // <--- 3. Inicializar QueryClient
+  const queryClient = useQueryClient(); 
   
   const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(ventureSchema),
@@ -80,7 +80,7 @@ const CreateVenturePage = () => {
 
       // 5. Invalidar Cache (Para que al volver, la lista se actualice sola)
       queryClient.invalidateQueries({ queryKey: ['myVentures'] });
-      queryClient.invalidateQueries({ queryKey: ['studentStats'] }); // Actualiza el contador de "Active Services" en el Dashboard
+      queryClient.invalidateQueries({ queryKey: ['studentStats'] }); 
 
       // 6. Redirigir
       navigate('/student/my-ventures');

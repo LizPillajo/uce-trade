@@ -36,8 +36,6 @@ const CategorySection = () => {
         {/* CATEGORY GRID */}
         <Grid container spacing={3} justifyContent="center" alignItems="stretch">
           {categories.map((cat) => (
-            // md={3} means 4 columns per row (12/3 = 4).
-            // sm={6} means 2 columns on tablets.
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={cat.id} sx={{ display: 'flex' }}>
               <Paper
                 component={Link}

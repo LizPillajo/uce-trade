@@ -7,7 +7,7 @@ import { fetchUserProfile } from '../../services/api';
 import VentureCard from '../../components/ventures/VentureCard';
 import StudentProfileHeader from '../../components/student/StudentProfileHeader';
 import ProfileBioSection from '../../components/profile/ProfileBioSection';
-import ProfileStatsGrid from '../../components/profile/ProfileStatsGrid'; // <--- NUEVO
+import ProfileStatsGrid from '../../components/profile/ProfileStatsGrid';
 
 const SellerProfilePage = () => {
   const { id } = useParams();

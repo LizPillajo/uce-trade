@@ -211,7 +211,7 @@ const LoginPage = () => {
 
       {/* DERECHA: Panel Azul */}
       <Grid size={{ xs: 12, md: 6 }} sx={{ display: { xs: "none", md: "flex" }, p: 0, minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
-        <AuthBluePanel title="Connect with UCE talent" subtitle="Access hundreds of services..." />
+        <AuthBluePanel title="Connect with UCE talent" subtitle="Access hundreds of services and products offered by students at the Central University of Ecuador." />
       </Grid>
     </Grid>
   );
