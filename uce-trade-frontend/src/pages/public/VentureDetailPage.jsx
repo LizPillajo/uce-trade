@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Container, Grid, Box, Typography, Paper, CircularProgress, Alert, Dialog, DialogContent, DialogActions } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 
 import VentureHero from '../../components/ventures/VentureHero';
@@ -17,6 +16,7 @@ import SeoMeta from '../../components/common/SeoMeta';
 import PaymentModal from '../../components/payment/PaymentModal'; 
 import { fetchServiceById, downloadInvoice, confirmPayment } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import BackButton from '../../components/ui/BackButton';
 
 const VentureDetailPage = () => {
   const { id } = useParams();
@@ -76,9 +76,7 @@ const VentureDetailPage = () => {
       <SeoMeta title={venture.title} description={venture.description?.substring(0, 150)} />
 
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
-        <Button variant="text" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 3, color: 'text.secondary' }}>
-            Back
-        </Button>
+        <BackButton />
 
         <Grid container spacing={4}>
           {/* COLUMNA IZQUIERDA */}
