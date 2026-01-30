@@ -1,23 +1,21 @@
+// src/pages/student/CreateVenturePage.jsx
 import { useState } from 'react';
-import { 
-  Box, Container, Paper, Typography, Grid, TextField, 
-  MenuItem, Button, Stack, IconButton, InputAdornment, CircularProgress, Alert 
-} from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Box, Container, Paper, Typography, Grid, TextField, MenuItem, Button, Stack, InputAdornment, Alert } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useQueryClient } from '@tanstack/react-query'; // <--- 1. IMPORTANTE
+import { toast } from 'react-toastify';               // <--- 2. IMPORTANTE
 
 import { supabase } from '../../services/supabaseClient';
 import api from '../../services/api';
+import ImageUploadBox from '../../components/common/ImageUploadBox';
 
 const categories = ['Tutorials', 'Food', 'Design', 'Technology', 'Clothes', 'Photography', 'Other'];
 
-// 1. ESQUEMA DE VALIDACIÓN (ZOD)
+// Esquema Zod
 const ventureSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long"),
   category: z.string().min(1, "Please select a category"),
@@ -27,31 +25,19 @@ const ventureSchema = z.object({
 
 const CreateVenturePage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // <--- 3. Inicializar QueryClient
   
-  // 2. CONFIGURAR HOOK FORM
-  const { 
-    register, 
-    handleSubmit, 
-    setValue, 
-    watch,    
-    formState: { errors } 
-  } = useForm({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(ventureSchema),
-    defaultValues: {
-      title: '',
-      category: '',
-      price: '',
-      description: ''
-    }
+    defaultValues: { title: '', category: '', price: '', description: '' }
   });
 
-  // Estado local solo para UI de carga de imagen
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [preview, setPreview] = useState(null);
   const [generalError, setGeneralError] = useState('');
 
-  // Lógica de Supabase 
+  // Lógica de Supabase limpia
   const handleImageUpload = async (e) => {
     try {
       setGeneralError('');
@@ -63,17 +49,11 @@ const CreateVenturePage = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       
-      const { error: uploadError } = await supabase.storage
-        .from('ventures')
-        .upload(fileName, file);
-
+      const { error: uploadError } = await supabase.storage.from('ventures').upload(fileName, file);
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from('ventures')
-        .getPublicUrl(fileName);
+      const { data } = supabase.storage.from('ventures').getPublicUrl(fileName);
 
-      // Guardamos la URL en el formulario invisiblemente
       setPreview(data.publicUrl);
       setValue('imageUrl', data.publicUrl); 
       
@@ -85,7 +65,6 @@ const CreateVenturePage = () => {
     }
   };
 
-  // 3. FUNCIÓN ON SUBMIT 
   const onSubmit = async (data) => {
     if (!preview) {
       setGeneralError("Please upload an image for your service");
@@ -94,16 +73,22 @@ const CreateVenturePage = () => {
 
     try {
       setSubmitting(true);
-      await api.post('/ventures', {
-          ...data,
-          imageUrl: preview
-      });
+      await api.post('/ventures', { ...data, imageUrl: preview });
+      
+      // 4. Notificación de Éxito
+      toast.success("Service published successfully! 🚀");
 
+      // 5. Invalidar Cache (Para que al volver, la lista se actualice sola)
+      queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+      queryClient.invalidateQueries({ queryKey: ['studentStats'] }); // Actualiza el contador de "Active Services" en el Dashboard
+
+      // 6. Redirigir
       navigate('/student/my-ventures');
 
     } catch (error) {
       console.error(error);
       setGeneralError('Server error. Please try again.');
+      toast.error("Failed to publish service.");
     } finally {
       setSubmitting(false);
     }
@@ -115,148 +100,66 @@ const CreateVenturePage = () => {
         
         <Box mb={5} textAlign="center">
           <Typography variant="h4" fontWeight="800" color="#0d2149">Publish a new service</Typography>
-          <Typography variant="body1" color="text.secondary">
-            Share your talent with the university community.
-          </Typography>
+          <Typography variant="body1" color="text.secondary">Share your talent with the university community.</Typography>
         </Box>
 
         {generalError && <Alert severity="error" sx={{ mb: 3 }}>{generalError}</Alert>}
 
-        {/* 4. CONECTAR EL FORMULARIO */}
-        <Paper 
-          component="form" 
-          onSubmit={handleSubmit(onSubmit)} 
-          elevation={0} 
-          sx={{ p: { xs: 3, md: 5 }, borderRadius: '24px', border: '1px solid #e5e7eb' }}
-        >
+        <Paper component="form" onSubmit={handleSubmit(onSubmit)} elevation={0} sx={{ p: { xs: 3, md: 5 }, borderRadius: '24px', border: '1px solid #e5e7eb' }}>
           <Stack spacing={4}>
             
+            {/* Sección 1: Inputs */}
             <Box>
               <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>1. Basic Information</Typography>
-
               <Grid container spacing={3}>
                 <Grid size={{ xs: 12 }}> 
                   <TextField 
-                    fullWidth 
-                    label="Service Title" 
-                    placeholder="e.g., Math Tutorials" 
-                    variant="outlined" 
-                    // CONEXIÓN CON HOOK FORM:
-                    {...register("title")}
-                    error={!!errors.title}
-                    helperText={errors.title?.message}
+                    fullWidth label="Service Title" placeholder="e.g., Math Tutorials" variant="outlined" 
+                    {...register("title")} error={!!errors.title} helperText={errors.title?.message}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f9fafb' } }} 
                   />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
                   <TextField 
-                    select 
-                    fullWidth 
-                    label="Category" 
-                    defaultValue=""
-                    // CONEXIÓN CON HOOK FORM:
-                    {...register("category")}
-                    error={!!errors.category}
-                    helperText={errors.category?.message}
+                    select fullWidth label="Category" defaultValue=""
+                    {...register("category")} error={!!errors.category} helperText={errors.category?.message}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f9fafb' } }}
                   >
-                    {categories.map((option) => (
-                      <MenuItem key={option} value={option}>{option}</MenuItem>
-                    ))}
+                    {categories.map((option) => (<MenuItem key={option} value={option}>{option}</MenuItem>))}
                   </TextField>
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
                   <TextField 
-                    fullWidth 
-                    label="Price" 
-                    type="number"
-                    placeholder="0.00" 
-                    // CONEXIÓN CON HOOK FORM:
-                    {...register("price")}
-                    error={!!errors.price}
-                    helperText={errors.price?.message}
-                    InputProps={{
-                        startAdornment: <InputAdornment position="start"><AttachMoneyIcon fontSize="small" /></InputAdornment>,
-                    }}
+                    fullWidth label="Price" type="number" placeholder="0.00" 
+                    {...register("price")} error={!!errors.price} helperText={errors.price?.message}
+                    InputProps={{ startAdornment: <InputAdornment position="start"><AttachMoneyIcon fontSize="small" /></InputAdornment> }}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f9fafb' } }}
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
                   <TextField 
-                    fullWidth 
-                    label="Description" 
-                    multiline 
-                    rows={4} 
-                    placeholder="Describe what you offer..."
-                    // CONEXIÓN CON HOOK FORM:
-                    {...register("description")}
-                    error={!!errors.description}
-                    helperText={errors.description?.message}
+                    fullWidth label="Description" multiline rows={4} placeholder="Describe what you offer..."
+                    {...register("description")} error={!!errors.description} helperText={errors.description?.message}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f9fafb' } }}
                   />
                 </Grid>
               </Grid>
             </Box>
 
-            <Box>
-              <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>2. Gallery</Typography>
-              
-              <Button
-                component="label"
-                sx={{ 
-                    width: '100%',
-                    border: '2px dashed #e5e7eb', 
-                    borderRadius: '16px', 
-                    p: 4, 
-                    textAlign: 'center', 
-                    bgcolor: '#f9fafb',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    textTransform: 'none',
-                    '&:hover': { borderColor: '#0d2149', bgcolor: '#e0e7ff' }
-                }}
-              >
-                <input 
-                    type="file" 
-                    hidden 
-                    accept="image/*" 
-                    onChange={handleImageUpload} 
-                    disabled={uploading}
-                />
-                
-                {uploading ? (
-                    <CircularProgress /> 
-                ) : (
-                    <>
-                        <CloudUploadIcon sx={{ fontSize: 48, color: '#9ca3af', mb: 2 }} />
-                        <Typography fontWeight="bold" color="#0d2149">Click to upload image</Typography>
-                        <Typography variant="caption" color="text.secondary">JPG or PNG (max. 5MB)</Typography>
-                    </>
-                )}
-              </Button>
-              
-              {preview && (
-                <Box mt={2} display="flex" gap={2}>
-                    <Box sx={{ position: 'relative', width: 150, height: 100, borderRadius: '12px', overflow: 'hidden', border: '1px solid #ddd' }}>
-                        <img src={preview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <IconButton 
-                            size="small" 
-                            onClick={() => { setPreview(null); setValue('imageUrl', ''); }}
-                            sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(0,0,0,0.5)', color: 'white' }}
-                        >
-                            <CloseIcon fontSize="small" />
-                        </IconButton>
-                    </Box>
-                </Box>
-              )}
-            </Box>
+            {/* Sección 2: Componente Extraído */}
+            <ImageUploadBox 
+                preview={preview}
+                uploading={uploading}
+                onUpload={handleImageUpload}
+                onRemove={() => { setPreview(null); setValue('imageUrl', ''); }}
+                error={generalError && !preview ? "Image is required" : null}
+            />
 
+            {/* Botones de Acción */}
             <Box pt={2} display="flex" gap={2} justifyContent="flex-end">
                 <Button variant="text" onClick={() => navigate(-1)} sx={{ color: '#6b7280', fontWeight: 'bold' }}>Cancel</Button>
                 <Button 
-                    type="submit" 
-                    variant="contained" 
-                    size="large" 
+                    type="submit" variant="contained" size="large"
                     disabled={submitting || uploading}
                     sx={{ bgcolor: '#0d2149', borderRadius: '12px', px: 6 }}
                 >

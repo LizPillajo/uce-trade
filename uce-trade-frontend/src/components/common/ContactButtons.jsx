@@ -28,14 +28,14 @@ const ContactButtons = ({ phoneNumber, email, fullName, ventureTitle = "", varia
       <Button 
         fullWidth variant="contained" startIcon={<WhatsAppIcon />} 
         onClick={handleWhatsApp} 
-        sx={{ bgcolor: '#25D366', borderRadius: '12px', color: 'white', py: 1 }}
+        sx={{ bgcolor: '#25D366', borderRadius: '12px', color: 'white', py: 0.8 }}
       >
         WhatsApp
       </Button>
       <Button 
         fullWidth variant="outlined" startIcon={<EmailIcon />} 
         onClick={handleEmail} 
-        sx={{ borderColor: '#e5e7eb', color: '#374151', borderRadius: '12px', py: 1.2, bgcolor: 'white' }}
+        sx={{ borderColor: '#e5e7eb', color: '#374151', borderRadius: '12px', py: 0.8, bgcolor: 'white' }}
       >
         {variant === "horizontal" ? "Email" : (email || "Email")}
       </Button>

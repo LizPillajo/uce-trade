@@ -32,8 +32,6 @@ const VentureDetailPage = () => {
   const [paymentStatus, setPaymentStatus] = useState(null); 
   const [downloading, setDownloading] = useState(false); 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  
-  // --- 🗑️ LÓGICA DE CONTACTO ELIMINADA (Ya está en ContactButtons) ---
 
   const handleDownloadInvoice = async () => {
       try {
@@ -113,7 +111,6 @@ const VentureDetailPage = () => {
                 downloading={downloading}
                 onBuy={() => setOpenPayment(true)}
                 onDownload={handleDownloadInvoice}
-                // Ya no pasamos onWhatsApp ni onEmail
               />
 
               <OwnerCard 
