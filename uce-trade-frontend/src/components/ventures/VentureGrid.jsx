@@ -26,23 +26,24 @@ const VentureGrid = ({ isLoading, ventures, viewMode }) => {
     );
   }
 
-  // VISTA DE CUADRÍCULA (GRID)
+  // MODO CUADRÍCULA (GRID) 
   if (viewMode === 'grid') {
     return (
       <Grid container spacing={3} justifyContent="flex-start">
         {ventures.map((venture) => (
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={venture.id}>
-            <VentureCard data={venture} variant="vertical" />
+            <VentureCard data={venture} />
           </Grid>
         ))}
       </Grid>
     );
   }
 
-  // VISTA DE LISTA (STACK)
+  // MODO LISTA (LIST) - Horizontal
   return (
     <Stack spacing={3}>
       {ventures.map((venture) => (
+        // Box width 100% permite que la tarjeta se estire
         <Box key={venture.id} sx={{ width: '100%' }}>
           <VentureCard data={venture} variant="horizontal" />
         </Box>
