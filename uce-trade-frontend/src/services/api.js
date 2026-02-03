@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// 1. Create a configured Axios instance
+// 1. Configuración de Axios
 const api = axios.create({
   baseURL: 'http://localhost:8080/api', 
   withCredentials: true, 
@@ -9,7 +9,8 @@ const api = axios.create({
   },
 });
 
-// LOGIN
+// AUTENTICACIÓN
+
 export const loginUser = async (credentials) => {
   try {
     const response = await api.post('/auth/login', credentials);
@@ -20,10 +21,8 @@ export const loginUser = async (credentials) => {
   }
 };
 
-// 2. Function to REGISTER a user
 export const registerUser = async (userData) => {
   try {
-    // This calls your AuthController.java
     const response = await api.post('/auth/register', userData);
     return response.data;
   } catch (error) {
@@ -32,18 +31,24 @@ export const registerUser = async (userData) => {
   }
 };
 
-// GET /api/ventures
+export const googleLogin = async (token) => {
+  const response = await api.post('/auth/google', { token });
+  return response.data;
+};
+
+// VENTURES (PÚBLICO Y EXPLORER)
+
+// Home: Destacados
 export const fetchFeaturedServices = async () => {
   try {
     const response = await api.get('/ventures/featured');
-    return response.data; // 4 featured records
+    return response.data;
   } catch (error) {
-    console.error("Error fetching ventures:", error);
-    return []; // Returns empty array if fails to avoid breaking the page
+    return [];
   }
 };
 
-// For Explorer: Get PAGINATED list
+// Explorer & Admin Grid: Buscador principal
 export const fetchServices = async (page = 1, search = '', category = 'All', sort = 'recent') => {
   const pageParam = page - 1; 
   const params = new URLSearchParams();
@@ -59,35 +64,102 @@ export const fetchServices = async (page = 1, search = '', category = 'All', sor
   return response.data;
 };
 
+// Detalle de un servicio
 export const fetchServiceById = async (id) => {
   const response = await api.get(`/ventures/${id}`);
   return response.data;
 };
 
-// Get my ventures
+// Sugerencias de búsqueda (Autocomplete)
+export const fetchSuggestions = async (query) => {
+  if (!query) return [];
+  const response = await api.get(`/ventures/suggestions?query=${query}`);
+  return response.data; 
+};
+
+// GESTIÓN ESTUDIANTE (DASHBOARD & CRUD)
+
+// Obtener mis emprendimientos
 export const fetchMyVentures = async () => {
   const response = await api.get('/ventures/my-ventures');
   return response.data;
 };
 
+// Crear nuevo emprendimiento
+export const createVenture = async (data) => {
+    const response = await api.post('/ventures', data);
+    return response.data;
+};
+
+// Editar emprendimiento
+export const updateVenture = async (id, data) => {
+    const response = await api.put(`/ventures/${id}`, data);
+    return response.data;
+};
+
+// Borrar emprendimiento (Soft Delete)
+export const deleteVenture = async (id) => {
+    const response = await api.delete(`/ventures/${id}`);
+    return response.data;
+};
+
+// Estadísticas Estudiante con Filtro de Periodo
+export const fetchStudentStats = async (period = 'ALL') => {
+  const response = await api.get(`/dashboard/student?period=${period}`);
+  return response.data;
+};
+
+// Descargar Reporte Estudiante CSV
+export const downloadStudentReport = async (period = 'ALL') => {
+    const response = await api.get(`/dashboard/student/report?period=${period}`, {
+        responseType: 'blob'
+    });
+    return response.data;
+};
+
+// GESTIÓN ADMIN (DASHBOARD & TABLAS)
+
+// Estadísticas Admin con Filtro de Periodo
+export const fetchAdminStats = async (period = 'ALL') => {
+  const response = await api.get(`/admin/stats?period=${period}`);
+  return response.data;
+};
+
+// Obtener lista de usuarios paginada
+export const fetchAdminUsers = async (page = 1, size = 10) => {
+    const response = await api.get(`/admin/users?page=${page - 1}&size=${size}`);
+    return response.data;
+};
+
+// Eliminar usuario
+export const deleteAdminUser = async (id) => {
+    const response = await api.delete(`/admin/users/${id}`);
+    return response.data;
+};
+
+// Exportar CSV de Usuarios
+export const exportUsersReport = async () => {
+    const response = await api.get('/admin/export/users', { responseType: 'blob' });
+    return response.data;
+};
+
+// Exportar CSV de Emprendimientos
+export const exportVenturesReport = async () => {
+  const response = await api.get('/admin/export/ventures', { responseType: 'blob' });
+  return response.data;
+};
+
+// Cambiar estado de Venture (Aprobar/Rechazar)
+export const updateVentureStatus = async (id, status) => {
+    const response = await api.put(`/admin/ventures/${id}/status`, { status });
+    return response.data;
+};
+
+// PAGOS, PERFIL Y REVIEWS
+
 // Download Invoice
 export const downloadInvoice = async (ventureId) => {
-  const response = await api.get(`/payments/invoice/${ventureId}`, {
-    responseType: 'blob', // Important for binary files
-  });
-  return response.data;
-};
-
-// PERFIL PÚBLICO: Ver datos de otro usuario
-export const fetchUserProfile = async (userId) => {
-  const response = await api.get(`/users/${userId}/profile`);
-  return response.data;
-};
-
-// GOOGLE LOGIN: Enviar token de Firebase al Backend
-export const googleLogin = async (token) => {
-  // Enviamos el token en el cuerpo del POST
-  const response = await api.post('/auth/google', { token });
+  const response = await api.get(`/payments/invoice/${ventureId}`, { responseType: 'blob' });
   return response.data;
 };
 
@@ -97,17 +169,16 @@ export const confirmPayment = async (ventureId) => {
   return response.data;
 };
 
-// Obtener estadísticas REALES para el Admin
-export const fetchAdminStats = async () => {
-  const response = await api.get('/admin/stats');
+// PERFIL PÚBLICO: Ver datos de otro usuario
+export const fetchUserProfile = async (userId) => {
+  const response = await api.get(`/users/${userId}/profile`);
   return response.data;
 };
 
-// Obtener sugerencias de búsqueda
-export const fetchSuggestions = async (query) => {
-  if (!query) return [];
-  const response = await api.get(`/ventures/suggestions?query=${query}`);
-  return response.data; 
+// Actualizar perfil
+export const updateUserProfile = async (userData) => {
+  const response = await api.put('/users/profile', userData);
+  return response.data;
 };
 
 // Obtener comentarios
@@ -118,49 +189,8 @@ export const fetchReviews = async (ventureId) => {
 
 // Publicar comentario
 export const postReview = async (ventureId, reviewData) => {
-  // reviewData = { rating: 5, comment: "Excelente!" }
   const response = await api.post(`/ventures/${ventureId}/reviews`, reviewData);
   return response.data;
-};
-
-// Actualizar perfil
-export const updateUserProfile = async (userData) => {
-  const response = await api.put('/users/profile', userData);
-  return response.data;
-};
-
-// Exportar Reporte CSV (Admin)
-export const exportVenturesReport = async () => {
-  const response = await api.get('/admin/export/ventures', {
-    responseType: 'blob', 
-  });
-  return response.data;
-};
-
-// Borrar Venture (Soft Delete)
-export const deleteVenture = async (id) => {
-    const response = await api.delete(`/ventures/${id}`);
-    return response.data;
-};
-
-// Actualizar Venture
-export const updateVenture = async (id, data) => {
-    const response = await api.put(`/ventures/${id}`, data);
-    return response.data;
-};
-
-// DASHBOARD: Estadísticas del Estudiante
-export const fetchStudentStats = async (period = 'ALL') => {
-    const response = await api.get(`/dashboard/student?period=${period}`);
-    return response.data;
-};
-
-// Descargar Reporte
-export const downloadStudentReport = async (period = 'ALL') => {
-    const response = await api.get(`/dashboard/student/report?period=${period}`, {
-        responseType: 'blob'
-    });
-    return response.data;
 };
 
 export default api;
