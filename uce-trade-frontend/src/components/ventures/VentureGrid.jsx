@@ -1,7 +1,7 @@
 // src/components/ventures/VentureGrid.jsx
 import { Grid, Stack, Box, Typography } from '@mui/material';
 import VentureCard from './VentureCard';
-import VentureSkeletonCard from './VentureSkeletonCard';
+import { VentureCardSkeleton } from '../ui/Skeletons';
 
 const VentureGrid = ({ isLoading, ventures, viewMode }) => {
   if (isLoading) {
@@ -9,7 +9,7 @@ const VentureGrid = ({ isLoading, ventures, viewMode }) => {
       <Grid container spacing={3}>
         {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={n}>
-            <VentureSkeletonCard />
+            <VentureCardSkeleton />
           </Grid>
         ))}
       </Grid>
