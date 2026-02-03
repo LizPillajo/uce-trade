@@ -1,88 +1,97 @@
-import { Box, Container, Paper, TextField, MenuItem, InputAdornment, Button, CircularProgress } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-
-import BackButton from '../../components/ui/BackButton'; 
-import PageHeader from '../../components/common/PageHeader';
-import VenturesTable from '../../components/admin/VenturesTable';
 import { useState } from 'react';
+import { Box, Container, Pagination, CircularProgress, Typography, Button } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { exportVenturesReport } from '../../services/api';
 
-// Datos Mock
-const mockData = [
-    { name: 'Programming Classes', faculty: 'Engineering', owner: 'Liz Pillajo', cat: 'Tutoring', status: 'Active', visits: '1.250', date: '2024-01-15' },
-    { name: 'UCE Homemade Lunch', faculty: 'Gastronomy', owner: 'Vanessa Vela', cat: 'Food', status: 'Pending', visits: '850', date: '2024-01-18' },
-    { name: 'Logo Design', faculty: 'Arts', owner: 'Ana López', cat: 'Design', status: 'Active', visits: '980', date: '2024-01-10' },
-    { name: 'Laptop Repair', faculty: 'Engineering', owner: 'Pedro Martinez', cat: 'Technology', status: 'Rejected', visits: '420', date: '2024-01-12' },
-];
+import VenturesTable from '../../components/admin/VenturesTable';
+import VentureFilter from '../../components/ventures/VentureFilter';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
+import { fetchServices, deleteVenture, updateVentureStatus } from '../../services/api';
 
 const AdminVenturesPage = () => {
-  const [exporting, setExporting] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  
+  // Estados de Filtro
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [category, setCategory] = useState('All');
+  const [sort, setSort] = useState('recent');
+  
+  const [deleteId, setDeleteId] = useState(null);
 
-  const handleExport = async () => {
-    try {
-      setExporting(true);
-      const blob = await exportVenturesReport();
-      
-      // Crear link invisible para descargar
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Ventures_Report_${new Date().toISOString().slice(0,10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      
-      toast.success("Report downloaded successfully!");
-    } catch (error) {
-      console.error("Export error:", error);
-      toast.error("Failed to export report.");
-    } finally {
-      setExporting(false);
+  // 1. Fetch con filtros (Usamos fetchServices pero como admin veremos todo)
+  const { data, isLoading } = useQuery({
+    queryKey: ['adminVentures', page, searchTerm, category, sort],
+    queryFn: () => fetchServices(page, searchTerm, category, sort),
+    keepPreviousData: true
+  });
+
+  // 2. Acción: Borrar
+  const deleteMutation = useMutation({
+    mutationFn: deleteVenture,
+    onSuccess: () => {
+        toast.success("Venture deleted");
+        queryClient.invalidateQueries(['adminVentures']);
+        setDeleteId(null);
     }
+  });
+
+  // 3. Acción: Aprobar/Rechazar
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }) => updateVentureStatus(id, status),
+    onSuccess: () => {
+        toast.success("Status updated!");
+        queryClient.invalidateQueries(['adminVentures']);
+    }
+  });
+
+  const handleStatusChange = (id, newStatus) => {
+      statusMutation.mutate({ id, status: newStatus });
   };
 
   return (
-    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
-      <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
-        
-        <BackButton to="/admin/dashboard" />
+    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: '100px', pb: 8 }}>
+      <Container maxWidth="xl">
+         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/admin/dashboard')} sx={{ color: 'text.secondary', mb: 2 }}>
+            Dashboard
+         </Button>
+         
+         {/* FILTROS REUTILIZADOS (Asegúrate que VentureFilter acepte props para no mostrar viewMode si no quieres) */}
+         <VentureFilter 
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+            category={category} setCategory={setCategory}
+            sort={sort} setSort={setSort}
+            viewMode="list" setViewMode={() => {}} // Dummy func
+         />
 
-        <PageHeader 
-            title="Entrepreneurship Management" 
-            subtitle="Manage all the platform's ventures"
-            action={
-                <Button 
-                  variant="contained" 
-                  startIcon={exporting ? <CircularProgress size={20} color="inherit"/> : <FileDownloadIcon />} 
-                  onClick={handleExport} 
-                  disabled={exporting}
-                  sx={{ bgcolor: '#0d2149', borderRadius: '8px' }}
-                >
-                   {exporting ? "Exporting..." : "Export CSV"}
-                </Button>
-            }
-        />
+         {isLoading ? (
+            <Box display="flex" justifyContent="center" py={10}><CircularProgress /></Box>
+         ) : (
+            <>
+                {/* NOTA: Debes actualizar VenturesTable para aceptar las props de onApprove/onReject */}
+                <VenturesTable 
+                    ventures={data?.content || []} 
+                    onDelete={setDeleteId}
+                    onStatusChange={handleStatusChange} 
+                />
+                
+                <Box display="flex" justifyContent="center" mt={4}>
+                    <Pagination count={data?.totalPages || 1} page={page} onChange={(e,v) => setPage(v)} color="primary" />
+                </Box>
+            </>
+         )}
 
-        {/* FILTROS */}
-        <Paper elevation={0} sx={{ p: 2, mb: 3, borderRadius: '16px', border: '1px solid #e5e7eb', display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <TextField 
-                placeholder="Search by name or owner..." 
-                size="small" 
-                sx={{ flexGrow: 1, '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#f9fafb' } }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon color="action" /></InputAdornment> }}
-            />
-            <TextField select defaultValue="All" size="small" sx={{ minWidth: 150 }}>
-                <MenuItem value="All">All Categories</MenuItem>
-            </TextField>
-            <TextField select defaultValue="All" size="small" sx={{ minWidth: 150 }}>
-                <MenuItem value="All">All Status</MenuItem>
-            </TextField>
-        </Paper>
-
-        <VenturesTable ventures={mockData} />
-
+         <ConfirmationModal 
+            open={!!deleteId}
+            title="Delete Venture"
+            message="Are you sure you want to remove this venture?"
+            onClose={() => setDeleteId(null)}
+            onConfirm={() => deleteMutation.mutate(deleteId)}
+            loading={deleteMutation.isPending}
+         />
       </Container>
     </Box>
   );
