@@ -2,11 +2,11 @@ import { useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'react-toastify';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore} from '../store/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useWebSocket = () => {
-  const { user } = useAuth();
+  const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
   
   // REF para mantener la instancia del cliente entre renderizados

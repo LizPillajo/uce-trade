@@ -2,23 +2,23 @@
 import { useState } from "react";
 import { Box, Container, Typography, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit"; // Importado
+import EditIcon from "@mui/icons-material/Edit"; 
 import { useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
-import { fetchMyVentures, fetchStudentStats } from '../../services/api'; 
-import { useAuth } from '../../context/AuthContext';
+import { fetchMyVentures, fetchStudentStats } from '../../services/api';
+import { useAuthStore} from '../../store/authStore';
 
 // Componentes
 import EditProfileModal from '../../components/profile/EditProfileModal';
 import StudentProfileHeader from "../../components/student/StudentProfileHeader";
 import ProfileBioSection from "../../components/profile/ProfileBioSection";
-import ProfileStatsGrid from "../../components/profile/ProfileStatsGrid"; // <--- NUEVO
+import ProfileStatsGrid from "../../components/profile/ProfileStatsGrid"; 
 import MyVenturesTable from "../../components/student/MyVenturesTable";
 import Button from "../../components/ui/Button";
 
 const MyVenturesPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [openModal, setOpenModal] = useState(false);
   
   const { data: ventures, isLoading: loadingVentures } = useQuery({ queryKey: ['myVentures'], queryFn: fetchMyVentures });

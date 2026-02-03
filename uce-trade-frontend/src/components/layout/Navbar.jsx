@@ -4,13 +4,13 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
 import MenuIcon from '@mui/icons-material/Menu';
 import Button from '../ui/Button'; 
-import { useAuth } from '../../context/AuthContext'; 
+import { useAuthStore} from '../../store/authStore'; 
 
 import MobileDrawer from './MobileDrawer';
 import UserMenu from './UserMenu';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   
   // Estados

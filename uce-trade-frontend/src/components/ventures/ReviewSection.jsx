@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Box, Typography, Avatar, TextField, Rating, Paper, Stack, Divider, Alert } from '@mui/material';
 import Button from '../ui/Button';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore} from '../../store/authStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchReviews, postReview } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const ReviewSection = ({ ventureId }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

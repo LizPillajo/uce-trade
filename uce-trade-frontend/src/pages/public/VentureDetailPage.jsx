@@ -15,7 +15,7 @@ import { toast } from 'react-toastify';
 import SeoMeta from '../../components/common/SeoMeta';
 import PaymentModal from '../../components/payment/PaymentModal'; 
 import { fetchServiceById, downloadInvoice, confirmPayment } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore} from '../../store/authStore';
 import BackButton from '../../components/ui/BackButton';
 
 const VentureDetailPage = () => {
@@ -23,7 +23,7 @@ const VentureDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const processedRef = useRef(false);
-  const { user } = useAuth();
+  const { user } = useAuthStore();
 
   const [openPayment, setOpenPayment] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null); 

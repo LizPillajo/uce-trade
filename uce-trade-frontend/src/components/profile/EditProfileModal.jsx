@@ -5,11 +5,11 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import Button from '../ui/Button';
 import { useMutation } from '@tanstack/react-query';
 import { updateUserProfile } from '../../services/api';
-import { useAuth } from '../../context/AuthContext'; // Importamos el contexto
+import { useAuthStore} from '../../store/authStore';
 import { toast } from 'react-toastify';
 
 const EditProfileModal = ({ open, handleClose, user }) => {
-  const { updateUserSession } = useAuth(); // Usamos la nueva función
+  const updateUser = useAuthStore((state) => state.updateUser);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -39,9 +39,7 @@ const EditProfileModal = ({ open, handleClose, user }) => {
   const mutation = useMutation({
     mutationFn: updateUserProfile,
     onSuccess: (updatedUser) => {
-      // 1. ACTUALIZAR EL CONTEXTO INMEDIATAMENTE
-      // El backend devuelve el objeto User actualizado. Lo mapeamos para el frontend.
-      updateUserSession({
+      updateUser({
         name: updatedUser.fullName,
         faculty: updatedUser.faculty,
         phoneNumber: updatedUser.phoneNumber,

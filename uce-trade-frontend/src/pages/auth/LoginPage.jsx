@@ -9,13 +9,13 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import AuthSplitLayout from "../../components/layout/AuthSplitLayout"; 
 
-import { useAuth } from "../../context/AuthContext";
+import { useAuthStore} from '../../store/authStore';
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../services/firebase";
 import { googleLogin } from "../../services/api";
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login } = useAuthStore();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
