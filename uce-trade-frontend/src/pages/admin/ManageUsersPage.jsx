@@ -1,58 +1,110 @@
-// src/pages/admin/ManageUsersPage.jsx
-import { Box, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Avatar, Button } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';       
-import Card from '../../components/ui/Card';
-import Badge from '../../components/ui/Badge';
-import BackButton from '../../components/ui/BackButton'; 
+import { useState } from 'react';
+import { Box, Container, Typography, Button, Pagination, CircularProgress } from '@mui/material';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+
+import UsersTable from '../../components/admin/UsersTable';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
+import { fetchAdminUsers, deleteAdminUser, exportUsersReport } from '../../services/api';
 
 const ManageUsersPage = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [deleteId, setDeleteId] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+
+  // 1. Cargar Usuarios
+  const { data, isLoading } = useQuery({
+    queryKey: ['adminUsers', page],
+    queryFn: () => fetchAdminUsers(page, 10),
+    keepPreviousData: true
+  });
+
+  // 2. Borrar Usuario
+  const deleteMutation = useMutation({
+    mutationFn: deleteAdminUser,
+    onSuccess: () => {
+        toast.success("User deleted successfully");
+        queryClient.invalidateQueries(['adminUsers']);
+        setDeleteId(null);
+    },
+    onError: () => toast.error("Could not delete user")
+  });
+
+  // 3. Descargar Reporte
+  const handleExport = async () => {
+    try {
+        setDownloading(true);
+        const blob = await exportUsersReport();
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `Users_Report.csv`);
+        document.body.appendChild(link);
+        link.click();
+        setDownloading(false);
+        toast.success("Report downloaded!");
+    } catch (e) {
+        setDownloading(false);
+        toast.error("Export failed");
+    }
+  };
 
   return (
-    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: '120px', pb: 8 }}>
+    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: '100px', pb: 8 }}>
       <Container maxWidth="xl">
         
-        <BackButton />
-
-        <Typography variant="h4" fontWeight="800" color="#0d2149" mb={4}>Manage Users</Typography>
+        {/* HEADER */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Box>
+                 <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/admin/dashboard')} sx={{ color: 'text.secondary', mb: 1 }}>
+                    Dashboard
+                </Button>
+                <Typography variant="h4" fontWeight="800" color="#0d2149">Manage Users</Typography>
+            </Box>
+            <Button 
+                variant="contained" 
+                startIcon={downloading ? <CircularProgress size={20} color="inherit"/> : <FileDownloadIcon />}
+                onClick={handleExport}
+                disabled={downloading}
+                sx={{ bgcolor: '#0d2149' }}
+            >
+                {downloading ? "Exporting..." : "Export List"}
+            </Button>
+        </Box>
         
-        <Card noPadding>
-            <TableContainer>
-                <Table>
-                    <TableHead sx={{ bgcolor: '#f9fafb' }}>
-                        <TableRow>
-                            <TableCell sx={{ fontWeight: 'bold', color: '#6b7280' }}>User</TableCell>
-                            <TableCell sx={{ fontWeight: 'bold', color: '#6b7280' }}>Role</TableCell>
-                            <TableCell sx={{ fontWeight: 'bold', color: '#6b7280' }}>Faculty</TableCell>
-                            <TableCell sx={{ fontWeight: 'bold', color: '#6b7280' }}>Status</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 'bold', color: '#6b7280' }}>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {[1,2,3].map(i => (
-                            <TableRow key={i} hover>
-                                <TableCell>
-                                    <Box display="flex" alignItems="center" gap={2}>
-                                        <Avatar>U{i}</Avatar>
-                                        <Box>
-                                            <Typography fontWeight="bold" color="#0d2149">User Name {i}</Typography>
-                                            <Typography variant="caption" color="text.secondary">user{i}@uce.edu.ec</Typography>
-                                        </Box>
-                                    </Box>
-                                </TableCell>
-                                <TableCell>Student</TableCell>
-                                <TableCell>Engineering</TableCell>
-                                <TableCell><Badge status="Active" /></TableCell>
-                                <TableCell align="right">
-                                    <IconButton size="small"><EditIcon fontSize="small" /></IconButton>
-                                    <IconButton size="small" color="error"><DeleteIcon fontSize="small" /></IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </Card>
+        {/* TABLA O LOADING */}
+        {isLoading ? (
+             <Box display="flex" justifyContent="center" py={10}><CircularProgress /></Box>
+        ) : (
+            <>
+                <UsersTable users={data?.content || []} onDelete={setDeleteId} />
+                
+                <Box display="flex" justifyContent="center" mt={4}>
+                    <Pagination 
+                        count={data?.totalPages || 1} 
+                        page={page} 
+                        onChange={(e, v) => setPage(v)} 
+                        color="primary" 
+                    />
+                </Box>
+            </>
+        )}
+
+        {/* MODAL CONFIRMACIÓN */}
+        <ConfirmationModal 
+            open={!!deleteId}
+            title="Delete User"
+            message="This will permanently delete the user and their ventures. Are you sure?"
+            onClose={() => setDeleteId(null)}
+            onConfirm={() => deleteMutation.mutate(deleteId)}
+            loading={deleteMutation.isPending}
+        />
+
       </Container>
     </Box>
   );
