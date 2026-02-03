@@ -1,27 +1,18 @@
 // src/pages/admin/ManageUsersPage.jsx
 import { Box, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Avatar, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'; 
-import { useNavigate } from 'react-router-dom';           
+import EditIcon from '@mui/icons-material/Edit';       
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import BackButton from '../../components/ui/BackButton'; 
 
 const ManageUsersPage = () => {
-    const navigate = useNavigate(); 
 
   return (
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: '120px', pb: 8 }}>
       <Container maxWidth="xl">
         
-        {/* BACK BUTTON */}
-        <Button 
-            startIcon={<ArrowBackIcon />} 
-            onClick={() => navigate('/admin/dashboard')} 
-            sx={{ mb: 3, color: 'text.secondary', textTransform: 'none', fontWeight: 600 }}
-        >
-            Back to Dashboard
-        </Button>
+        <BackButton />
 
         <Typography variant="h4" fontWeight="800" color="#0d2149" mb={4}>Manage Users</Typography>
         

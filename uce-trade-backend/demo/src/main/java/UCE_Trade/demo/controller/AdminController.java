@@ -16,6 +16,8 @@ import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -88,5 +90,33 @@ public class AdminController {
         response.put("growthData", growthData);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/export/ventures")
+    public ResponseEntity<byte[]> exportVenturesCsv() {
+        List<Venture> ventures = ventureRepository.findAll();
+
+        StringBuilder csvBuilder = new StringBuilder();
+        csvBuilder.append("ID,Title,Owner,Email,Category,Price,Rating,Status,Date\n");
+
+        // Datos
+        for (Venture v : ventures) {
+            csvBuilder.append(v.getId()).append(",");
+            csvBuilder.append("\"").append(v.getTitle().replace("\"", "\"\"")).append("\",");
+            csvBuilder.append(v.getOwner().getFullName()).append(",");
+            csvBuilder.append(v.getOwner().getEmail()).append(",");
+            csvBuilder.append(v.getCategory()).append(",");
+            csvBuilder.append(v.getPrice()).append(",");
+            csvBuilder.append(v.getRating()).append(",");
+            csvBuilder.append("Active").append(","); 
+            csvBuilder.append(v.getCreatedDate()).append("\n");
+        }
+
+        byte[] csvBytes = csvBuilder.toString().getBytes();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ventures_report.csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(csvBytes);
     }
 }

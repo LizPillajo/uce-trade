@@ -7,7 +7,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import AuthSplitLayout from '../../components/layout/AuthSplitLayout'; // <--- NUEVO
+import AuthSplitLayout from '../../components/layout/AuthSplitLayout'; 
 
 import { registerUser, googleLogin } from '../../services/api';
 import { auth, googleProvider } from "../../services/firebase"; 

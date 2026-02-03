@@ -1,10 +1,13 @@
-import { Box, Container, Paper, TextField, MenuItem, InputAdornment, Button } from '@mui/material';
+import { Box, Container, Paper, TextField, MenuItem, InputAdornment, Button, CircularProgress } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 import BackButton from '../../components/ui/BackButton'; 
 import PageHeader from '../../components/common/PageHeader';
 import VenturesTable from '../../components/admin/VenturesTable';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import { exportVenturesReport } from '../../services/api';
 
 // Datos Mock
 const mockData = [
@@ -15,6 +18,31 @@ const mockData = [
 ];
 
 const AdminVenturesPage = () => {
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const blob = await exportVenturesReport();
+      
+      // Crear link invisible para descargar
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Ventures_Report_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      
+      toast.success("Report downloaded successfully!");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export report.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -27,10 +55,12 @@ const AdminVenturesPage = () => {
             action={
                 <Button 
                   variant="contained" 
-                  startIcon={<FileDownloadIcon />} 
+                  startIcon={exporting ? <CircularProgress size={20} color="inherit"/> : <FileDownloadIcon />} 
+                  onClick={handleExport} 
+                  disabled={exporting}
                   sx={{ bgcolor: '#0d2149', borderRadius: '8px' }}
                 >
-                    Export
+                   {exporting ? "Exporting..." : "Export CSV"}
                 </Button>
             }
         />

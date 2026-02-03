@@ -5,12 +5,10 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import SchoolIcon from "@mui/icons-material/School";
 import GoogleIcon from '@mui/icons-material/Google'; 
 
-// Components
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
-import AuthSplitLayout from "../../components/layout/AuthSplitLayout"; // <--- NUEVO
+import AuthSplitLayout from "../../components/layout/AuthSplitLayout"; 
 
-// Services & Context
 import { useAuth } from "../../context/AuthContext";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../services/firebase";

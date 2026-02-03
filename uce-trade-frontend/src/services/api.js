@@ -135,4 +135,12 @@ export const updateUserProfile = async (userData) => {
   return response.data;
 };
 
+// Exportar Reporte CSV (Admin)
+export const exportVenturesReport = async () => {
+  const response = await api.get('/admin/export/ventures', {
+    responseType: 'blob', 
+  });
+  return response.data;
+};
+
 export default api;

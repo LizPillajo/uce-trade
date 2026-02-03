@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'react-toastify';
@@ -8,64 +8,58 @@ import { useQueryClient } from '@tanstack/react-query';
 export const useWebSocket = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  console.log("🔄 Hook useWebSocket ejecutándose. Usuario actual:", user);
+  
+  // REF para mantener la instancia del cliente entre renderizados
+  const clientRef = useRef(null);
 
   useEffect(() => {
-    if (!user || !user.email) {
-        console.warn("⚠️ No hay usuario logueado, no se conecta el socket.");
-        return;
-    }
+    // Si no hay usuario o ya hay una conexión activa, no hacer nada
+    if (!user || clientRef.current) return;
 
-    console.log("🔌 Intentando conectar a WebSocket con usuario:", user.email);
+    console.log("🔌 Iniciando conexión WebSocket...");
 
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-      debug: (str) => console.log('🕵️ STOMP:', str), 
       reconnectDelay: 5000,
       onConnect: () => {
-        console.log('✅ CONEXIÓN EXITOSA AL SOCKET');
+        console.log('✅ SOCKET CONECTADO');
 
+        // Suscripción Estudiante (Ventas personales)
         if (user.role === 'STUDENT') {
-          const topic = `/topic/sales/${user.email}`;
-          console.log(`📡 Suscribiéndose al canal: ${topic}`);
-
-          client.subscribe(topic, (message) => {
-            console.log("📩 ¡MENSAJE RECIBIDO!", message.body);
+          client.subscribe(`/topic/sales/${user.email}`, (message) => {
             const notif = JSON.parse(message.body);
-            toast.success(`💰 ${notif.title}: ${notif.body}`);
+            toast.success(`💰 ${notif.title}: ${notif.body}`, { toastId: 'sale-notif' });
             
-            // Recargar datos
             queryClient.invalidateQueries({ queryKey: ['studentStats'] });
             queryClient.invalidateQueries({ queryKey: ['myVentures'] });
           });
         }
 
+        // Suscripción Admin (General)
         if (user.role === 'ADMIN') {
           client.subscribe('/topic/admin/notifications', (msg) => {
             const notif = JSON.parse(msg.body);
-            // Mostrar alerta azul
-            toast.info(`🔔 ${notif.title}: ${notif.body}`);
+            toast.info(`🔔 ${notif.title}: ${notif.body}`, { toastId: 'admin-notif' });
             
-            // Recargar Dashboard Admin automáticamente
+            // Recargar Dashboard
             queryClient.invalidateQueries({ queryKey: ['adminStats'] });
           });
         }
       },
       onStompError: (frame) => {
-        console.error('❌ Error de STOMP:', frame.headers['message']);
-        console.error('Detalles:', frame.body);
-      },
-      onWebSocketError: (event) => {
-        console.error('❌ Error de WebSocket (Nivel Red):', event);
+        console.error('❌ Error STOMP:', frame.headers['message']);
       }
     });
 
     client.activate();
+    clientRef.current = client; 
 
     return () => {
-      console.log("🛑 Desconectando socket...");
-      client.deactivate();
+      console.log("🛑 Limpiando socket...");
+      if (clientRef.current) {
+        clientRef.current.deactivate();
+        clientRef.current = null;
+      }
     };
-  }, [user, queryClient]);
+  }, [user, queryClient]); 
 };
