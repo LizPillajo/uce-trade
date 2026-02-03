@@ -5,7 +5,14 @@ import ViewListIcon from "@mui/icons-material/ViewList";
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import VentureSearchBar from "./VentureSearchBar"; 
 
-const VentureFilter = ({searchTerm, setSearchTerm, category, setCategory, sort, setSort, viewMode, setViewMode}) => {
+// Añado la prop "showViewToggles" con valor por defecto true (para que en Explore sigan saliendo)
+const VentureFilter = ({
+    searchTerm, setSearchTerm, 
+    category, setCategory, 
+    sort, setSort, 
+    viewMode, setViewMode,
+    showViewToggles = true // <--- NUEVA PROP
+}) => {
   
   const handleClearFilters = () => {
     setSearchTerm('');
@@ -39,7 +46,7 @@ const VentureFilter = ({searchTerm, setSearchTerm, category, setCategory, sort, 
       {/* BARRA DE HERRAMIENTAS */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2, width: '100%', flexWrap: 'wrap' }}>
         
-        {/* 1. Componente de Búsqueda Extraído */}
+        {/* 1. Componente de Búsqueda */}
         <VentureSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
     
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, width: { xs: '100%', md: 'auto' }, flexWrap: 'wrap' }}>
@@ -91,17 +98,21 @@ const VentureFilter = ({searchTerm, setSearchTerm, category, setCategory, sort, 
             <MenuItem value="price_low">Lowest Price</MenuItem>
           </Select>
 
-          <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", md: "block" } }} />
+          {/* 4. BOTONES DE VISTA (Solo se muestran si showViewToggles es true) */}
+          {showViewToggles && (
+            <>
+                <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", md: "block" } }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconButton color={viewMode === 'grid' ? "primary" : "default"} onClick={() => setViewMode('grid')}>
+                    <GridViewIcon />
+                    </IconButton>
+                    <IconButton color={viewMode === 'list' ? "primary" : "default"} onClick={() => setViewMode('list')}>
+                    <ViewListIcon />
+                    </IconButton>
+                </Box>
+            </>
+          )}
 
-          {/* 4. BOTONES DE VISTA */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color={viewMode === 'grid' ? "primary" : "default"} onClick={() => setViewMode('grid')}>
-              <GridViewIcon />
-            </IconButton>
-            <IconButton color={viewMode === 'list' ? "primary" : "default"} onClick={() => setViewMode('list')}>
-              <ViewListIcon />
-            </IconButton>
-          </Box>
         </Box>
       </Box>
     </Box>

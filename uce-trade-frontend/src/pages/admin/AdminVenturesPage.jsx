@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Container, Pagination, CircularProgress, Typography, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import FileDownloadIcon from '@mui/icons-material/FileDownload'; // <--- ICONO NUEVO
+import FileDownloadIcon from '@mui/icons-material/FileDownload'; 
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import VenturesTable from '../../components/admin/VenturesTable';
 import VentureFilter from '../../components/ventures/VentureFilter';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
-import { fetchServices, deleteVenture, updateVentureStatus, exportVenturesReport } from '../../services/api'; // <--- IMPORTAMOS LA FUNCIÓN
+import { fetchServices, deleteVenture, updateVentureStatus, exportVenturesReport } from '../../services/api';
 
 const AdminVenturesPage = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const AdminVenturesPage = () => {
   
   // Estados de Acción
   const [deleteId, setDeleteId] = useState(null);
-  const [downloading, setDownloading] = useState(false); // <--- ESTADO DE CARGA PARA EXPORTAR
+  const [downloading, setDownloading] = useState(false); 
 
   // 1. Fetch con filtros
   const { data, isLoading } = useQuery({
@@ -55,13 +55,11 @@ const AdminVenturesPage = () => {
       statusMutation.mutate({ id, status: newStatus });
   };
 
-  // 4. NUEVA FUNCIÓN: EXPORTAR CSV
+  // 4. Exportar CSV
   const handleExport = async () => {
     try {
         setDownloading(true);
         const blob = await exportVenturesReport();
-        
-        // Crear link invisible y descargar
         const url = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement('a');
         link.href = url;
@@ -69,7 +67,6 @@ const AdminVenturesPage = () => {
         document.body.appendChild(link);
         link.click();
         link.parentNode.removeChild(link);
-        
         toast.success("Ventures report downloaded! 📊");
     } catch (e) {
         console.error(e);
@@ -83,13 +80,12 @@ const AdminVenturesPage = () => {
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: '100px', pb: 8 }}>
       <Container maxWidth="xl">
          
-         {/* HEADER CON BOTONES */}
+         {/* HEADER */}
          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
              <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/admin/dashboard')} sx={{ color: 'text.secondary' }}>
                 Dashboard
              </Button>
 
-             {/* BOTÓN DE EXPORTAR AÑADIDO */}
              <Button 
                 variant="contained" 
                 startIcon={downloading ? <CircularProgress size={20} color="inherit"/> : <FileDownloadIcon />}
@@ -101,12 +97,12 @@ const AdminVenturesPage = () => {
             </Button>
          </Box>
          
-         {/* FILTROS */}
+         {/* FILTROS (Sin Toggle de Grid/List) */}
          <VentureFilter 
             searchTerm={searchTerm} setSearchTerm={setSearchTerm}
             category={category} setCategory={setCategory}
             sort={sort} setSort={setSort}
-            viewMode="list" setViewMode={() => {}} 
+            showViewToggles={false} // <--- ¡AQUÍ ESTÁ LA MAGIA!
          />
 
          {/* TABLA O CARGANDO */}
@@ -126,7 +122,6 @@ const AdminVenturesPage = () => {
             </>
          )}
 
-         {/* MODAL DE CONFIRMACIÓN DE BORRADO */}
          <ConfirmationModal 
             open={!!deleteId}
             title="Delete Venture"
