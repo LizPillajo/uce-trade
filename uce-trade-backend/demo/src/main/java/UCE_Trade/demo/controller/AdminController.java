@@ -39,42 +39,60 @@ public class AdminController {
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getAdminStats(@RequestParam(defaultValue = "ALL") String period) {
         
-        // 1. Obtener datos base
+        // 1. KPIs Generales (Contadores totales)
         long totalUsers = userRepository.count();
         long totalVentures = ventureRepository.count();
         
-        // 2. Filtrar transacciones según el periodo 
-        List<Transaction> allTransactions = transactionRepository.findAll();
-        List<Transaction> filteredTransactions = filterTransactionsByPeriod(allTransactions, period);
-        long totalSalesCount = filteredTransactions.size(); 
-
-        // 3. Pendientes 
+        // Pendientes (Buscamos explicitamente status 'Pending' y no borrados)
         long pending = ventureRepository.findAll().stream()
                 .filter(v -> "Pending".equalsIgnoreCase(v.getStatus()) && !v.isDeleted())
                 .count();
 
-        // 4. Gráfica Circular
+        // 2. Filtrar transacciones para el KPI de "Total Visits/Sales"
+        List<Transaction> allTransactions = transactionRepository.findAll();
+        long totalSalesCount = filterTransactionsByPeriod(allTransactions, period).size();
+
+        // 3. Gráfica Circular (Ventures por Categoría)
         Map<String, Long> venturesByCategory = ventureRepository.findAll().stream()
                 .filter(v -> !v.isDeleted() && v.getCategory() != null)
                 .collect(Collectors.groupingBy(Venture::getCategory, Collectors.counting()));
 
-        // 5. Gráfica de Crecimiento
+        // 4. GRÁFICA DE CRECIMIENTO (USERS GROWTH) - ¡LA CURVA SEXY! 📈
         List<Map<String, Object>> growthData = new ArrayList<>();
-        
-        Map<String, Double> salesByDate = filteredTransactions.stream()
-            .collect(Collectors.groupingBy(
-                    t -> {
-                        if (period.equals("DAILY")) return t.getDate().format(DateTimeFormatter.ofPattern("HH:00")); // Horas
-                        if (period.equals("MONTHLY")) return t.getDate().format(DateTimeFormatter.ofPattern("dd/MM")); // Días
-                        return t.getDate().format(DateTimeFormatter.ofPattern("MMM")); // Meses (Default)
-                    },
-                    Collectors.summingDouble(t -> t.getAmount().doubleValue())
-            ));
-            
-        salesByDate.forEach((key, val) -> growthData.add(Map.of("name", key, "val", val)));
-        
-        growthData.sort(Comparator.comparing(m -> (String) m.get("name")));
+        List<User> allUsers = userRepository.findAll();
+        LocalDate now = LocalDate.now();
 
+        if ("DAILY".equals(period)) {
+            // Mostrar últimos 14 días (día por día)
+            for (int i = 13; i >= 0; i--) {
+                LocalDate date = now.minusDays(i);
+                long count = allUsers.stream()
+                    .filter(u -> u.getCreatedAt() != null && u.getCreatedAt().equals(date))
+                    .count();
+                growthData.add(Map.of("name", date.format(DateTimeFormatter.ofPattern("dd MMM")), "val", count));
+            }
+        } else if ("ANNUAL".equals(period)) {
+            // Mostrar últimos 5 años
+            for (int i = 4; i >= 0; i--) {
+                int year = now.getYear() - i;
+                long count = allUsers.stream()
+                    .filter(u -> u.getCreatedAt() != null && u.getCreatedAt().getYear() == year)
+                    .count();
+                growthData.add(Map.of("name", String.valueOf(year), "val", count));
+            }
+        } else {
+            // DEFAULT (MONTHLY o ALL): Mostrar últimos 12 meses
+            YearMonth currentMonth = YearMonth.now();
+            for (int i = 11; i >= 0; i--) {
+                YearMonth targetMonth = currentMonth.minusMonths(i);
+                long count = allUsers.stream()
+                    .filter(u -> u.getCreatedAt() != null && YearMonth.from(u.getCreatedAt()).equals(targetMonth))
+                    .count();
+                growthData.add(Map.of("name", targetMonth.format(DateTimeFormatter.ofPattern("MMM yy")), "val", count));
+            }
+        }
+
+        // 5. Construir respuesta
         Map<String, Object> response = new HashMap<>();
         response.put("kpi", Map.of(
             "totalVentures", totalVentures,
