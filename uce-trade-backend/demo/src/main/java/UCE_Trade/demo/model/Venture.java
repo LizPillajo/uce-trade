@@ -23,20 +23,22 @@ public class Venture implements Serializable {
 
     private String title;
     
-    @Column(length = 1000) // Descripción larga
+    @Column(length = 1000) 
     private String description;
     
     private BigDecimal price;
     
-    private String category; // Ej: "Technology", "Food"
+    private String category; 
     
     private String imageUrl;
     
-    private Double rating; // 0.0 a 5.0
+    private Double rating; 
     
     private LocalDate createdDate;
 
-    // Relación: Muchos emprendimientos pertenecen a Un Usuario
+    @Column(columnDefinition = "boolean default false")
+    private boolean deleted = false;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;

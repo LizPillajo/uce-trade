@@ -78,12 +78,6 @@ export const downloadInvoice = async (ventureId) => {
   return response.data;
 };
 
-// DASHBOARD: Estadísticas del Estudiante
-export const fetchStudentStats = async () => {
-  const response = await api.get('/dashboard/student');
-  return response.data;
-};
-
 // PERFIL PÚBLICO: Ver datos de otro usuario
 export const fetchUserProfile = async (userId) => {
   const response = await api.get(`/users/${userId}/profile`);
@@ -141,6 +135,32 @@ export const exportVenturesReport = async () => {
     responseType: 'blob', 
   });
   return response.data;
+};
+
+// Borrar Venture (Soft Delete)
+export const deleteVenture = async (id) => {
+    const response = await api.delete(`/ventures/${id}`);
+    return response.data;
+};
+
+// Actualizar Venture
+export const updateVenture = async (id, data) => {
+    const response = await api.put(`/ventures/${id}`, data);
+    return response.data;
+};
+
+// DASHBOARD: Estadísticas del Estudiante
+export const fetchStudentStats = async (period = 'ALL') => {
+    const response = await api.get(`/dashboard/student?period=${period}`);
+    return response.data;
+};
+
+// Descargar Reporte
+export const downloadStudentReport = async (period = 'ALL') => {
+    const response = await api.get(`/dashboard/student/report?period=${period}`, {
+        responseType: 'blob'
+    });
+    return response.data;
 };
 
 export default api;

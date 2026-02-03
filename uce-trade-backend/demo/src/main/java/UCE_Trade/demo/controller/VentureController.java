@@ -196,4 +196,37 @@ public class VentureController {
             return ResponseEntity.badRequest().body("Error saving review");
         }
     }
+
+    // EDIT
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateVenture(@PathVariable Long id, @RequestBody Venture updates) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ventureRepository.findById(id).map(venture -> {
+            if (!venture.getOwner().getEmail().equals(auth.getName())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No eres el dueño de este emprendimiento");
+            }
+            venture.setTitle(updates.getTitle());
+            venture.setDescription(updates.getDescription());
+            venture.setPrice(updates.getPrice());
+            venture.setCategory(updates.getCategory());
+            if(updates.getImageUrl() != null) venture.setImageUrl(updates.getImageUrl());
+            
+            ventureRepository.save(venture);
+            return ResponseEntity.ok(venture);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteVenture(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ventureRepository.findById(id).map(venture -> {
+            if (!venture.getOwner().getEmail().equals(auth.getName())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No eres el dueño");
+            }
+            venture.setDeleted(true); 
+            ventureRepository.save(venture);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

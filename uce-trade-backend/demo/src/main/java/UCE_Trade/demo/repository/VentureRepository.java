@@ -8,20 +8,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
-
 import java.util.List;
 
 @Repository
 public interface VentureRepository extends JpaRepository<Venture, Long> {
     
-    // 1. Para el Home: Traer solo los 4 mejores calificados
     List<Venture> findTop4ByOrderByRatingDesc();
     
-    // 2. Buscar por el email del dueño
-    List<Venture> findByOwnerEmail(String email);
+    // Buscar solo los NO borrados
+    @Query("SELECT v FROM Venture v WHERE v.owner.email = :email AND v.deleted = false")
+    List<Venture> findByOwnerEmail(@Param("email") String email);
 
-    // 3. Búsqueda Avanzada (Texto + Categoría + Paginación)
+    // Buscar TODOS (incluido borrados) para reportes
+    @Query("SELECT v FROM Venture v WHERE v.owner.email = :email")
+    List<Venture> findAllByOwnerEmail(@Param("email") String email);
+
     @Query("SELECT v FROM Venture v WHERE " +
+           "v.deleted = false AND " + // Ignorar borrados
            "(:category IS NULL OR :category = '' OR :category = 'All' OR v.category = :category) AND " +
            "(:search IS NULL OR :search = '' OR " +
            "LOWER(v.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
@@ -31,12 +34,11 @@ public interface VentureRepository extends JpaRepository<Venture, Long> {
                                  @Param("category") String category, 
                                  Pageable pageable);
 
-    @Query(value = "SELECT title FROM ventures WHERE LOWER(title) LIKE LOWER(CONCAT('%', :query, '%')) LIMIT 5", nativeQuery = true)
+    @Query(value = "SELECT title FROM ventures WHERE deleted = false AND LOWER(title) LIKE LOWER(CONCAT('%', :query, '%')) LIMIT 5", nativeQuery = true)
     List<String> findTitlesByQuery(@Param("query") String query);
 
-    // Top 4 más vendidos en los últimos 7 días
     @Query("SELECT v FROM Transaction t JOIN t.venture v " +
-           "WHERE t.date >= :startDate " +
+           "WHERE v.deleted = false AND t.date >= :startDate " +
            "GROUP BY v " +
            "ORDER BY COUNT(t) DESC")
     List<Venture> findTopSellingVentures(@Param("startDate") LocalDateTime startDate, Pageable pageable);
