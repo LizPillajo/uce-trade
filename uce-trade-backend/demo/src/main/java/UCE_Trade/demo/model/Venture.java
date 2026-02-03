@@ -39,6 +39,9 @@ public class Venture implements Serializable {
     @Column(columnDefinition = "boolean default false")
     private boolean deleted = false;
 
+    @Column(columnDefinition = "varchar(255) default 'Active'")
+    private String status = "Active";
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
