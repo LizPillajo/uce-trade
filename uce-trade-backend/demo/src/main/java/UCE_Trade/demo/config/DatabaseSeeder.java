@@ -7,6 +7,8 @@ import UCE_Trade.demo.model.Venture;
 import UCE_Trade.demo.repository.TransactionRepository;
 import UCE_Trade.demo.repository.UserRepository;
 import UCE_Trade.demo.repository.VentureRepository;
+import UCE_Trade.demo.service.AlgoliaService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,9 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private AlgoliaService algoliaService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -108,7 +113,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
             if (users.isEmpty()) users = userRepository.findAll();
 
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < 20; i++) {
                 Venture v = new Venture();
                 v.setTitle(faker.commerce().productName());
                 v.setDescription(faker.lorem().paragraph(3));
@@ -117,14 +122,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                 v.setPrice(new BigDecimal(priceStr));
                 v.setCategory(categories[faker.random().nextInt(categories.length)]);
                 v.setRating(faker.number().randomDouble(1, 1, 5));
-
                 v.setImageUrl("https://picsum.photos/seed/" + (i + 100) + "/300/200");
-
                 v.setCreatedDate(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-
                 v.setOwner(users.get(faker.random().nextInt(users.size())));
-
                 v.setDeleted(false); 
+
                 int randomStatus = faker.number().numberBetween(1, 10);
                 if (randomStatus == 1) v.setStatus("Pending");
                 else if (randomStatus == 2) v.setStatus("Rejected");
@@ -132,8 +134,14 @@ public class DatabaseSeeder implements CommandLineRunner {
 
                 ventures.add(v);
             }
-            ventureRepository.saveAll(ventures);
-            System.out.println("✅ 1000 Emprendimientos creados.");
+
+            List<Venture> savedVentures = ventureRepository.saveAll(ventures);
+            
+            for(Venture v : savedVentures) {
+                algoliaService.saveVenture(v);
+            }
+
+            System.out.println("✅ Emprendimientos creados y enviados a Algolia.");
         }
 
         // --- CREAR TRANSACCIONES (VENTAS) ---
