@@ -61,7 +61,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             // Arreglar Descripción
             if (u.getDescription() == null || u.getDescription().isEmpty()) {
                 u.setDescription("Hi! I am a student of " + (u.getFaculty() != null ? u.getFaculty() : "UCE") + ". " +
-                        "I am passionate about technology and entrepreneurship.");
+                    "I am passionate about technology and entrepreneurship.");
                 changed = true;
             }
             // Arreglar GitHub
@@ -105,6 +105,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             System.out.println("✅ Usuarios nuevos creados.");
         }
 
+        long ventureCount = ventureRepository.count();
+
         // --- CREAR EMPRENDIMIENTOS ---
         if (ventureRepository.count() == 0) {
             System.out.println("🌱 SEEDER: Creando 1000 emprendimientos...");
@@ -140,8 +142,23 @@ public class DatabaseSeeder implements CommandLineRunner {
             for(Venture v : savedVentures) {
                 algoliaService.saveVenture(v);
             }
-
             System.out.println("✅ Emprendimientos creados y enviados a Algolia.");
+            
+        }else{
+            System.out.println("🔄 BD CON DATOS: Sincronizando " + ventureCount + " emprendimientos existentes con Algolia...");
+            
+            List<Venture> allVentures = ventureRepository.findAll();
+            int counter = 0;
+
+            for (Venture v : allVentures) {
+                algoliaService.saveVenture(v);
+                counter++;
+                // Imprimir progreso cada 100 items
+                if (counter % 100 == 0) {
+                    System.out.println("   -> Enviados a Algolia: " + counter + " / " + ventureCount);
+                }
+            }
+            System.out.println("✅ Sincronización Masiva Completada.");
         }
 
         // --- CREAR TRANSACCIONES (VENTAS) ---
