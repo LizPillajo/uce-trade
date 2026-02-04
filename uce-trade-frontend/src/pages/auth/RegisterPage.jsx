@@ -1,57 +1,88 @@
-// src/pages/auth/RegisterPage.jsx
 import { useState } from 'react';
 import { Typography, Box, Link, TextField, MenuItem, Alert, Divider } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
 import GoogleIcon from '@mui/icons-material/Google';
 
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import AuthSplitLayout from '../../components/layout/AuthSplitLayout'; 
 
+import { useAuthStore } from '../../store/authStore';
 import { registerUser, googleLogin } from '../../services/api';
 import { auth, googleProvider } from "../../services/firebase"; 
 import { signInWithPopup } from "firebase/auth"; 
 
+const registerSchema = z.object({
+  fullName: z.string().min(3, "Full name is required"),
+  email: z.string().email("Invalid email format"), 
+  faculty: z.string().min(1, "Select a faculty or option"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"], 
+});
+
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ fullName: '', email: '', faculty: '', password: '', confirmPassword: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const login = useAuthStore((state) => state.login); 
+  const [serverError, setServerError] = useState('');
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { faculty: '' } 
+  });
+
+  const onSubmit = async (data) => {
+    setServerError('');
+    try {
+      const { confirmPassword, ...payload } = data;
+      
+      await registerUser(payload);
+      
+      alert('Account created successfully! Please log in.');
+      navigate('/login');
+    } catch (err) {
+      console.error(err);
+      setServerError(typeof err === 'string' ? err : 'Registration error. Email might be taken.');
+    }
+  };
 
   const handleFirebaseSignUp = async () => {
     try {
-      setError(''); setLoading(true);
+      setServerError('');
       const result = await signInWithPopup(auth, googleProvider);
       const token = await result.user.getIdToken();
       const data = await googleLogin(token);
-      localStorage.setItem('user', JSON.stringify({ name: data.name, role: data.role, email: result.user.email, avatar: data.avatar || result.user.photoURL }));
-      window.location.href = data.role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard';
+ 
+      login({
+        name: data.name, 
+        role: data.role, 
+        email: result.user.email, 
+        avatar: data.avatar || result.user.photoURL,
+        faculty: data.faculty,
+        phoneNumber: data.phoneNumber,
+        description: data.description,
+        githubUser: data.githubUser
+      });
+      
+      const path = data.role === 'ADMIN' ? '/admin/dashboard' : (data.role === 'STUDENT' ? '/student/dashboard' : '/explore');
+      navigate(path);
+
     } catch (err) {
       console.error(err);
-      if (err.code !== 'auth/popup-closed-by-user') setError("Error registering with Google.");
-      setLoading(false);
+      if (err.code !== 'auth/popup-closed-by-user') {
+         setServerError("Error registering with Google.");
+      }
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    if (formData.password !== formData.confirmPassword) { setError("Passwords do not match"); return; }
-    
-    setLoading(true);
-    try {
-      await registerUser({ fullName: formData.fullName, email: formData.email, password: formData.password, faculty: formData.faculty });
-      alert('Account created successfully! Now log in.');
-      navigate('/login');
-    } catch (err) {
-      setError(typeof err === 'string' ? err : 'Registration error.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const facultyRegister = register("faculty");
 
   return (
     <AuthSplitLayout 
@@ -67,9 +98,9 @@ const RegisterPage = () => {
         <Typography variant="h4" fontWeight="bold" color="#0d2149" gutterBottom>Create your account</Typography>
         <Typography variant="body1" color="text.secondary" mb={4}>Sign up to publish your services</Typography>
 
-        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+        {serverError && <Alert severity="error" sx={{ mb: 3 }}>{serverError}</Alert>}
 
-        <Button variant="outlined" fullWidth startIcon={<GoogleIcon />} onClick={handleFirebaseSignUp} disabled={loading} sx={{ mb: 3, py: 1.5, borderColor: '#ddd', color: '#555', textTransform: 'none', fontWeight: 'bold', bgcolor: '#f3f4f6' }}>
+        <Button variant="outlined" fullWidth startIcon={<GoogleIcon />} onClick={handleFirebaseSignUp} sx={{ mb: 3, bgcolor: '#f3f4f6' }}>
           Sign up with Google
         </Button>
 
@@ -77,19 +108,69 @@ const RegisterPage = () => {
             <Divider sx={{ flexGrow: 1 }} /><Typography variant="caption" color="text.secondary" sx={{ mx: 2 }}>OR</Typography><Divider sx={{ flexGrow: 1 }} />
         </Box>
 
-        <Box component="form" onSubmit={handleSubmit}>
-          <Input label="Full Name" name="fullName" placeholder="Liz Pillajo" value={formData.fullName} onChange={handleChange} />
-          <Input label="Institutional Email" name="email" placeholder="student@uce.edu.ec" value={formData.email} onChange={handleChange} />
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           
-          <TextField select label="College / Major" name="faculty" fullWidth variant="outlined" value={formData.faculty} onChange={handleChange} sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#f9fafb' } }}>
-              {['Engineering', 'Arts', 'Medicine', 'Economics', 'Psychology'].map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
+          <Input 
+            label="Full Name" 
+            placeholder="Liz Pillajo" 
+            {...register("fullName")} 
+            error={!!errors.fullName} 
+            helperText={errors.fullName?.message}
+          />
+          
+          <Input 
+            label="Email" 
+            placeholder="student@uce.edu.ec" 
+            {...register("email")} 
+            error={!!errors.email} 
+            helperText={errors.email?.message}
+          />
+          
+          <TextField 
+            select 
+            label="College / Major" 
+            fullWidth 
+            variant="outlined" 
+            defaultValue=""
+            inputRef={facultyRegister.ref} 
+            {...facultyRegister}          
+            error={!!errors.faculty} 
+            helperText={errors.faculty?.message}
+            sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#f9fafb' } }}
+          >
+              {['Engineering', 'Arts', 'Medicine', 'Economics', 'Psychology', 'External Client'].map(opt => (
+                  <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+              ))}
           </TextField>
 
-          <Input label="Password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} />
-          <Input label="Confirm Password" name="confirmPassword" type="password" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} />
+          <Input 
+            label="Password" 
+            type="password" 
+            placeholder="••••••••" 
+            {...register("password")} 
+            error={!!errors.password} 
+            helperText={errors.password?.message}
+          />
+          
+          <Input 
+            label="Confirm Password" 
+            type="password" 
+            placeholder="••••••••" 
+            {...register("confirmPassword")} 
+            error={!!errors.confirmPassword} 
+            helperText={errors.confirmPassword?.message}
+          />
 
-          <Button type="submit" variant="contained" color="secondary" fullWidth size="large" disabled={loading} sx={{ py: 1.5, mt: 2, mb: 3 }}>
-            {loading ? 'Creating...' : 'Create Account'}
+          <Button 
+            type="submit" 
+            variant="contained" 
+            color="secondary" 
+            fullWidth 
+            size="large" 
+            disabled={isSubmitting}
+            sx={{ py: 1.5, mt: 2, mb: 3 }}
+          >
+            {isSubmitting ? 'Creating...' : 'Create Account'}
           </Button>
 
           <Typography variant="body2" textAlign="center" color="text.secondary">

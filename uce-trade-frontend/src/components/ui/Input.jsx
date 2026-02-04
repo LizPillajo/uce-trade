@@ -1,9 +1,11 @@
 // src/components/ui/Input.jsx
 import { TextField } from '@mui/material';
+import { forwardRef } from 'react'; 
 
-const Input = ({ label, type = "text", ...props }) => {
+const Input = forwardRef(({ label, type = "text", ...props }, ref) => {
   return (
     <TextField
+      inputRef={ref} 
       label={label}
       type={type}
       fullWidth
@@ -21,9 +23,11 @@ const Input = ({ label, type = "text", ...props }) => {
           color: 'text.secondary',
         }
       }}
-      {...props}
+      {...props} 
     />
   );
-};
+});
+
+Input.displayName = "Input";
 
 export default Input;

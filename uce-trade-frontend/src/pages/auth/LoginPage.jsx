@@ -1,66 +1,88 @@
-// src/pages/auth/LoginPage.jsx
 import { useState } from 'react';
-import { Typography, Box, Link, Alert, Divider } from "@mui/material";
+import { Typography, Box, Link, Alert, Divider, Stack } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import SchoolIcon from "@mui/icons-material/School";
 import GoogleIcon from '@mui/icons-material/Google'; 
 
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
 import Button from "../../components/ui/Button";
-import Input from "../../components/ui/Input";
+import Input from "../../components/ui/Input"; 
 import AuthSplitLayout from "../../components/layout/AuthSplitLayout"; 
 
-import { useAuthStore} from '../../store/authStore';
+import { useAuthStore } from '../../store/authStore';
+
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../services/firebase";
-import { googleLogin } from "../../services/api";
+import { googleLogin, loginUser } from "../../services/api";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
+});
 
 const LoginPage = () => {
-  const { login } = useAuthStore();
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login); 
+  const [serverError, setServerError] = useState('');
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' }
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsSubmitting(true);
-    const result = await login(email, password);
-    if (result.success) {
-      const user = JSON.parse(localStorage.getItem('user'));
-      navigate(user?.role === 'ADMIN' ? "/admin/dashboard" : (user?.role === 'STUDENT' ? "/student/dashboard" : "/explore"));
-    } else {
-      setError("Incorrect credentials or user not registered.");
-      setIsSubmitting(false);
+  const onSubmit = async (data) => {
+    setServerError('');
+    try {
+      // Llamada a la API
+      const result = await loginUser({ email: data.email, password: data.password });
+      
+      // Guardar en Zustand (Global)
+      login(result);
+      
+      // Redirigir según rol
+      const redirectPath = result.role === 'ADMIN' ? "/admin/dashboard" : (result.role === 'STUDENT' ? "/student/dashboard" : "/explore");
+      navigate(redirectPath);
+
+    } catch (error) {
+      console.error(error);
+      setServerError(typeof error === 'string' ? error : "Incorrect credentials or user not registered.");
     }
   };
 
   const handleFirebaseLogin = async () => {
     try {
-      setError('');
-      setIsSubmitting(true);
+      setServerError('');
       const result = await signInWithPopup(auth, googleProvider);
       const token = await result.user.getIdToken();
       const data = await googleLogin(token); 
       
-      localStorage.setItem('user', JSON.stringify({
-        name: data.name, role: data.role, email: result.user.email, avatar: data.avatar || result.user.photoURL
-      }));
+      // Guardar en Zustand
+      login({
+        name: data.name, 
+        role: data.role, 
+        email: result.user.email, 
+        avatar: data.avatar || result.user.photoURL,
+      });
       
-      window.location.href = data.role === 'ADMIN' ? "/admin/dashboard" : (data.role === 'STUDENT' ? "/student/dashboard" : "/explore");
+      const redirectPath = data.role === 'ADMIN' ? "/admin/dashboard" : "/student/dashboard";
+      navigate(redirectPath);
     } catch (err) {
       console.error(err);
-      setError("Error logging in with Google.");
-      setIsSubmitting(false);
+      setServerError("Error logging in with Google.");
     }
   };
 
-  // Helper para llenado rápido (Testing)
   const handleQuickTest = (role) => {
-    if(role === 'admin') { setEmail('admin@uce.edu.ec'); setPassword('123'); } 
-    else { setEmail('ldpillajo@uce.edu.ec'); setPassword('secretPassword123'); }
+    if(role === 'admin') { 
+        setValue('email', 'admin@uce.edu.ec'); 
+        setValue('password', '123'); 
+    } else { 
+        setValue('email', 'ldpillajo@uce.edu.ec'); 
+        setValue('password', 'secretPassword123'); 
+    }
   };
 
   return (
@@ -77,9 +99,9 @@ const LoginPage = () => {
         <Typography variant="h4" fontWeight="bold" color="#0d2149" gutterBottom>Welcome back</Typography>
         <Typography variant="body1" color="text.secondary" mb={4}>Enter your credentials or use Google.</Typography>
 
-        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+        {serverError && <Alert severity="error" sx={{ mb: 3 }}>{serverError}</Alert>}
 
-        <Button variant="outlined" fullWidth startIcon={<GoogleIcon />} onClick={handleFirebaseLogin} disabled={isSubmitting} sx={{ mb: 3, py: 1.5, borderColor: '#ddd', color: '#555', textTransform: 'none', fontWeight: 'bold', bgcolor: 'white' }}>
+        <Button variant="outlined" fullWidth startIcon={<GoogleIcon />} onClick={handleFirebaseLogin} disabled={isSubmitting} sx={{ mb: 3 }}>
           Continue with Google
         </Button>
 
@@ -87,9 +109,25 @@ const LoginPage = () => {
             <Divider sx={{ flexGrow: 1 }} /><Typography variant="caption" color="text.secondary" sx={{ mx: 2 }}>OR</Typography><Divider sx={{ flexGrow: 1 }} />
         </Box>
 
-        <Box component="form" onSubmit={handleSubmit}>
-          <Input label="Institutional Email" placeholder="student@uce.edu.ec" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Input label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+        {/* Formulario conectado a RHF */}
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          
+          <Input 
+            label="Institutional Email" 
+            placeholder="student@uce.edu.ec" 
+            {...register("email")} 
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
+          
+          <Input 
+            label="Password" 
+            type="password" 
+            placeholder="••••••••" 
+            {...register("password")} 
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
 
           <Box textAlign="right" mb={3}>
             <Link component="button" type="button" variant="body2" underline="hover" sx={{ color: "#3b82f6", fontWeight: 500 }}>Forgot your password?</Link>
@@ -105,10 +143,10 @@ const LoginPage = () => {
         </Box>
         
         {/* Testing Buttons */}
-        <Box display="flex" gap={2} justifyContent="center" mt={4}>
+        <Stack direction="row" spacing={2} justifyContent="center" mt={4}>
            <Button size="small" onClick={() => handleQuickTest('student')} variant="outlined">Fill Student</Button>
            <Button size="small" onClick={() => handleQuickTest('admin')} variant="outlined" color="secondary">Fill Admin</Button>
-        </Box>
+        </Stack>
     </AuthSplitLayout>
   );
 };
