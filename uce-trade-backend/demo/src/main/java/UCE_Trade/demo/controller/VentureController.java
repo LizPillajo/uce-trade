@@ -2,23 +2,28 @@ package UCE_Trade.demo.controller;
 
 import UCE_Trade.demo.model.User;
 import UCE_Trade.demo.model.Venture;
-import UCE_Trade.demo.repository.VentureRepository;
-import UCE_Trade.demo.service.NotificationService;
 import UCE_Trade.demo.model.Review;
+import UCE_Trade.demo.repository.VentureRepository;
+import UCE_Trade.demo.repository.ReviewRepository;
+import UCE_Trade.demo.service.NotificationService;
+import UCE_Trade.demo.service.UserService;
+import UCE_Trade.demo.service.AlgoliaService; // <--- IMPORTAR
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl; // <--- IMPORTAR
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.http.HttpStatus;
-import java.time.LocalDateTime;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ventures")
@@ -35,6 +40,9 @@ public class VentureController {
 
     @Autowired
     private UCE_Trade.demo.repository.ReviewRepository reviewRepository;
+
+    @Autowired
+    private AlgoliaService algoliaService;
 
     // 1. ENDPOINT PARA 4 destacados
     // GET http://localhost:8080/api/ventures/featured
@@ -65,16 +73,34 @@ public class VentureController {
     public Page<Venture> getAllVentures(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
-            @RequestParam(required = false) String search,   
+            @RequestParam(required = false) String search,    
             @RequestParam(required = false) String category, 
             @RequestParam(defaultValue = "recent") String sort  
     ) {
-        // Ordenamiento básico
+
+        if (search != null && !search.trim().isEmpty()) {
+            // 1. Obtener IDs desde Algolia
+            List<Long> ids = algoliaService.search(search, category);
+            
+            if (ids.isEmpty()) {
+                return Page.empty();
+            }
+
+            List<Venture> ventures = ventureRepository.findAllById(ids);
+            
+            ventures.removeIf(v -> v.isDeleted() || !"Active".equalsIgnoreCase(v.getStatus()));
+
+            int start = Math.min((int)PageRequest.of(page, size).getOffset(), ventures.size());
+            int end = Math.min((start + size), ventures.size());
+            List<Venture> pageContent = ventures.subList(start, end);
+
+            return new PageImpl<>(pageContent, PageRequest.of(page, size), ventures.size());
+        }
+
         Sort sorting = Sort.by("createdDate").descending();
         if ("rating".equals(sort)) sorting = Sort.by("rating").descending();
         if ("price_low".equals(sort)) sorting = Sort.by("price").ascending();
 
-        // Búsqueda avanzada
         return ventureRepository.searchVentures(search, category, PageRequest.of(page, size, sorting));
     }
 
@@ -120,22 +146,19 @@ public class VentureController {
     @PostMapping
     public ResponseEntity<?> createVenture(@RequestBody Venture venture) {
         try {
-            System.out.println("RECIBIDO: " + venture); // <--- DEBUG 1: Ver qué llega
-
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName(); 
-            System.out.println("USUARIO: " + email); // <--- DEBUG 2: Ver quién lo envía
             
             User owner = userService.getUserByEmail(email);
-            if (owner == null) {
-                 return ResponseEntity.badRequest().body("Error: Usuario no encontrado en BD");
-            }
+            if (owner == null) return ResponseEntity.badRequest().body("Error: Usuario no encontrado");
 
             venture.setOwner(owner);
             venture.setCreatedDate(java.time.LocalDate.now());
             venture.setRating(0.0);
             
             Venture savedVenture = ventureRepository.save(venture);
+
+            algoliaService.saveVenture(savedVenture);
 
             notificationService.notifyAdmin(
                 "Nuevo Emprendimiento 🚀",
@@ -157,11 +180,9 @@ public class VentureController {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
             
-            // 1. Validar Usuario y Venture
             User user = userService.getUserByEmail(email);
             Venture venture = ventureRepository.findById(id).orElseThrow();
 
-            // 2. Crear Review
             Review review = new Review();
             review.setRating((Integer) payload.get("rating"));
             review.setComment((String) payload.get("comment"));
@@ -171,15 +192,16 @@ public class VentureController {
             
             reviewRepository.save(review);
 
-            // 3. Recalcular Promedio del Emprendimiento
             List<Review> allReviews = reviewRepository.findByVentureIdOrderByDateDesc(id);
             double avg = allReviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
-            
-            // Redondear a 1 decimal
             double roundedAvg = Math.round(avg * 10.0) / 10.0;
             
             venture.setRating(roundedAvg);
-            ventureRepository.save(venture);
+            Venture updatedVenture = ventureRepository.save(venture);
+
+            // --- ALGOLIA SYNC (Actualizar rating) ---
+            algoliaService.saveVenture(updatedVenture);
+            // ----------------------------------------
 
             if (!venture.getOwner().getEmail().equals(email)) {
                 notificationService.notifyUser(
@@ -203,7 +225,7 @@ public class VentureController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return ventureRepository.findById(id).map(venture -> {
             if (!venture.getOwner().getEmail().equals(auth.getName())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No eres el dueño de este emprendimiento");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No eres el dueño");
             }
             venture.setTitle(updates.getTitle());
             venture.setDescription(updates.getDescription());
@@ -211,8 +233,11 @@ public class VentureController {
             venture.setCategory(updates.getCategory());
             if(updates.getImageUrl() != null) venture.setImageUrl(updates.getImageUrl());
             
-            ventureRepository.save(venture);
-            return ResponseEntity.ok(venture);
+            Venture saved = ventureRepository.save(venture);
+
+            algoliaService.saveVenture(saved);
+
+            return ResponseEntity.ok(saved);
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -226,6 +251,9 @@ public class VentureController {
             }
             venture.setDeleted(true); 
             ventureRepository.save(venture);
+
+            algoliaService.deleteVenture(id);
+
             return ResponseEntity.ok().build();
         }).orElse(ResponseEntity.notFound().build());
     }
