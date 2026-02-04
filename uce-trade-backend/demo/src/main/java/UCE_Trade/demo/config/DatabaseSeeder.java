@@ -105,8 +105,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             System.out.println("✅ Usuarios nuevos creados.");
         }
 
-        long ventureCount = ventureRepository.count();
-
         // --- CREAR EMPRENDIMIENTOS ---
         if (ventureRepository.count() == 0) {
             System.out.println("🌱 SEEDER: Creando 1000 emprendimientos...");

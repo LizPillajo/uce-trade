@@ -6,6 +6,7 @@ import UCE_Trade.demo.model.Venture;
 import UCE_Trade.demo.repository.TransactionRepository;
 import UCE_Trade.demo.repository.UserRepository;
 import UCE_Trade.demo.repository.VentureRepository;
+import UCE_Trade.demo.service.AlgoliaService;
 import UCE_Trade.demo.service.NotificationService; 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ public class AdminController {
     private TransactionRepository transactionRepository;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private AlgoliaService algoliaService;
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getAdminStats(@RequestParam(defaultValue = "ALL") String period) {
@@ -150,7 +153,8 @@ public class AdminController {
         
         return ventureRepository.findById(id).map(v -> {
             v.setStatus(newStatus);
-            ventureRepository.save(v);
+            Venture saved = ventureRepository.save(v);
+            algoliaService.saveVenture(saved);
    
             notificationService.notifyUser(
                 v.getOwner().getEmail(), 
