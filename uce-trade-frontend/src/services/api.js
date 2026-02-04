@@ -155,6 +155,21 @@ export const updateVentureStatus = async (id, status) => {
     return response.data;
 };
 
+export const fetchAdminVentures = async (page = 1, search = '', category = 'All', sort = 'status') => {
+  const pageParam = page - 1;
+  const params = new URLSearchParams();
+
+  params.append('page', pageParam);
+  params.append('size', 10); 
+  params.append('sort', sort);
+
+  if (search) params.append('search', search);
+  if (category && category !== 'All') params.append('category', category);
+
+  const response = await api.get(`/admin/ventures?${params.toString()}`);
+  return response.data;
+};
+
 // PAGOS, PERFIL Y REVIEWS
 
 // Download Invoice

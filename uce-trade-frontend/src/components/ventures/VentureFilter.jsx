@@ -11,13 +11,16 @@ const VentureFilter = ({
     category, setCategory, 
     sort, setSort, 
     viewMode, setViewMode,
-    showViewToggles = true // <--- NUEVA PROP
+    showViewToggles = true,
+    isAdmin = false,
+    initialSort = 'recent'
+
 }) => {
   
   const handleClearFilters = () => {
     setSearchTerm('');
     setCategory('All');
-    setSort('recent');
+    setSort(initialSort);
   };
 
   const hasActiveFilters = category !== 'All' || sort !== 'recent' || searchTerm !== '';
@@ -96,6 +99,7 @@ const VentureFilter = ({
             <MenuItem value="recent">Most recent</MenuItem>
             <MenuItem value="rating">Best Rated</MenuItem>
             <MenuItem value="price_low">Lowest Price</MenuItem>
+            {isAdmin && <MenuItem value="status">Status (A-Z)</MenuItem>}
           </Select>
 
           {/* 4. BOTONES DE VISTA (Solo se muestran si showViewToggles es true) */}

@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import VenturesTable from '../../components/admin/VenturesTable';
 import VentureFilter from '../../components/ventures/VentureFilter';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
-import { fetchServices, deleteVenture, updateVentureStatus, exportVenturesReport } from '../../services/api';
+import { fetchAdminVentures, deleteVenture, updateVentureStatus, exportVenturesReport } from '../../services/api';
 
 const AdminVenturesPage = () => {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ const AdminVenturesPage = () => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('All');
-  const [sort, setSort] = useState('status');
+  const [sort, setSort] = useState('recent');
   
   // Estados de Acción
   const [deleteId, setDeleteId] = useState(null);
@@ -28,7 +28,7 @@ const AdminVenturesPage = () => {
   // 1. Fetch con filtros
   const { data, isLoading } = useQuery({
     queryKey: ['adminVentures', page, searchTerm, category, sort],
-    queryFn: () => fetchServices(page, searchTerm, category, sort),
+    queryFn: () => fetchAdminVentures(page, searchTerm, category, sort),
     keepPreviousData: true
   });
 
@@ -102,7 +102,9 @@ const AdminVenturesPage = () => {
             searchTerm={searchTerm} setSearchTerm={setSearchTerm}
             category={category} setCategory={setCategory}
             sort={sort} setSort={setSort}
-            showViewToggles={false} // <--- ¡AQUÍ ESTÁ LA MAGIA!
+            showViewToggles={false} 
+            isAdmin={true} 
+            initialSort="recent"
          />
 
          {/* TABLA O CARGANDO */}

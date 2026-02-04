@@ -229,4 +229,25 @@ public class AdminController {
             }
         }).collect(Collectors.toList());
     }
+
+    @GetMapping("/ventures")
+public Page<Venture> getAllVenturesForAdmin(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) String category,
+        @RequestParam(defaultValue = "status") String sort 
+) {
+
+    Sort sorting = Sort.by("createdDate").descending();
+    
+    if ("status".equals(sort)) {
+        sorting = Sort.by("status").ascending(); 
+    } else if ("recent".equals(sort)) {
+        sorting = Sort.by("createdDate").descending();
+    } else if ("rating".equals(sort)) {
+        sorting = Sort.by("rating").descending();
+    }
+    return ventureRepository.searchVentures(search, category, PageRequest.of(page, size, sorting));
+}
 }
