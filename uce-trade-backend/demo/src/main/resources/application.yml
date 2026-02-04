@@ -33,6 +33,11 @@ spring:
           starttls:
             enable: true
 
+algolia:
+  app-id: ${APPLICATION_ID}
+  api-key: ${ADMIN_API_KEY}
+  index-name: ventures
+
 stripe:
   secret: ${STRIPE_API_KEY:clave_no_encontrada}
 
