@@ -19,7 +19,7 @@ const AdminVenturesPage = () => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('All');
-  const [sort, setSort] = useState('recent');
+  const [sort, setSort] = useState('status');
   
   // Estados de Acción
   const [deleteId, setDeleteId] = useState(null);

@@ -97,6 +97,7 @@ public class VentureController {
         Sort sorting = Sort.by("createdDate").descending();
         if ("rating".equals(sort)) sorting = Sort.by("rating").descending();
         if ("price_low".equals(sort)) sorting = Sort.by("price").ascending();
+        if ("status".equals(sort)) sorting = Sort.by("status").ascending();
 
         return ventureRepository.searchVentures(search, category, PageRequest.of(page, size, sorting));
     }
