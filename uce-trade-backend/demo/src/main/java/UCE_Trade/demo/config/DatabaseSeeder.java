@@ -143,22 +143,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 algoliaService.saveVenture(v);
             }
             System.out.println("✅ Emprendimientos creados y enviados a Algolia.");
-            
-        }else{
-            System.out.println("🔄 BD CON DATOS: Sincronizando " + ventureCount + " emprendimientos existentes con Algolia...");
-            
-            List<Venture> allVentures = ventureRepository.findAll();
-            int counter = 0;
 
-            for (Venture v : allVentures) {
-                algoliaService.saveVenture(v);
-                counter++;
-                // Imprimir progreso cada 100 items
-                if (counter % 100 == 0) {
-                    System.out.println("   -> Enviados a Algolia: " + counter + " / " + ventureCount);
-                }
-            }
-            System.out.println("✅ Sincronización Masiva Completada.");
         }
 
         // --- CREAR TRANSACCIONES (VENTAS) ---
