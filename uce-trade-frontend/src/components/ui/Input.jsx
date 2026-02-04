@@ -10,6 +10,7 @@ const Input = forwardRef(({ label, type = "text", ...props }, ref) => {
       type={type}
       fullWidth
       variant="outlined"
+      InputLabelProps={{ shrink: true }}
       sx={{
         mb: 2, 
         '& .MuiOutlinedInput-root': {

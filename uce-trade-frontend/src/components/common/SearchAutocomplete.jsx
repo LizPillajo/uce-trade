@@ -16,6 +16,10 @@ const SearchAutocomplete = ({
   const debouncedTerm = useDebounce(inputValue, 300);
 
   useEffect(() => {
+    setInputValue(initialValue);
+  }, [initialValue]);
+
+  useEffect(() => {
     let active = true;
     if (debouncedTerm === "") {
       setOptions([]);
