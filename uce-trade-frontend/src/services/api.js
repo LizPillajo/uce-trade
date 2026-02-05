@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore'; 
+import { toast } from 'react-toastify';
 
 // 1. Configuración de Axios
 const api = axios.create({
@@ -8,6 +10,30 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      const logout = useAuthStore.getState().logout;
+      
+      logout();
+
+      toast.error("Tu sesión ha expirado. Por favor, ingresa nuevamente.");
+
+      window.location.href = '/login';
+      
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // AUTENTICACIÓN
 
@@ -206,6 +232,11 @@ export const fetchReviews = async (ventureId) => {
 export const postReview = async (ventureId, reviewData) => {
   const response = await api.post(`/ventures/${ventureId}/reviews`, reviewData);
   return response.data;
+};
+
+export const fetchNotifications = async () => {
+    const response = await api.get('/notifications/my-notifications');
+    return response.data;
 };
 
 export default api;
