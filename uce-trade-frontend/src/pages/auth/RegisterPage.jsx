@@ -138,9 +138,32 @@ const RegisterPage = () => {
             helperText={errors.faculty?.message}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#f9fafb' } }}
           >
-              {['Engineering', 'Arts', 'Medicine', 'Economics', 'Psychology', 'External Client'].map(opt => (
-                  <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-              ))}
+            {[
+              'Arts',
+              'Architecture and Urban Planning',
+              'Sciences',
+              'Administrative Sciences',
+              'Agricultural Sciences',
+              'Biological Sciences',
+              'Disability Sciences, Pre-hospital Care and Disasters',
+              'Economic Sciences',
+              'Medical Sciences',
+              'Psychological Sciences',
+              'Chemical Sciences',
+              'Social and Human Sciences',
+              'Social Communication',
+              'Physical Culture',
+              'Engineering and Applied Sciences',
+              'Philosophy, Literature, and Education Sciences',
+              'Geological, Mining, Petroleum, and Environmental Engineering',
+              'Chemical Engineering',
+              'Jurisprudence, Political and Social Sciences',
+              'Veterinary Medicine and Animal Husbandry',
+              'Dentistry', 'External Client'
+            ].map(opt => (
+              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+            ))}
+
           </TextField>
 
           <Input 
