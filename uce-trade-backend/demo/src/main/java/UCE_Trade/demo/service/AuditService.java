@@ -12,13 +12,17 @@ public class AuditService {
     private AuditLogRepository auditLogRepository;
 
     public void logAction(String action, String entity, Long entityId, String detail, String username) {
-        AuditLog log = new AuditLog();
-        log.setAction(action);
-        log.setEntity(entity);
-        log.setEntityId(entityId);
-        log.setDetail(detail);
-        log.setUsername(username);
-        log.setTimestamp(LocalDateTime.now());
-        auditLogRepository.save(log);
+        try {
+            AuditLog log = new AuditLog();
+            log.setAction(action);
+            log.setEntity(entity);
+            log.setEntityId(entityId);
+            log.setDetail(detail);
+            log.setUsername(username);
+            log.setTimestamp(LocalDateTime.now());
+            auditLogRepository.save(log);
+        } catch (Exception e) {
+            System.err.println("Error guardando log de auditoría: " + e.getMessage());
+        }
     }
 }

@@ -5,7 +5,8 @@ import UCE_Trade.demo.model.Venture;
 import UCE_Trade.demo.model.Review;
 import UCE_Trade.demo.repository.VentureRepository;
 import UCE_Trade.demo.service.NotificationService;
-import UCE_Trade.demo.service.AlgoliaService; 
+import UCE_Trade.demo.service.AlgoliaService;
+import UCE_Trade.demo.service.AuditService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,6 +41,9 @@ public class VentureController {
 
     @Autowired
     private AlgoliaService algoliaService;
+
+    @Autowired
+    private AuditService auditService;
 
     // 1. ENDPOINT PARA 4 destacados
     // GET http://localhost:8080/api/ventures/featured
@@ -145,9 +149,9 @@ public class VentureController {
     public ResponseEntity<?> createVenture(@RequestBody Venture venture) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String email = auth.getName(); 
-            
+            String email = auth.getName();             
             User owner = userService.getUserByEmail(email);
+
             if (owner == null) return ResponseEntity.badRequest().body("Error: Usuario no encontrado");
 
             venture.setOwner(owner);
@@ -155,8 +159,9 @@ public class VentureController {
             venture.setRating(0.0);
             
             Venture savedVenture = ventureRepository.save(venture);
-
             algoliaService.saveVenture(savedVenture);
+
+            auditService.logAction("CREATE", "Venture", savedVenture.getId(), "Creó: " + savedVenture.getTitle(), email);
 
             notificationService.notifyAdmin(
                 "Nuevo Emprendimiento 🚀",
@@ -232,8 +237,9 @@ public class VentureController {
             if(updates.getImageUrl() != null) venture.setImageUrl(updates.getImageUrl());
             
             Venture saved = ventureRepository.save(venture);
-
             algoliaService.saveVenture(saved);
+
+            auditService.logAction("UPDATE", "Venture", saved.getId(), "Editó: " + saved.getTitle(), auth.getName());
 
             return ResponseEntity.ok(saved);
         }).orElse(ResponseEntity.notFound().build());
@@ -249,8 +255,9 @@ public class VentureController {
             }
             venture.setDeleted(true); 
             ventureRepository.save(venture);
-
             algoliaService.deleteVenture(id);
+
+            auditService.logAction("DELETE", "Venture", id, "Borró (Soft): " + venture.getTitle(), auth.getName());
 
             return ResponseEntity.ok().build();
         }).orElse(ResponseEntity.notFound().build());

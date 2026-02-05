@@ -1,8 +1,12 @@
 package UCE_Trade.demo.controller;
 
+import UCE_Trade.demo.model.RefreshToken;
 import UCE_Trade.demo.model.User;
 import UCE_Trade.demo.security.JwtUtil;
+import UCE_Trade.demo.service.RefreshTokenService;
 import UCE_Trade.demo.service.UserService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +15,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseToken;
-import java.util.UUID;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,6 +35,9 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
     // LOGIN
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials, HttpServletResponse response) {
@@ -47,14 +52,16 @@ public class AuthController {
 
             User user = userService.getUserByEmail(email); 
             
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+            String accessToken = jwtUtil.generateToken(user.getEmail(), user.getRole());
+            try { refreshTokenService.deleteByUserId(user.getId()); } catch (Exception e) {}
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
 
             // CREAR LA COOKIE 
-            Cookie cookie = new Cookie("jwt_token", token);
+            Cookie cookie = new Cookie("jwt_token", accessToken);
             cookie.setHttpOnly(true); // ¡Importante! JS no puede leerla (seguridad)
             cookie.setSecure(false);  // false para localhost, true en producción (AWS)
             cookie.setPath("/");      // Disponible en toda la app
-            cookie.setMaxAge(24 * 60 * 60); // 1 día
+            cookie.setMaxAge(15 * 60); // 1 día
 
             response.addCookie(cookie);
 
@@ -67,12 +74,38 @@ public class AuthController {
                 "phoneNumber", user.getPhoneNumber() != null ? user.getPhoneNumber() : "", 
                 "description", user.getDescription() != null ? user.getDescription() : "", 
                 "githubUser", user.getGithubUser() != null ? user.getGithubUser() : "", 
+                "refreshToken", refreshToken.getToken(),
                 "avatar", user.getAvatarUrl() != null ? user.getAvatarUrl() : "" 
             ));
 
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Credenciales incorrectas");
         }
+    }
+
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<?> refreshtoken(@RequestBody Map<String, String> request, HttpServletResponse response) {
+        String requestRefreshToken = request.get("refreshToken");
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+                    
+                    Cookie cookie = new Cookie("jwt_token", token);
+                    cookie.setHttpOnly(true);
+                    cookie.setSecure(false);
+                    cookie.setPath("/");
+                    cookie.setMaxAge(15 * 60); // 15 min
+                    response.addCookie(cookie);
+
+                    return ResponseEntity.ok(Map.of(
+                        "accessToken", token,
+                        "refreshToken", requestRefreshToken
+                    ));
+                })
+                .orElseThrow(() -> new RuntimeException("Refresh token inválido"));
     }
 
     @PostMapping("/google")
@@ -103,12 +136,14 @@ public class AuthController {
 
             // Generar Token JWT (Cookie)
             String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+            try { refreshTokenService.deleteByUserId(user.getId()); } catch (Exception e) {}
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
 
             Cookie cookie = new Cookie("jwt_token", token);
             cookie.setHttpOnly(true);
             cookie.setSecure(false); 
             cookie.setPath("/");
-            cookie.setMaxAge(24 * 60 * 60);
+            cookie.setMaxAge(15 * 60);
             response.addCookie(cookie);
 
             return ResponseEntity.ok(Map.of(
@@ -120,6 +155,7 @@ public class AuthController {
                 "phoneNumber", user.getPhoneNumber() != null ? user.getPhoneNumber() : "",
                 "description", user.getDescription() != null ? user.getDescription() : "",
                 "githubUser", user.getGithubUser() != null ? user.getGithubUser() : "",
+                "refreshToken", refreshToken.getToken(),
                 "avatar", user.getAvatarUrl() != null ? user.getAvatarUrl() : ""
             ));
 

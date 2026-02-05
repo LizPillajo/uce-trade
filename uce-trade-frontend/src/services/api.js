@@ -21,10 +21,23 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const logout = useAuthStore.getState().logout;
-      
-      logout();
+      try {
+        const user = useAuthStore.getState().user;
+        const refreshToken = user?.refreshToken;
 
+        if (refreshToken) {
+            await axios.post('http://localhost:8080/api/auth/refreshtoken', {
+                refreshToken: refreshToken
+            }, { withCredentials: true });
+
+            return api(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error("No se pudo refrescar la sesión:", refreshError);
+      }
+
+      const logout = useAuthStore.getState().logout;      
+      logout();
       toast.error("Tu sesión ha expirado. Por favor, ingresa nuevamente.");
 
       window.location.href = '/login';
