@@ -61,7 +61,7 @@ public class AuthController {
             cookie.setHttpOnly(true); // ¡Importante! JS no puede leerla (seguridad)
             cookie.setSecure(false);  // false para localhost, true en producción (AWS)
             cookie.setPath("/");      // Disponible en toda la app
-            cookie.setMaxAge(15 * 60); // 1 día
+            cookie.setMaxAge(7 * 24 * 60 * 60); // 7 días
 
             response.addCookie(cookie);
 
@@ -97,7 +97,7 @@ public class AuthController {
                     cookie.setHttpOnly(true);
                     cookie.setSecure(false);
                     cookie.setPath("/");
-                    cookie.setMaxAge(15 * 60); // 15 min
+                    cookie.setMaxAge(7 * 24 * 60 * 60); // 7 días
                     response.addCookie(cookie);
 
                     return ResponseEntity.ok(Map.of(
@@ -131,7 +131,7 @@ public class AuthController {
                 user.setFullName(name);
                 user.setAvatarUrl(pictureUrl);
                 user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); 
-                user = userService.registerStudent(user); // Aquí se asigna el rol (Student/Client)
+                user = userService.registerStudent(user); 
             }
 
             // Generar Token JWT (Cookie)
@@ -143,7 +143,7 @@ public class AuthController {
             cookie.setHttpOnly(true);
             cookie.setSecure(false); 
             cookie.setPath("/");
-            cookie.setMaxAge(15 * 60);
+            cookie.setMaxAge(7 * 24 * 60 * 60); 
             response.addCookie(cookie);
 
             return ResponseEntity.ok(Map.of(

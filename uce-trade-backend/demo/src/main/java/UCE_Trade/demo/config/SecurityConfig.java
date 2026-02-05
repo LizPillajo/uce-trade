@@ -34,7 +34,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 1. RUTAS PÚBLICAS (Sin Login)
                 .requestMatchers(
-                    //"/api/**",
                     "/api/auth/**",           // Login y Registro
                     "/api/ventures",          // Listar todos (Explore)
                     "/api/ventures/**",       // Detalles y Featured
@@ -46,7 +45,18 @@ public class SecurityConfig {
                     "/swagger-ui.html"        // Swagger HTML
                 ).permitAll()
                 
-                // 2. RUTAS PRIVADAS (Todo lo demás)
+                // 2. RUTAS SOLO PARA ADMIN
+                .requestMatchers("/api/admin/**").hasAuthority("ADMIN") 
+
+                // 3. RUTAS PRIVADAS (Requieren estar logueado como STUDENT, ADMIN o CLIENT)
+                .requestMatchers(
+                    "/api/dashboard/**",        // Dashboard estudiante
+                    "/api/notifications/**",    // Notificaciones
+                    "/api/users/**",            // Perfiles
+                    "/api/payments/**"          // Pagos
+                ).authenticated()
+
+                // 4. RUTAS PRIVADAS (Todo lo demás)
                 .anyRequest().authenticated()
             )
 
@@ -70,7 +80,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

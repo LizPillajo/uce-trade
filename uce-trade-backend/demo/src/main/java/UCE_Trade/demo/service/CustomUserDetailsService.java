@@ -3,12 +3,13 @@ package UCE_Trade.demo.service;
 import UCE_Trade.demo.model.User;
 import UCE_Trade.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority; 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService; 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collections; 
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService { 
@@ -21,11 +22,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
 
-        // Convertimos tu User a un User de Spring Security
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                new ArrayList<>()
+                Collections.singletonList(new SimpleGrantedAuthority(user.getRole())) 
         );
     }
 }

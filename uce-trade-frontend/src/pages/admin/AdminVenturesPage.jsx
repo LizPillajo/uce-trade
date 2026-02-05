@@ -108,21 +108,18 @@ const AdminVenturesPage = () => {
          />
 
          {/* TABLA O CARGANDO */}
-         {isLoading ? (
-            <Box display="flex" justifyContent="center" py={10}><CircularProgress /></Box>
-         ) : (
-            <>
-                <VenturesTable 
-                    ventures={data?.content || []} 
-                    onDelete={setDeleteId}
-                    onStatusChange={handleStatusChange} 
-                />
-                
-                <Box display="flex" justifyContent="center" mt={4}>
-                    <Pagination count={data?.totalPages || 1} page={page} onChange={(e,v) => setPage(v)} color="primary" />
-                </Box>
-            </>
-         )}
+         <VenturesTable 
+             ventures={data?.content || []} 
+             onDelete={setDeleteId}
+             onStatusChange={handleStatusChange} 
+             loading={isLoading} 
+          />
+          
+          {!isLoading && (
+              <Box display="flex" justifyContent="center" mt={4}>
+                 <Pagination count={data?.totalPages || 1} page={page} onChange={(e,v) => setPage(v)} color="primary" />
+              </Box>
+          )}
 
          <ConfirmationModal 
             open={!!deleteId}

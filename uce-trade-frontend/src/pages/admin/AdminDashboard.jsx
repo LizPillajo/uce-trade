@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Container, Typography, Button, CircularProgress, Alert, TextField, MenuItem } from "@mui/material";
+import { Box, Container, Typography, Button, Alert, TextField, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -10,6 +10,7 @@ import { useWebSocket } from "../../hooks/useWebSocket";
 import AdminKpiGroup from "../../components/admin/AdminKpiGroup";
 import CategoryCharts from "../../components/admin/CategoryCharts";
 import GrowthChart from "../../components/admin/GrowthChart";
+import { DashboardSkeleton } from '../../components/ui/Skeletons';
 
 const COLORS = ["#0d2149", "#efb034", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"];
 const periods = [
@@ -29,7 +30,13 @@ const AdminDashboard = () => {
     queryFn: () => fetchAdminStats(period)
   });
 
-  if (isLoading) return <Box display="flex" justifyContent="center" mt={10}><CircularProgress /></Box>;
+  if (isLoading) return (
+     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
+        <Container maxWidth="xl">
+            <DashboardSkeleton />
+        </Container>
+     </Box>
+  );
   if (isError) return <Container sx={{mt: 5}}><Alert severity="error">Error connecting to admin server.</Alert></Container>;
 
   const pieData = stats?.pieData ? Object.keys(stats.pieData).map((key, index) => ({

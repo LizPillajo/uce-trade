@@ -78,21 +78,17 @@ const ManageUsersPage = () => {
         </Box>
         
         {/* TABLA O LOADING */}
-        {isLoading ? (
-             <Box display="flex" justifyContent="center" py={10}><CircularProgress /></Box>
-        ) : (
-            <>
-                <UsersTable users={data?.content || []} onDelete={setDeleteId} />
-                
-                <Box display="flex" justifyContent="center" mt={4}>
-                    <Pagination 
-                        count={data?.totalPages || 1} 
-                        page={page} 
-                        onChange={(e, v) => setPage(v)} 
-                        color="primary" 
-                    />
-                </Box>
-            </>
+        <UsersTable 
+            users={data?.content || []} 
+            onDelete={setDeleteId} 
+            loading={isLoading} 
+        />
+        
+        {/* Paginación */}
+        {!isLoading && (
+            <Box display="flex" justifyContent="center" mt={4}>
+                <Pagination count={data?.totalPages || 1} page={page} onChange={(e, v) => setPage(v)} color="primary" />
+            </Box>
         )}
 
         {/* MODAL CONFIRMACIÓN */}

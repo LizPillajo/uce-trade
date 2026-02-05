@@ -1,13 +1,17 @@
-import { Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
 import Button from '../ui/Button';
+import { toast } from 'react-toastify';
 
 const ContactButtons = ({ phoneNumber, email, fullName, ventureTitle = "", variant = "vertical" }) => {
   
   const handleWhatsApp = () => {
     let phone = phoneNumber?.replace(/\D/g, '');
-    if (!phone) return alert("The seller has not registered a phone number.");
+    if (!phone) {
+        toast.warning("No phone number available for this user.");
+        return;
+    }
     if (phone.startsWith('09')) phone = '593' + phone.substring(1);
     else if (phone.startsWith('9')) phone = '593' + phone;
     const message = ventureTitle 

@@ -1,6 +1,6 @@
 // src/pages/student/MyVenturesPage.jsx
 import { useState } from "react";
-import { Box, Container, Typography, CircularProgress } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit"; 
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ import ProfileBioSection from "../../components/profile/ProfileBioSection";
 import ProfileStatsGrid from "../../components/profile/ProfileStatsGrid"; 
 import MyVenturesTable from "../../components/student/MyVenturesTable";
 import Button from "../../components/ui/Button";
+import { ProfileHeaderSkeleton } from '../../components/ui/Skeletons';
 
 const MyVenturesPage = () => {
   const navigate = useNavigate();
@@ -22,16 +23,28 @@ const MyVenturesPage = () => {
   const [openModal, setOpenModal] = useState(false);
   
   const { data: ventures, isLoading: loadingVentures } = useQuery({ queryKey: ['myVentures'], queryFn: fetchMyVentures });
-  const { data: stats } = useQuery({ queryKey: ['studentStats'], queryFn: fetchStudentStats });
+  
+  // El endpoint fetchStudentStats devuelve un objeto: { kpi: { sales: X, rating: Y ... }, ... }
+  const { data: stats } = useQuery({ 
+      queryKey: ['studentStats'], 
+      queryFn: () => fetchStudentStats('ALL') 
+  });
 
-  if (loadingVentures) return <Box display="flex" justifyContent="center" pt={20}><CircularProgress /></Box>;
+  if (loadingVentures) return (
+     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
+        <Container maxWidth="xl">
+           <ProfileHeaderSkeleton />
+        </Container>
+     </Box>
+  );
 
   return (
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
       <EditProfileModal open={openModal} handleClose={() => setOpenModal(false)} user={user} />
       
       <Container maxWidth="xl">
-        {/* 1. Header con Botón alineado correctamente usando la prop 'action' */}
+        
+        {/* 1. Header: Pasamos 'stats' completo. El componente internamente busca stats.kpi.rating */}
         <StudentProfileHeader 
           user={user} 
           stats={stats} 
@@ -50,12 +63,13 @@ const MyVenturesPage = () => {
         {/* 2. Bio y Contacto */}
         <ProfileBioSection user={user} />
 
-        {/* 3. Tarjetas Estadísticas (RECUPERADAS) */}
+        {/* 3. Tarjetas Estadísticas */}
         <Box mb={3}>
              <Typography variant="h5" fontWeight="800" color="#0d2149" mb={2}>My Performance</Typography>
+    
              <ProfileStatsGrid 
                 ventureCount={ventures?.length} 
-                stats={{ sales: stats?.kpi?.sales, rating: stats?.kpi?.rating }} 
+                stats={stats?.kpi} 
              />
         </Box>
 

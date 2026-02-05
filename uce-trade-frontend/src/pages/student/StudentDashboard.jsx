@@ -11,6 +11,7 @@ import StudentKpiCards from '../../components/student/StudentKpiCards';
 import { IncomeHistoryChart, CategoryBarChart } from '../../components/student/StudentCharts';
 import StudentPerformanceList from '../../components/student/StudentPerformanceList';
 import Button from '../../components/ui/Button'; 
+import { DashboardSkeleton } from '../../components/ui/Skeletons';
 
 const periods = [
     { value: 'ALL', label: 'All Time' },
@@ -49,7 +50,13 @@ const StudentDashboard = () => {
     }
   };
 
-  if (isLoading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh"><CircularProgress /></Box>;
+  if (isLoading) return (
+     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
+        <Container maxWidth="xl">
+            <DashboardSkeleton />
+        </Container>
+     </Box>
+  );
   if (isError) return <Container sx={{ mt: 10 }}><Alert severity="error">Error loading dashboard statistics.</Alert></Container>;
 
   // Transformaciones de datos

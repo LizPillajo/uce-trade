@@ -1,11 +1,10 @@
-// src/components/home/FeaturedSection.jsx
-import { Box, Container, Typography, Grid, CircularProgress, Alert } from '@mui/material';
+import { Box, Container, Typography, Grid, Alert } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { fetchFeaturedServices } from '../../services/api'; 
 import VentureCard from '../ventures/VentureCard';
+import { VentureCardSkeleton } from '../ui/Skeletons';
 
 const FeaturedSection = () => {
-  // Use the new fetchFeaturedServices function
   const { data: ventures, isLoading, isError } = useQuery({
     queryKey: ['featuredVentures'],
     queryFn: fetchFeaturedServices, 
@@ -14,42 +13,31 @@ const FeaturedSection = () => {
   return (
     <Box component="section" sx={{ py: { xs: 4, md: 6 }, bgcolor: 'white' }}>
       <Container maxWidth="xl">
-        <Box mb={4} display="flex" justifyContent="space-between" alignItems="flex-end" sx={{ px: { xs: 2, sm: 3 } }}>
-          <Box>
-            <Typography variant="h4" fontWeight="bold" gutterBottom color="primary" sx={{ mb: 1 }}>
-              Highlights of the week
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Entrepreneurial ventures most highly valued by the UCE community.
-            </Typography>
-          </Box>
+        <Box mb={4}>
+            <Typography variant="h4" fontWeight="bold" gutterBottom color="primary">Highlights of the week</Typography>
+            <Typography variant="body1" color="text.secondary">Entrepreneurial ventures most highly valued by the UCE community.</Typography>
         </Box>
 
-        {/* Loading State */}
-        {isLoading && (
-          <Box display="flex" justifyContent="center" py={5}>
-            <CircularProgress color="primary" />
-          </Box>
-        )}
+        {isError && <Alert severity="error">Could not load featured ventures.</Alert>}
 
-        {/* Error State */}
-        {isError && (
-          <Alert severity="error">Could not load featured ventures.</Alert>
-        )}
-
-        {/* Card Grid */}
-        {!isLoading && !isError && (
-          <Grid container spacing={3} justifyContent="flex-start" sx={{ mb: 6 }}>
-            {ventures?.map((venture) => (
+        <Grid container spacing={3} justifyContent="flex-start" sx={{ mb: 6 }}>
+          {/* ESTADO DE CARGA: MOSTRAR 4 SKELETONS */}
+          {isLoading ? (
+             [1, 2, 3, 4].map((n) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={n}>
+                   <VentureCardSkeleton />
+                </Grid>
+             ))
+          ) : (
+             ventures?.map((venture) => (
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={venture.id}>
                 <VentureCard data={venture} />
               </Grid>
-            ))}
-          </Grid>
-        )}
+            ))
+          )}
+        </Grid>
       </Container>
     </Box>
   );
 };
-
 export default FeaturedSection;

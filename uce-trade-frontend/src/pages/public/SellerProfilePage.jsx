@@ -1,13 +1,14 @@
 // src/pages/public/SellerProfilePage.jsx
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Container, Grid, Typography, CircularProgress, Alert, Chip } from '@mui/material'; // Chip agregado
+import { Box, Container, Typography, Alert, Chip, Grid } from '@mui/material'; 
 import { fetchUserProfile } from '../../services/api';
 
 import VentureCard from '../../components/ventures/VentureCard';
 import StudentProfileHeader from '../../components/student/StudentProfileHeader';
 import ProfileBioSection from '../../components/profile/ProfileBioSection';
 import ProfileStatsGrid from '../../components/profile/ProfileStatsGrid';
+import { ProfileHeaderSkeleton } from '../../components/ui/Skeletons';
 
 const SellerProfilePage = () => {
   const { id } = useParams();
@@ -16,7 +17,14 @@ const SellerProfilePage = () => {
     queryFn: () => fetchUserProfile(id)
   });
 
-  if (isLoading) return <Box sx={{ pt: 15, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>;
+  if (isLoading) return (
+    <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
+      <Container maxWidth="xl">
+          <ProfileHeaderSkeleton />
+      </Container>
+    </Box>
+  );
+  
   if (isError || !data) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">User not found</Alert></Box>;
 
   const { user, ventures } = data;
@@ -25,35 +33,32 @@ const SellerProfilePage = () => {
     ? (ventures.reduce((acc, curr) => acc + (curr.rating || 0), 0) / ventures.length).toFixed(1) 
     : "0.0";
 
-  // Objeto stats para el componente compartido
-  const publicStats = { kpi: { rating: avgRating } };
+  const headerStats = { kpi: { rating: avgRating } };
+
+  const gridStats = { rating: avgRating };
 
   return (
     <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: "120px", pb: 8 }}>
       <Container maxWidth="xl">
         
-        {/* 1. Header: Pasamos un Chip o vacío en 'action' ya que es vista pública */}
         <StudentProfileHeader 
             user={user} 
-            stats={publicStats} 
+            stats={headerStats} 
             action={<Chip label="Public View" variant="outlined" />}
         />
 
-        {/* 2. Bio y Contacto */}
         <ProfileBioSection user={user} />
 
-        {/* 3. Tarjetas Estadísticas (RECUPERADAS) */}
         <Box mb={5}>
             <Typography variant="h5" fontWeight="800" color="#0d2149" mb={2}>Overview</Typography>
-             {/* Notar que aquí pasamos el Rol porque no mostramos ventas privadas */}
+             {/* Pasamos gridStats y el Rol */}
              <ProfileStatsGrid 
                 ventureCount={ventures?.length} 
                 role={user.role}
-                stats={{ rating: avgRating }} 
+                stats={gridStats} 
              />
         </Box>
 
-        {/* 4. Grid de Ventures */}
         <Typography variant="h5" fontWeight="800" color="#0d2149" mb={3}>
             Published ventures
         </Typography>

@@ -31,7 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = null;
         
-        // 1. Buscar el token en las Cookies
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("jwt_token".equals(cookie.getName())) {
@@ -41,23 +40,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 2. Si hay token y no hay sesión iniciada en memoria
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String email = jwtUtil.getEmailFromToken(token);
-
-            if (email != null) {
+          
+            if (jwtUtil.validateToken(token)) {
+                
+                String email = jwtUtil.getEmailFromToken(token);
+                
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                if (jwtUtil.validateToken(token)) {
-                    // 3. Crear la sesión de seguridad manual
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    
-                    // 4. Establecer el usuario en el contexto. Aquí deja de ser anonymous
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 

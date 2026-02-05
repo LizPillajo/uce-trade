@@ -2,8 +2,9 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
+import { TableRowSkeleton } from '../ui/Skeletons'; // <--- Importamos aquí
 
-const UsersTable = ({ users, onDelete }) => {
+const UsersTable = ({ users, onDelete, loading }) => { // <--- Nueva prop 'loading'
   const navigate = useNavigate();
 
   return (
@@ -20,7 +21,13 @@ const UsersTable = ({ users, onDelete }) => {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {users.map((row) => (
+                {/* LÓGICA DE CARGA INTEGRADA AQUÍ */}
+                {loading ? (
+                    // Mostramos 5 filas de esqueleto (6 columnas)
+                    [...Array(5)].map((_, i) => <TableRowSkeleton key={i} cols={6} />)
+                ) : (
+                    // Lógica normal de datos
+                    users.map((row) => (
                     <TableRow key={row.id} hover>
                         <TableCell>
                             <Box display="flex" alignItems="center" gap={2}>
@@ -58,7 +65,16 @@ const UsersTable = ({ users, onDelete }) => {
                             </Tooltip>
                         </TableCell>
                     </TableRow>
-                ))}
+                )))}
+
+                {/* Mensaje si no hay datos (y no está cargando) */}
+                {!loading && users.length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                            <Typography color="text.secondary">No users found.</Typography>
+                        </TableCell>
+                    </TableRow>
+                )}
             </TableBody>
         </Table>
     </TableContainer>

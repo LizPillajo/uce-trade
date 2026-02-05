@@ -16,6 +16,7 @@ import { useAuthStore } from '../../store/authStore';
 import { registerUser, googleLogin } from '../../services/api';
 import { auth, googleProvider } from "../../services/firebase"; 
 import { signInWithPopup } from "firebase/auth"; 
+import { toast } from 'react-toastify';
 
 const registerSchema = z.object({
   fullName: z.string().min(3, "Full name is required"),
@@ -45,7 +46,7 @@ const RegisterPage = () => {
       
       await registerUser(payload);
       
-      alert('Account created successfully! Please log in.');
+      toast.success('Account created successfully! Please log in. 🎉');
       navigate('/login');
     } catch (err) {
       console.error(err);
