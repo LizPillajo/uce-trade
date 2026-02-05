@@ -3,59 +3,42 @@ import { Box, Container, Pagination, CircularProgress, Typography, Button } from
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FileDownloadIcon from '@mui/icons-material/FileDownload'; 
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
 import VenturesTable from '../../components/admin/VenturesTable';
 import VentureFilter from '../../components/ventures/VentureFilter';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
-import { fetchAdminVentures, deleteVenture, updateVentureStatus, exportVenturesReport } from '../../services/api';
+import { fetchAdminVentures, exportVenturesReport } from '../../services/api';
+import { useVentureMutations } from '../../hooks/useVentureMutations'; 
 
 const AdminVenturesPage = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   
-  // Estados de Filtro
+  const { deleteVenture, changeStatus, isDeleting } = useVentureMutations();
+  
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('All');
   const [sort, setSort] = useState('recent');
-  
-  // Estados de Acción
   const [deleteId, setDeleteId] = useState(null);
   const [downloading, setDownloading] = useState(false); 
 
-  // 1. Fetch con filtros
   const { data, isLoading } = useQuery({
     queryKey: ['adminVentures', page, searchTerm, category, sort],
     queryFn: () => fetchAdminVentures(page, searchTerm, category, sort),
     keepPreviousData: true
   });
 
-  // 2. Acción: Borrar
-  const deleteMutation = useMutation({
-    mutationFn: deleteVenture,
-    onSuccess: () => {
-        toast.success("Venture deleted");
-        queryClient.invalidateQueries(['adminVentures']);
-        setDeleteId(null);
-    }
-  });
-
-  // 3. Acción: Aprobar/Rechazar
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }) => updateVentureStatus(id, status),
-    onSuccess: () => {
-        toast.success("Status updated!");
-        queryClient.invalidateQueries(['adminVentures']);
-    }
-  });
-
   const handleStatusChange = (id, newStatus) => {
-      statusMutation.mutate({ id, status: newStatus });
+      changeStatus({ id, status: newStatus });
   };
 
-  // 4. Exportar CSV
+  const handleConfirmDelete = () => {
+      deleteVenture(deleteId);
+      setDeleteId(null);
+  };
+
   const handleExport = async () => {
     try {
         setDownloading(true);
@@ -79,8 +62,7 @@ const AdminVenturesPage = () => {
   return (
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: '100px', pb: 8 }}>
       <Container maxWidth="xl">
-         
-         {/* HEADER */}
+          
          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
              <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/admin/dashboard')} sx={{ color: 'text.secondary' }}>
                 Dashboard
@@ -97,7 +79,6 @@ const AdminVenturesPage = () => {
             </Button>
          </Box>
          
-         {/* FILTROS (Sin Toggle de Grid/List) */}
          <VentureFilter 
             searchTerm={searchTerm} setSearchTerm={setSearchTerm}
             category={category} setCategory={setCategory}
@@ -107,7 +88,6 @@ const AdminVenturesPage = () => {
             initialSort="recent"
          />
 
-         {/* TABLA O CARGANDO */}
          <VenturesTable 
              ventures={data?.content || []} 
              onDelete={setDeleteId}
@@ -126,8 +106,8 @@ const AdminVenturesPage = () => {
             title="Delete Venture"
             message="Are you sure you want to remove this venture? This action cannot be undone."
             onClose={() => setDeleteId(null)}
-            onConfirm={() => deleteMutation.mutate(deleteId)}
-            loading={deleteMutation.isPending}
+            onConfirm={handleConfirmDelete}
+            loading={isDeleting}
          />
       </Container>
     </Box>

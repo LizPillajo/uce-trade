@@ -1,32 +1,28 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, IconButton, Avatar, Tooltip } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { TableRowSkeleton } from '../ui/Skeletons'; // <--- Importamos aquí
+import { TableRowSkeleton } from '../ui/Skeletons';
+import TableActions from '../ui/TableActions'; // <--- IMPORTANTE
 
-const UsersTable = ({ users, onDelete, loading }) => { // <--- Nueva prop 'loading'
+const UsersTable = ({ users, onDelete, loading }) => {
   const navigate = useNavigate();
+  const headers = ["User", "Faculty", "Joined", "Active Ventures", "Total Sales", "Actions"];
 
   return (
     <TableContainer component={Paper} elevation={0} sx={{ borderRadius: '16px', border: '1px solid #e5e7eb' }}>
         <Table>
             <TableHead sx={{ bgcolor: '#f9fafb' }}>
                 <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#6b7280' }}>User</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#6b7280' }}>Faculty</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#6b7280' }}>Joined</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold', color: '#6b7280' }}>Active Ventures</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold', color: '#6b7280' }}>Total Sales</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold', color: '#6b7280' }}>Actions</TableCell>
+                    {headers.map((head) => (
+                        <TableCell key={head} align={head === "Actions" ? "right" : (head === "Active Ventures" || head === "Total Sales") ? "center" : "left"} sx={{ fontWeight: 'bold', color: '#6b7280' }}>
+                            {head}
+                        </TableCell>
+                    ))}
                 </TableRow>
             </TableHead>
             <TableBody>
-                {/* LÓGICA DE CARGA INTEGRADA AQUÍ */}
                 {loading ? (
-                    // Mostramos 5 filas de esqueleto (6 columnas)
                     [...Array(5)].map((_, i) => <TableRowSkeleton key={i} cols={6} />)
                 ) : (
-                    // Lógica normal de datos
                     users.map((row) => (
                     <TableRow key={row.id} hover>
                         <TableCell>
@@ -52,22 +48,17 @@ const UsersTable = ({ users, onDelete, loading }) => { // <--- Nueva prop 'loadi
                                 {row.totalSales}
                              </Typography>
                         </TableCell>
+                        
+                        {/* LIMPIEZA AQUI */}
                         <TableCell align="right">
-                            <Tooltip title="View Profile">
-                                <IconButton size="small" onClick={() => navigate(`/profile/${row.id}`)}>
-                                    <VisibilityIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete User">
-                                <IconButton size="small" color="error" onClick={() => onDelete(row.id)}>
-                                    <DeleteIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
+                            <TableActions 
+                                onView={() => navigate(`/profile/${row.id}`)}
+                                onDelete={() => onDelete(row.id)}
+                            />
                         </TableCell>
                     </TableRow>
                 )))}
 
-                {/* Mensaje si no hay datos (y no está cargando) */}
                 {!loading && users.length === 0 && (
                     <TableRow>
                         <TableCell colSpan={6} align="center" sx={{ py: 3 }}>

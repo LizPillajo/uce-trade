@@ -10,24 +10,30 @@ const SearchAutocomplete = ({
   placeholder = "Search...",
   sx = {} 
 }) => {
-  const [inputValue, setInputValue] = useState(initialValue);
+  const [inputValue, setInputValue] = useState(initialValue || "");
   const [options, setOptions] = useState([]);
   
   const debouncedTerm = useDebounce(inputValue, 300);
 
   useEffect(() => {
-    setInputValue(initialValue);
+    setInputValue(initialValue || "");
   }, [initialValue]);
 
   useEffect(() => {
     let active = true;
-    if (debouncedTerm === "") {
+    
+    if (!debouncedTerm || debouncedTerm.trim() === "") {
       setOptions([]);
       return undefined;
     }
 
     fetchSuggestions(debouncedTerm).then((results) => {
-      if (active) setOptions(results);
+      if (active && results) {
+          const cleanResults = results.filter(item => item !== null && item !== undefined);
+          setOptions(cleanResults);
+      }
+    }).catch(() => {
+        if(active) setOptions([]);
     });
 
     return () => { active = false; };
@@ -45,9 +51,16 @@ const SearchAutocomplete = ({
       freeSolo
       fullWidth
       options={options}
-      inputValue={inputValue}
-      onInputChange={(_, newValue) => setInputValue(newValue)}
-      onChange={(_, newValue) => onSearch(newValue)} 
+      inputValue={inputValue || ""} 
+      
+      onInputChange={(_, newValue) => {
+          setInputValue(newValue || ""); 
+      }}
+      
+      onChange={(_, newValue) => {
+          onSearch(newValue || "");
+      }} 
+      
       renderInput={(params) => (
         <TextField
           {...params}

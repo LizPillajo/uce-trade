@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Container, Typography, CircularProgress, Alert, Grid, TextField, MenuItem, Stack } from '@mui/material';
+import { Box, Container, Typography, CircularProgress, Alert, Grid, Stack } from '@mui/material';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
@@ -12,21 +12,14 @@ import { IncomeHistoryChart, CategoryBarChart } from '../../components/student/S
 import StudentPerformanceList from '../../components/student/StudentPerformanceList';
 import Button from '../../components/ui/Button'; 
 import { DashboardSkeleton } from '../../components/ui/Skeletons';
-
-const periods = [
-    { value: 'ALL', label: 'All Time' },
-    { value: 'DAILY', label: 'Today' },
-    { value: 'MONTHLY', label: 'This Month' },
-    { value: 'ANNUAL', label: 'This Year' }
-];
+import PeriodSelector from '../../components/common/PeriodSelector'; 
 
 const StudentDashboard = () => {
   useWebSocket(); 
   const [period, setPeriod] = useState('ALL');
   const [downloading, setDownloading] = useState(false);
 
-  // Hook recibe 'period' ahora
-  const { data: stats, isLoading, isError, refetch } = useQuery({
+  const { data: stats, isLoading, isError } = useQuery({
     queryKey: ['studentStats', period],
     queryFn: () => fetchStudentStats(period)
   });
@@ -52,9 +45,7 @@ const StudentDashboard = () => {
 
   if (isLoading) return (
      <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
-        <Container maxWidth="xl">
-            <DashboardSkeleton />
-        </Container>
+        <Container maxWidth="xl"><DashboardSkeleton /></Container>
      </Box>
   );
   if (isError) return <Container sx={{ mt: 10 }}><Alert severity="error">Error loading dashboard statistics.</Alert></Container>;
@@ -78,7 +69,6 @@ const StudentDashboard = () => {
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
       <Container maxWidth="xl">
         
-        {/* HEADER CON CONTROLES */}
         <Box mb={6} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
           <Box>
             <Typography variant="h4" fontWeight="800" color="#0d2149">Dashboard</Typography>
@@ -86,18 +76,9 @@ const StudentDashboard = () => {
           </Box>
           
           <Stack direction="row" spacing={2}>
-            {/* SELECTOR DE PERIODO */}
-            <TextField 
-                select 
-                size="small" 
-                value={period} 
-                onChange={(e) => setPeriod(e.target.value)}
-                sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 150 }}
-            >
-                {periods.map((p) => <MenuItem key={p.value} value={p.value}>{p.label}</MenuItem>)}
-            </TextField>
+            {/* Componente Atomizado */}
+            <PeriodSelector value={period} onChange={setPeriod} />
 
-            {/* BOTÓN REPORTE */}
             <Button 
                 variant="outlined" 
                 startIcon={downloading ? <CircularProgress size={20}/> : <FileDownloadIcon />}
@@ -110,13 +91,9 @@ const StudentDashboard = () => {
           </Stack>
         </Box>
 
-        {/* 1. KPIs */}
         <StudentKpiCards kpi={stats.kpi} />
-
-        {/* 2. GRÁFICA PRINCIPAL */}
         <IncomeHistoryChart lineData={lineChartData} />
 
-        {/* 3. SECCIÓN INFERIOR */}
         <Grid container spacing={4}>
           <Grid size={{ xs: 12, lg: 6 }}>
             <CategoryBarChart barData={barChartData} />

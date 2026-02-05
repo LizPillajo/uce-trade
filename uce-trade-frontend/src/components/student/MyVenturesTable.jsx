@@ -1,48 +1,26 @@
 import { useState } from 'react';
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Box, Avatar, Typography, IconButton } from '@mui/material';
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Box, Avatar, Typography } from '@mui/material';
 import StarIcon from "@mui/icons-material/Star";
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
 
 import Badge from '../ui/Badge'; 
 import ConfirmationModal from '../common/ConfirmationModal';
 import EditVentureModal from './EditVentureModal';
-import { deleteVenture, updateVenture } from '../../services/api';
+import TableActions from '../ui/TableActions'; 
+import { useVentureMutations } from '../../hooks/useVentureMutations'; 
 
 const MyVenturesTable = ({ ventures }) => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  
+  const { deleteVenture, updateVenture, isDeleting, isUpdating } = useVentureMutations();
 
-  // Estados para Modales
   const [deleteId, setDeleteId] = useState(null);
   const [editVenture, setEditVenture] = useState(null);
 
-  // Mutación: Borrar
-  const deleteMutation = useMutation({
-    mutationFn: deleteVenture,
-    onSuccess: () => {
-        toast.success("Venture deleted successfully");
-        queryClient.invalidateQueries(['myVentures']);
-        queryClient.invalidateQueries(['studentStats']); 
-        setDeleteId(null);
-    },
-    onError: () => toast.error("Failed to delete venture")
-  });
-
-  // Mutación: Editar
-  const updateMutation = useMutation({
-    mutationFn: (data) => updateVenture(editVenture.id, data),
-    onSuccess: () => {
-        toast.success("Venture updated successfully");
-        queryClient.invalidateQueries(['myVentures']);
-        setEditVenture(null);
-    },
-    onError: () => toast.error("Failed to update venture")
-  });
+  const handleUpdate = (data) => {
+    updateVenture({ id: editVenture.id, data });
+    setEditVenture(null);
+  };
 
   return (
     <>
@@ -90,16 +68,13 @@ const MyVenturesTable = ({ ventures }) => {
                       {row.rating || 0.0}
                     </Box>
                   </TableCell>
+                  
                   <TableCell align="right">
-                    <IconButton size="small" onClick={() => navigate(`/venture/${row.id}`)} title="View">
-                      <VisibilityOutlinedIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => setEditVenture(row)} title="Edit">
-                        <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" color="error" onClick={() => setDeleteId(row.id)} title="Delete">
-                        <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
+                    <TableActions 
+                        onView={() => navigate(`/venture/${row.id}`)}
+                        onEdit={() => setEditVenture(row)}
+                        onDelete={() => setDeleteId(row.id)}
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -108,23 +83,22 @@ const MyVenturesTable = ({ ventures }) => {
         </Table>
       </TableContainer>
 
-      {/* --- MODAL CONFIRMACIÓN BORRAR --- */}
+      {/* Modales controlados por estado local, acciones controladas por el hook */}
       <ConfirmationModal 
         open={!!deleteId}
         title="Delete Venture?"
-        message="Are you sure? This action will remove the service from the store but keep it in your history report."
+        message="Are you sure? This action will remove the service from the store."
         onClose={() => setDeleteId(null)}
-        onConfirm={() => deleteMutation.mutate(deleteId)}
-        loading={deleteMutation.isPending}
+        onConfirm={() => { deleteVenture(deleteId); setDeleteId(null); }}
+        loading={isDeleting}
       />
 
-      {/* --- MODAL EDICIÓN --- */}
       <EditVentureModal 
         open={!!editVenture}
         handleClose={() => setEditVenture(null)}
         venture={editVenture}
-        onSave={(data) => updateMutation.mutate(data)}
-        loading={updateMutation.isPending}
+        onSave={handleUpdate}
+        loading={isUpdating}
       />
     </>
   );
