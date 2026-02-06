@@ -13,7 +13,7 @@ import StudentPerformanceList from '../../components/student/StudentPerformanceL
 import Button from '../../components/ui/Button'; 
 import { DashboardSkeleton } from '../../components/ui/Skeletons';
 import PeriodSelector from '../../components/common/PeriodSelector'; 
-import PageLayout from '../../components/layout/PageLayout'; // <--- IMPORTADO
+import PageLayout from '../../components/layout/PageLayout'; 
 
 const StudentDashboard = () => {
   useWebSocket(); 

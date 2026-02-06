@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Box, Typography } from '@mui/material';
+import { TableRow, TableCell, Box } from '@mui/material';
 import StarIcon from "@mui/icons-material/Star";
 import { useNavigate } from "react-router-dom";
 
@@ -8,11 +8,11 @@ import ConfirmationModal from '../common/ConfirmationModal';
 import EditVentureModal from './EditVentureModal';
 import TableActions from '../ui/TableActions'; 
 import UserInfoItem from '../common/UserInfoItem'; 
+import DataTable from '../ui/DataTable';
 import { useVentureMutations } from '../../hooks/useVentureMutations'; 
 
 const MyVenturesTable = ({ ventures }) => {
   const navigate = useNavigate();
-  
   const { deleteVenture, updateVenture, isDeleting, isUpdating } = useVentureMutations();
 
   const [deleteId, setDeleteId] = useState(null);
@@ -23,64 +23,49 @@ const MyVenturesTable = ({ ventures }) => {
     setEditVenture(null);
   };
 
+  const headers = ["Service", "Category", "Price", "Status", "Rating", "Actions"];
+
   return (
     <>
-      <TableContainer component={Paper} elevation={0} sx={{ borderRadius: "24px", border: "1px solid #e5e7eb" }}>
-        <Table>
-          <TableHead sx={{ bgcolor: "#f9fafb" }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Service</TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Category</TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Price</TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "#6b7280" }}>Rating</TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold", color: "#6b7280" }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {ventures?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                  <Typography color="text.secondary">You haven't published any services yet.</Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              ventures.map((row) => (
-                <TableRow key={row.id} hover>
-                  <TableCell>
+      <DataTable
+        headers={headers}
+        loading={false} 
+        isEmpty={!ventures || ventures.length === 0}
+        emptyMessage="You haven't published any services yet."
+        colSpan={6}
+      >
+          {ventures?.map((row) => (
+            <TableRow key={row.id} hover>
+                <TableCell>
                     <UserInfoItem 
                         name={row.title}
                         avatar={row.imageUrl}
                         subtitle={`Created: ${row.createdDate || 'Recently'}`}
                         sx={{ '& .MuiAvatar-root': { borderRadius: '8px' } }}
                     />
-                  </TableCell>
-                  <TableCell><Badge status={row.category} /></TableCell> 
-                  <TableCell sx={{ fontWeight: "bold" }}>${row.price}</TableCell>
-                  <TableCell>
-                    <Badge status="Active" /> 
-                  </TableCell>
-                  <TableCell>
+                </TableCell>
+                <TableCell><Badge status={row.category} /></TableCell> 
+                <TableCell sx={{ fontWeight: "bold" }}>${row.price}</TableCell>
+                <TableCell><Badge status="Active" /></TableCell>
+                <TableCell>
                     <Box display="flex" alignItems="center" gap={0.5}>
-                      <StarIcon fontSize="small" sx={{ color: "#f59e0b" }} />
-                      {row.rating || 0.0}
+                        <StarIcon fontSize="small" sx={{ color: "#f59e0b" }} />
+                        {row.rating || 0.0}
                     </Box>
-                  </TableCell>
-                  
-                  <TableCell align="right">
+                </TableCell>
+                
+                <TableCell align="right">
                     <TableActions 
                         onView={() => navigate(`/venture/${row.id}`)}
                         onEdit={() => setEditVenture(row)}
                         onDelete={() => setDeleteId(row.id)}
                     />
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                </TableCell>
+            </TableRow>
+          ))}
+      </DataTable>
 
+      {/* Modales se mantienen igual */}
       <ConfirmationModal 
         open={!!deleteId}
         title="Delete Venture?"

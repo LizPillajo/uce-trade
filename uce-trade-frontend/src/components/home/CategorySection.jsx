@@ -1,6 +1,4 @@
-// src/components/home/CategorySection.jsx
-import { Box, Container, Typography, Grid, Paper } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Box, Container, Typography, Grid } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import CheckroomIcon from '@mui/icons-material/Checkroom';
@@ -8,6 +6,7 @@ import BrushIcon from '@mui/icons-material/Brush';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import CategoryCard from './CategoryCard'; 
 
 const categories = [
   { id: 'Tutorials', name: 'Tutorials', icon: SchoolIcon, color: '#e3f2fd', iconColor: '#1565c0', count: 120 },
@@ -33,60 +32,10 @@ const CategorySection = () => {
           </Typography>
         </Box>
 
-        {/* CATEGORY GRID */}
         <Grid container spacing={3} justifyContent="center" alignItems="stretch">
           {categories.map((cat) => (
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={cat.id} sx={{ display: 'flex' }}>
-              <Paper
-                component={Link}
-                to={`/explore?category=${cat.id}`}
-                elevation={0}
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  // Increased padding for larger appearance
-                  p: 2, 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  textDecoration: 'none',
-                  borderRadius: '24px', 
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  bgcolor: 'white',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 20px rgba(0,0,0,0.08)',
-                    borderColor: 'primary.main',
-                  }
-                }}
-              >
-                {/* Large Icon Circle */}
-                <Box sx={{ 
-                    bgcolor: cat.color, 
-                    color: cat.iconColor, 
-                    width: 80, 
-                    height: 80,
-                    borderRadius: '50%', 
-                    mb: 3,
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center'
-                }}>
-                  {/* Large Icon */}
-                  <cat.icon sx={{ fontSize: 40 }} />
-                </Box>
-                
-                <Typography variant="h5" fontWeight="bold" color="text.primary" gutterBottom>
-                  {cat.name}
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
-                  {cat.count} listings
-                </Typography>
-              </Paper>
+              <CategoryCard category={cat} />
             </Grid>
           ))}
         </Grid>
