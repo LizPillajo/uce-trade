@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Container, Pagination, CircularProgress, Typography, Button } from '@mui/material';
+import { Pagination, CircularProgress, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FileDownloadIcon from '@mui/icons-material/FileDownload'; 
 import { useNavigate } from 'react-router-dom';
@@ -11,10 +11,10 @@ import VentureFilter from '../../components/ventures/VentureFilter';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import { fetchAdminVentures, exportVenturesReport } from '../../services/api';
 import { useVentureMutations } from '../../hooks/useVentureMutations'; 
+import PageLayout from '../../components/layout/PageLayout'; 
 
 const AdminVenturesPage = () => {
   const navigate = useNavigate();
-  
   const { deleteVenture, changeStatus, isDeleting } = useVentureMutations();
   
   const [page, setPage] = useState(1);
@@ -30,15 +30,6 @@ const AdminVenturesPage = () => {
     keepPreviousData: true
   });
 
-  const handleStatusChange = (id, newStatus) => {
-      changeStatus({ id, status: newStatus });
-  };
-
-  const handleConfirmDelete = () => {
-      deleteVenture(deleteId);
-      setDeleteId(null);
-  };
-
   const handleExport = async () => {
     try {
         setDownloading(true);
@@ -46,28 +37,33 @@ const AdminVenturesPage = () => {
         const url = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `Ventures_Report_${new Date().toISOString().slice(0,10)}.csv`);
+        link.setAttribute('download', `Ventures_Report.csv`);
         document.body.appendChild(link);
         link.click();
-        link.parentNode.removeChild(link);
-        toast.success("Ventures report downloaded! 📊");
-    } catch (e) {
-        console.error(e);
-        toast.error("Failed to export report");
-    } finally {
         setDownloading(false);
+    } catch (e) {
+        setDownloading(false);
+        toast.error("Failed to export");
     }
   };
 
   return (
-    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: '100px', pb: 8 }}>
-      <Container maxWidth="xl">
-          
-         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-             <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/admin/dashboard')} sx={{ color: 'text.secondary' }}>
+    <PageLayout
+        // 1. Aquí va el botón de atrás (arriba a la izquierda)
+        breadcrumbs={
+             <Button 
+                startIcon={<ArrowBackIcon />} 
+                onClick={() => navigate('/admin/dashboard')} 
+                sx={{ color: 'text.secondary', textTransform: 'none', pl: 0, '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' } }}
+             >
                 Dashboard
              </Button>
-
+        }
+        // 2. Aquí va el título grande (abajo del breadcrumb)
+        title="Explore Business"
+        
+        // 3. Aquí va el botón de exportar (arriba a la derecha)
+        actions={
              <Button 
                 variant="contained" 
                 startIcon={downloading ? <CircularProgress size={20} color="inherit"/> : <FileDownloadIcon />}
@@ -77,13 +73,15 @@ const AdminVenturesPage = () => {
             >
                 {downloading ? "Exporting..." : "Export Report"}
             </Button>
-         </Box>
-         
+        }
+    >
+         {/* 4. Importante: showTitle={false} para que no salga DOBLE título */}
          <VentureFilter 
             searchTerm={searchTerm} setSearchTerm={setSearchTerm}
             category={category} setCategory={setCategory}
             sort={sort} setSort={setSort}
-            showViewToggles={false} 
+            showViewToggles={false}
+            showTitle={false} 
             isAdmin={true} 
             initialSort="recent"
          />
@@ -91,26 +89,29 @@ const AdminVenturesPage = () => {
          <VenturesTable 
              ventures={data?.content || []} 
              onDelete={setDeleteId}
-             onStatusChange={handleStatusChange} 
+             onStatusChange={(id, status) => changeStatus({ id, status })} 
              loading={isLoading} 
           />
           
           {!isLoading && (
-              <Box display="flex" justifyContent="center" mt={4}>
-                 <Pagination count={data?.totalPages || 1} page={page} onChange={(e,v) => setPage(v)} color="primary" />
-              </Box>
+                 <Pagination 
+                    count={data?.totalPages || 1} 
+                    page={page} 
+                    onChange={(e,v) => setPage(v)} 
+                    color="primary" 
+                    sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}
+                 />
           )}
 
          <ConfirmationModal 
             open={!!deleteId}
             title="Delete Venture"
-            message="Are you sure you want to remove this venture? This action cannot be undone."
+            message="Are you sure? This cannot be undone."
             onClose={() => setDeleteId(null)}
-            onConfirm={handleConfirmDelete}
+            onConfirm={() => { deleteVenture(deleteId); setDeleteId(null); }}
             loading={isDeleting}
          />
-      </Container>
-    </Box>
+    </PageLayout>
   );
 };
 

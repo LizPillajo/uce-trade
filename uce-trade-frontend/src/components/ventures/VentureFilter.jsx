@@ -12,6 +12,7 @@ const VentureFilter = ({
     sort, setSort, 
     viewMode, setViewMode,
     showViewToggles = true,
+    showTitle = true,
     isAdmin = false,
     initialSort = 'recent'
 
@@ -27,24 +28,25 @@ const VentureFilter = ({
 
   return (
     <Box sx={{ mb: 4 }}>
-      {/* TÍTULO Y BOTÓN DE LIMPIAR */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4" fontWeight="bold" color="#0d2149">
-          Explore Business
-        </Typography>
+      {showTitle && (
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h4" fontWeight="bold" color="#0d2149">
+              Explore Business
+            </Typography>
 
-        {hasActiveFilters && (
-            <Button 
-                startIcon={<FilterAltOffIcon />} 
-                onClick={handleClearFilters}
-                color="error"
-                size="small"
-                sx={{ fontWeight: 'bold' }}
-            >
-                Clear Filters
-            </Button>
-        )}
-      </Box>
+            {hasActiveFilters && (
+                <Button 
+                    startIcon={<FilterAltOffIcon />} 
+                    onClick={handleClearFilters}
+                    color="error"
+                    size="small"
+                    sx={{ fontWeight: 'bold' }}
+                >
+                    Clear Filters
+                </Button>
+            )}
+          </Box>
+      )}
 
       {/* BARRA DE HERRAMIENTAS */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2, width: '100%', flexWrap: 'wrap' }}>

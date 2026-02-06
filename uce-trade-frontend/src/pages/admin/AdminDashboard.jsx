@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Container, Typography, Button, Alert } from "@mui/material";
+import { Button, Alert, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -11,7 +11,8 @@ import AdminKpiGroup from "../../components/admin/AdminKpiGroup";
 import CategoryCharts from "../../components/admin/CategoryCharts";
 import GrowthChart from "../../components/admin/GrowthChart";
 import { DashboardSkeleton } from '../../components/ui/Skeletons';
-import PeriodSelector from '../../components/common/PeriodSelector'; // <--- NUEVO
+import PeriodSelector from '../../components/common/PeriodSelector'; 
+import PageLayout from '../../components/layout/PageLayout'; 
 
 const COLORS = ["#0d2149", "#efb034", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"];
 
@@ -26,14 +27,11 @@ const AdminDashboard = () => {
   });
 
   if (isLoading) return (
-     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
-        <Container maxWidth="xl"><DashboardSkeleton /></Container>
-     </Box>
+     <PageLayout><DashboardSkeleton /></PageLayout>
   );
   
-  if (isError) return <Container sx={{mt: 15}}><Alert severity="error">Error connecting to admin server.</Alert></Container>;
+  if (isError) return <PageLayout><Alert severity="error">Error connecting to admin server.</Alert></PageLayout>;
 
-  // Transformación de datos más limpia
   const pieData = stats?.pieData ? Object.entries(stats.pieData).map(([name, value], index) => ({
     name: name || "Other",
     value,
@@ -41,33 +39,24 @@ const AdminDashboard = () => {
   })) : [];
 
   return (
-    <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pt: { xs: 10, sm: 12 }, pb: 8 }}>
-      <Container maxWidth="xl">
-        
-        <Box mb={5} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
-          <Box>
-            <Typography variant="h4" fontWeight="800" color="#0d2149">Admin Panel</Typography>
-            <Typography variant="body1" color="text.secondary">Real-time platform monitoring</Typography>
-          </Box>
-          <Box display="flex" gap={2}>
-            {/* Usamos el componente reutilizable */}
-            <PeriodSelector value={period} onChange={setPeriod} />
-            
-            <Button variant="outlined" startIcon={<PersonIcon />} onClick={() => navigate("/admin/users")}>Users</Button>
-            <Button variant="contained" startIcon={<FilterListIcon />} onClick={() => navigate("/admin/ventures")} sx={{ bgcolor: "#0d2149" }}>Startups</Button>
-          </Box>
-        </Box>
+    <PageLayout 
+        title="Admin Panel" 
+        subtitle="Real-time platform monitoring"
+        actions={
+            <>
+                <PeriodSelector value={period} onChange={setPeriod} />
+                <Button variant="outlined" startIcon={<PersonIcon />} onClick={() => navigate("/admin/users")}>Users</Button>
+                <Button variant="contained" startIcon={<FilterListIcon />} onClick={() => navigate("/admin/ventures")} sx={{ bgcolor: "#0d2149" }}>Startups</Button>
+            </>
+        }
+    >
+      <AdminKpiGroup kpi={stats.kpi} />
+      <Box mb={5}>
+        <GrowthChart data={stats.growthData || []} />        
+      </Box>
+      <CategoryCharts pieData={pieData} />   
 
-        <AdminKpiGroup kpi={stats.kpi} />
-
-        <Box mb={5}>
-           <GrowthChart data={stats.growthData || []} />
-        </Box>
-
-        <CategoryCharts pieData={pieData} />
-
-      </Container>
-    </Box>
+    </PageLayout>
   );
 };
 

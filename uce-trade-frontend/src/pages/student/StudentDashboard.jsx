@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Container, Typography, CircularProgress, Alert, Grid, Stack } from '@mui/material';
+import { Grid, CircularProgress } from '@mui/material';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
@@ -13,6 +13,7 @@ import StudentPerformanceList from '../../components/student/StudentPerformanceL
 import Button from '../../components/ui/Button'; 
 import { DashboardSkeleton } from '../../components/ui/Skeletons';
 import PeriodSelector from '../../components/common/PeriodSelector'; 
+import PageLayout from '../../components/layout/PageLayout'; // <--- IMPORTADO
 
 const StudentDashboard = () => {
   useWebSocket(); 
@@ -43,12 +44,8 @@ const StudentDashboard = () => {
     }
   };
 
-  if (isLoading) return (
-     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
-        <Container maxWidth="xl"><DashboardSkeleton /></Container>
-     </Box>
-  );
-  if (isError) return <Container sx={{ mt: 10 }}><Alert severity="error">Error loading dashboard statistics.</Alert></Container>;
+  if (isLoading) return <PageLayout><DashboardSkeleton /></PageLayout>;
+  if (isError) return <PageLayout title="Error">Error loading dashboard.</PageLayout>;
 
   // Transformaciones de datos
   const lineChartData = stats?.chartSales 
@@ -66,31 +63,24 @@ const StudentDashboard = () => {
     : [];
 
   return (
-    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
-      <Container maxWidth="xl">
-        
-        <Box mb={6} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
-          <Box>
-            <Typography variant="h4" fontWeight="800" color="#0d2149">Dashboard</Typography>
-            <Typography variant="body1" color="text.secondary">Business overview</Typography>
-          </Box>
-          
-          <Stack direction="row" spacing={2}>
-            {/* Componente Atomizado */}
-            <PeriodSelector value={period} onChange={setPeriod} />
-
-            <Button 
-                variant="outlined" 
-                startIcon={downloading ? <CircularProgress size={20}/> : <FileDownloadIcon />}
-                onClick={handleDownload}
-                disabled={downloading}
-                sx={{ bgcolor: 'white', borderColor: '#e5e7eb', color: '#0d2149' }}
-            >
-                {downloading ? "Exporting..." : "Report"}
-            </Button>
-          </Stack>
-        </Box>
-
+    <PageLayout 
+        title="Dashboard" 
+        subtitle="Business overview"
+        actions={
+            <>
+                <PeriodSelector value={period} onChange={setPeriod} />
+                <Button 
+                    variant="outlined" 
+                    startIcon={downloading ? <CircularProgress size={20}/> : <FileDownloadIcon />}
+                    onClick={handleDownload}
+                    disabled={downloading}
+                    sx={{ bgcolor: 'white', borderColor: '#e5e7eb', color: '#0d2149' }}
+                >
+                    {downloading ? "Exporting..." : "Report"}
+                </Button>
+            </>
+        }
+    >
         <StudentKpiCards kpi={stats.kpi} />
         <IncomeHistoryChart lineData={lineChartData} />
 
@@ -102,9 +92,7 @@ const StudentDashboard = () => {
             <StudentPerformanceList topServices={stats.topServices} />
           </Grid>
         </Grid>
-
-      </Container>
-    </Box>
+    </PageLayout>
   );
 };
 
