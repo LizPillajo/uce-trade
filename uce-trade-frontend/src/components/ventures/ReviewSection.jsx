@@ -1,10 +1,15 @@
+// src/components/ventures/ReviewSection.jsx
 import { useState } from 'react';
-import { Box, Typography, Avatar, TextField, Rating, Paper, Stack, Divider, Alert } from '@mui/material';
+import { Box, Typography, Avatar, TextField, Rating, Paper, Stack, Alert } from '@mui/material';
 import Button from '../ui/Button';
-import { useAuthStore} from '../../store/authStore';
+import { useAuthStore } from '../../store/authStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchReviews, postReview } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+
+// 1. IMPORTAMOS LOS NUEVOS COMPONENTES
+import EmptyState from '../common/EmptyState';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 
 const ReviewSection = ({ ventureId }) => {
   const { user, isAuthenticated } = useAuthStore();
@@ -24,7 +29,6 @@ const ReviewSection = ({ ventureId }) => {
   const mutation = useMutation({
     mutationFn: (newReview) => postReview(ventureId, newReview),
     onSuccess: () => {
-      // Recargar reviews y también la info del venture (estrellas promedio)
       queryClient.invalidateQueries(['reviews', ventureId]);
       queryClient.invalidateQueries(['venture', ventureId]); 
       setComment('');
@@ -103,7 +107,17 @@ const ReviewSection = ({ ventureId }) => {
                 </Typography>
             </Paper>
         ))}
-        {reviews?.length === 0 && <Typography color="text.secondary">No reviews yet. Be the first!</Typography>}
+
+        {/* 2. AQUÍ ESTÁ EL CAMBIO: USAMOS EL EMPTY STATE */}
+        {reviews?.length === 0 && (
+            <EmptyState 
+                title="No reviews yet" 
+                subtitle="Be the first to share your experience with this service!"
+                icon={<RateReviewIcon sx={{ fontSize: 40, color: '#9ca3af' }} />}
+                sx={{ py: 2 }} 
+            />
+        )}
+
       </Stack>
     </Box>
   );

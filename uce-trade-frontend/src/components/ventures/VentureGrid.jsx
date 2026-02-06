@@ -1,7 +1,8 @@
-// src/components/ventures/VentureGrid.jsx
-import { Grid, Stack, Box, Typography } from '@mui/material';
+import { Grid, Stack, Box } from '@mui/material';
+import SearchOffIcon from '@mui/icons-material/SearchOff'; // Icono opcional
 import VentureCard from './VentureCard';
 import { VentureCardSkeleton } from '../ui/Skeletons';
+import EmptyState from '../common/EmptyState'; // <--- Importamos
 
 const VentureGrid = ({ isLoading, ventures, viewMode }) => {
   if (isLoading) {
@@ -18,11 +19,11 @@ const VentureGrid = ({ isLoading, ventures, viewMode }) => {
 
   if (ventures.length === 0) {
     return (
-      <Box textAlign="center" py={10}>
-        <Typography variant="h6" color="text.secondary">
-          No ventures match your filters.
-        </Typography>
-      </Box>
+       <EmptyState 
+         title="No ventures match your filters" 
+         subtitle="Try adjusting your search or category selection."
+         icon={<SearchOffIcon sx={{ fontSize: 40 }} />}
+       />
     );
   }
 
@@ -39,11 +40,10 @@ const VentureGrid = ({ isLoading, ventures, viewMode }) => {
     );
   }
 
-  // MODO LISTA (LIST) - Horizontal
+  // MODO LISTA (LIST)
   return (
     <Stack spacing={3}>
       {ventures.map((venture) => (
-        // Box width 100% permite que la tarjeta se estire
         <Box key={venture.id} sx={{ width: '100%' }}>
           <VentureCard data={venture} variant="horizontal" />
         </Box>
