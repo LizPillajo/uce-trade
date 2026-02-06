@@ -5,6 +5,7 @@ import UCE_Trade.demo.model.Venture;
 import UCE_Trade.demo.model.Review;
 import UCE_Trade.demo.repository.VentureRepository;
 import UCE_Trade.demo.service.NotificationService;
+import jakarta.validation.Valid;
 import UCE_Trade.demo.service.AlgoliaService;
 import UCE_Trade.demo.service.AuditService;
 
@@ -146,7 +147,7 @@ public class VentureController {
 
     // POST http://localhost:8080/api/ventures
     @PostMapping
-    public ResponseEntity<?> createVenture(@RequestBody Venture venture) {
+    public ResponseEntity<?> createVenture(@Valid @RequestBody Venture venture) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();             
@@ -158,8 +159,11 @@ public class VentureController {
             venture.setCreatedDate(java.time.LocalDate.now());
             venture.setRating(0.0);
             
+            venture.setDeleted(false);
+            venture.setStatus("Pending");
+
             Venture savedVenture = ventureRepository.save(venture);
-            algoliaService.saveVenture(savedVenture);
+            //algoliaService.saveVenture(savedVenture);
 
             auditService.logAction("CREATE", "Venture", savedVenture.getId(), "Creó: " + savedVenture.getTitle(), email);
 

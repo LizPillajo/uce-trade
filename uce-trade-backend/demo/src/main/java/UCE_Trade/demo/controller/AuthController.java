@@ -15,8 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import UCE_Trade.demo.dto.LoginRequest; 
-import jakarta.validation.Valid;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,9 +40,9 @@ public class AuthController {
 
     // LOGIN
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        String email = request.getEmail(); 
-        String password = request.getPassword();
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials, HttpServletResponse response) {
+        String email = credentials.get("email");
+        String password = credentials.get("password");
 
         try {
             // Verificar credenciales con Spring Security

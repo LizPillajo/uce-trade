@@ -12,7 +12,7 @@ const OwnerCard = ({ owner, onNavigate }) => (
     
     <UserInfoItem 
         name={owner.fullName} 
-        avatar={owner.avatar} 
+        avatar={owner.avatarUrl || owner.avatar}
         subtitle={owner.faculty}
         size={55}
         isVerified={true} 

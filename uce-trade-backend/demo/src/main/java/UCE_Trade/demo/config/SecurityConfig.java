@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -32,34 +33,26 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                // 1. RUTAS PÚBLICAS (Sin Login)
-                .requestMatchers(
-                    "/api/auth/**",           // Login y Registro
-                    "/api/ventures",          // Listar todos (Explore)
-                    "/api/ventures/**",       // Detalles y Featured
-                    "/api/ventures/featured", 
-                    "/api/payments/**",
-                    "/ws/**",
-                    "/v3/api-docs/**",        // Swagger Docs
-                    "/swagger-ui/**",         // Swagger UI
-                    "/swagger-ui.html"        // Swagger HTML
-                ).permitAll()
+                // 1. RUTAS PÚBLICAS (Login, Registro, Swagger, Websocket)
+                .requestMatchers("/api/auth/**", "/ws/**", "/error").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 
-                // 2. RUTAS SOLO PARA ADMIN
-                .requestMatchers("/api/admin/**").hasAuthority("ADMIN") 
+                // 2. RUTAS PÚBLICAS DE SOLO LECTURA (GET)
+                // Permite ver emprendimientos sin loguearse, pero NO crearlos
+                .requestMatchers(HttpMethod.GET, "/api/ventures", "/api/ventures/**", "/api/ventures/featured").permitAll()
+                
+                // 3. RUTAS DE SOLO ADMIN
+                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 
-                // 3. RUTAS PRIVADAS (Requieren estar logueado como STUDENT, ADMIN o CLIENT)
-                .requestMatchers(
-                    "/api/dashboard/**",        // Dashboard estudiante
-                    "/api/notifications/**",    // Notificaciones
-                    "/api/users/**",            // Perfiles
-                    "/api/payments/**"          // Pagos
-                ).authenticated()
-
-                // 4. RUTAS PRIVADAS (Todo lo demás)
+                // 4. RUTAS PROTEGIDAS (Crear venture, Perfil, Pagos)
+                // AQUÍ ESTABA EL ERROR: Spring necesita saber que POST /api/ventures requiere autenticación explícita
+                .requestMatchers(HttpMethod.POST, "/api/ventures").authenticated() 
+                .requestMatchers(HttpMethod.PUT, "/api/ventures/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/ventures/**").authenticated()
+                
+                // 5. TODO LO DEMÁS
                 .anyRequest().authenticated()
             )
-
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -78,10 +71,13 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        // Asegúrate de incluir el puerto exacto de tu frontend
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        configuration.setExposedHeaders(List.of("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

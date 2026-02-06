@@ -44,7 +44,11 @@ public class Venture implements Serializable {
     private LocalDate createdDate;
 
     @Column(columnDefinition = "boolean default false")
-    private boolean deleted = false;
+    private Boolean deleted = false;
+
+    public boolean isDeleted() {
+        return Boolean.TRUE.equals(this.deleted);
+    }
 
     @Column(columnDefinition = "varchar(255) default 'Active'")
     private String status = "Active";
