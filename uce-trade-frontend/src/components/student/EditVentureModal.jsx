@@ -1,13 +1,11 @@
 import { useEffect } from 'react';
-import { Grid, TextField, MenuItem, InputAdornment } from '@mui/material';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import { Grid } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Button from '../ui/Button';
-import BaseModal from '../ui/BaseModal'; // <--- IMPORTAR
-
-const categories = ['Tutorials', 'Food', 'Design', 'Technology', 'Clothes', 'Photography', 'Other'];
+import BaseModal from '../ui/BaseModal';
+import VentureFormFields from '../ventures/VentureFormFields'; 
 
 const schema = z.object({
   title: z.string().min(5, "Title must be at least 5 chars"),
@@ -47,30 +45,7 @@ const EditVentureModal = ({ open, handleClose, venture, onSave, loading }) => {
         }
     >
         <Grid container spacing={2} pt={1} component="form" id="edit-form" onSubmit={handleSubmit(onSave)}>
-          <Grid size={{ xs: 12 }}>
-            <TextField 
-                fullWidth label="Title" 
-                {...register("title")} error={!!errors.title} helperText={errors.title?.message} 
-            />
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-             <TextField select fullWidth label="Category" defaultValue="" {...register("category")} error={!!errors.category}>
-                {categories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-             </TextField>
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-             <TextField 
-                fullWidth label="Price" type="number"
-                InputProps={{ startAdornment: <InputAdornment position="start"><AttachMoneyIcon/></InputAdornment> }}
-                {...register("price")} error={!!errors.price}
-             />
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-             <TextField 
-                fullWidth label="Description" multiline rows={3}
-                {...register("description")} error={!!errors.description} helperText={errors.description?.message}
-             />
-          </Grid>
+           <VentureFormFields register={register} errors={errors} variant="modal" />
         </Grid>
     </BaseModal>
   );

@@ -1,7 +1,6 @@
 // src/pages/student/CreateVenturePage.jsx
 import { useState } from 'react';
-import { Box, Container, Paper, Typography, Grid, TextField, MenuItem, Button, Stack, InputAdornment, Alert } from '@mui/material';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import { Box, Container, Paper, Typography, Grid, Button, Stack, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,10 +11,8 @@ import { toast } from 'react-toastify';
 import { supabase } from '../../services/supabaseClient';
 import api from '../../services/api';
 import ImageUploadBox from '../../components/common/ImageUploadBox';
+import VentureFormFields from '../../components/ventures/VentureFormFields'; 
 
-const categories = ['Tutorials', 'Food', 'Design', 'Technology', 'Clothes', 'Photography', 'Other'];
-
-// Esquema Zod
 const ventureSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long"),
   category: z.string().min(1, "Please select a category"),
@@ -37,7 +34,6 @@ const CreateVenturePage = () => {
   const [preview, setPreview] = useState(null);
   const [generalError, setGeneralError] = useState('');
 
-  // Lógica de Supabase limpia
   const handleImageUpload = async (e) => {
     try {
       setGeneralError('');
@@ -75,14 +71,11 @@ const CreateVenturePage = () => {
       setSubmitting(true);
       await api.post('/ventures', { ...data, imageUrl: preview });
       
-      // 4. Notificación de Éxito
       toast.success("Service published successfully! 🚀");
 
-      // 5. Invalidar Cache (Para que al volver, la lista se actualice sola)
       queryClient.invalidateQueries({ queryKey: ['myVentures'] });
       queryClient.invalidateQueries({ queryKey: ['studentStats'] }); 
 
-      // 6. Redirigir
       navigate('/student/my-ventures');
 
     } catch (error) {
@@ -108,45 +101,15 @@ const CreateVenturePage = () => {
         <Paper component="form" onSubmit={handleSubmit(onSubmit)} elevation={0} sx={{ p: { xs: 3, md: 5 }, borderRadius: '24px', border: '1px solid #e5e7eb' }}>
           <Stack spacing={4}>
             
-            {/* Sección 1: Inputs */}
+            {/* Sección 1: Inputs Refactorizados */}
             <Box>
               <Typography variant="h6" fontWeight="bold" color="#0d2149" mb={3}>1. Basic Information</Typography>
               <Grid container spacing={3}>
-                <Grid size={{ xs: 12 }}> 
-                  <TextField 
-                    fullWidth label="Service Title" placeholder="e.g., Math Tutorials" variant="outlined" 
-                    {...register("title")} error={!!errors.title} helperText={errors.title?.message}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f9fafb' } }} 
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField 
-                    select fullWidth label="Category" defaultValue=""
-                    {...register("category")} error={!!errors.category} helperText={errors.category?.message}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f9fafb' } }}
-                  >
-                    {categories.map((option) => (<MenuItem key={option} value={option}>{option}</MenuItem>))}
-                  </TextField>
-                </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField 
-                    fullWidth label="Price" type="number" placeholder="0.00" 
-                    {...register("price")} error={!!errors.price} helperText={errors.price?.message}
-                    InputProps={{ startAdornment: <InputAdornment position="start"><AttachMoneyIcon fontSize="small" /></InputAdornment> }}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f9fafb' } }}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <TextField 
-                    fullWidth label="Description" multiline rows={4} placeholder="Describe what you offer..."
-                    {...register("description")} error={!!errors.description} helperText={errors.description?.message}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f9fafb' } }}
-                  />
-                </Grid>
+                <VentureFormFields register={register} errors={errors} variant="fancy" />
               </Grid>
             </Box>
 
-            {/* Sección 2: Componente Extraído */}
+            {/* Sección 2: Imagen */}
             <ImageUploadBox 
                 preview={preview}
                 uploading={uploading}
