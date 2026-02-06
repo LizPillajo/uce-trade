@@ -1,31 +1,19 @@
-import { Grid } from "@mui/material";
 import StoreIcon from "@mui/icons-material/Store";
 import PeopleIcon from "@mui/icons-material/People";
 import WarningIcon from "@mui/icons-material/Warning";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import StatCard from "../common/StatCard"; 
+import KpiGrid from "../common/KpiGrid"; // <--- Usamos el genérico aquí
 
 const AdminKpiGroup = ({ kpi }) => {
-  return (
-    <Grid container spacing={3} mb={5}>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <StatCard title="Total Ventures" value={kpi.totalVentures} badge="Live Now" icon={<StoreIcon />} color="#3b82f6"/>
-      </Grid>
-      
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <StatCard title="Active Users" value={kpi.activeUsers} badge="Community" icon={<PeopleIcon />} color="#8b5cf6" />
-      </Grid>
-      
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <StatCard title="Pending Review" value={kpi.pendingApproval} badge="Needs Action" icon={<WarningIcon />} color="#ef4444" />
-      </Grid>
+  // Aquí definimos la configuración específica del Admin
+  const items = [
+    { title: "Total Ventures", value: kpi?.totalVentures, badge: "Live Now", icon: <StoreIcon />, color: "#3b82f6" },
+    { title: "Active Users", value: kpi?.activeUsers, badge: "Community", icon: <PeopleIcon />, color: "#8b5cf6" },
+    { title: "Pending Review", value: kpi?.pendingApproval, badge: "Needs Action", icon: <WarningIcon />, color: "#ef4444" },
+    { title: "Total Transactions", value: kpi?.totalVisits, badge: "Volume", icon: <VisibilityIcon />, color: "#10b981" }
+  ];
 
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <StatCard title="Total Transactions" value={kpi.totalVisits} badge="Volume" icon={<VisibilityIcon />} color="#10b981" 
-        />
-      </Grid>
-    </Grid>
-  );
+  return <KpiGrid items={items} />;
 };
 
 export default AdminKpiGroup;
