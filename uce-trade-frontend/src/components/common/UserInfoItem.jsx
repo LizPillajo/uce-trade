@@ -1,33 +1,36 @@
-import { Box, Typography, Avatar } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // <--- IMPORTAMOS EL ICONO
+import Avatar from '../ui/Avatar'; 
 
 const UserInfoItem = ({ 
   name, 
   avatar, 
   subtitle, 
-  size = 40, 
-  color = '#0d2149',
-  reverse = false // Por si quieres el texto a la izquierda del avatar
+  size = 45, 
+  isVerified = false, // <--- NUEVA PROPIEDAD
+  sx = {} 
 }) => {
   return (
-    <Box display="flex" alignItems="center" gap={2} flexDirection={reverse ? 'row-reverse' : 'row'}>
+    <Box display="flex" alignItems="center" gap={2} sx={sx}>
       <Avatar 
         src={avatar} 
         alt={name}
-        sx={{ 
-            width: size, 
-            height: size, 
-            bgcolor: color, 
-            color: 'white',
-            fontSize: size * 0.4 
-        }}
-      >
-        {name?.charAt(0).toUpperCase()}
-      </Avatar>
+        size={size}
+        fallback={name}
+      />
       
-      <Box textAlign={reverse ? 'right' : 'left'}>
-        <Typography fontWeight="bold" color="#0d2149" lineHeight={1.2}>
-            {name}
-        </Typography>
+      <Box>
+        <Box display="flex" alignItems="center" gap={0.5}>
+            <Typography variant="body2" fontWeight="bold" color="#0d2149" lineHeight={1.2}>
+                {name || "Unknown User"}
+            </Typography>
+            
+            {/* Si es verificado, mostramos el check */}
+            {isVerified && (
+                <CheckCircleIcon sx={{ fontSize: 16, color: '#10b981' }} />
+            )}
+        </Box>
+
         {subtitle && (
             <Typography variant="caption" color="text.secondary" display="block">
                 {subtitle}

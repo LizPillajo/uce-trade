@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Box, Avatar, Typography } from '@mui/material';
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Box, Typography } from '@mui/material';
 import StarIcon from "@mui/icons-material/Star";
 import { useNavigate } from "react-router-dom";
 
@@ -7,6 +7,7 @@ import Badge from '../ui/Badge';
 import ConfirmationModal from '../common/ConfirmationModal';
 import EditVentureModal from './EditVentureModal';
 import TableActions from '../ui/TableActions'; 
+import UserInfoItem from '../common/UserInfoItem'; 
 import { useVentureMutations } from '../../hooks/useVentureMutations'; 
 
 const MyVenturesTable = ({ ventures }) => {
@@ -47,15 +48,12 @@ const MyVenturesTable = ({ ventures }) => {
               ventures.map((row) => (
                 <TableRow key={row.id} hover>
                   <TableCell>
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar variant="rounded" src={row.imageUrl} sx={{ width: 50, height: 50 }} />
-                      <Box>
-                        <Typography fontWeight="bold" color="#0d2149">{row.title}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Created: {row.createdDate || 'Recently'}
-                        </Typography>
-                      </Box>
-                    </Box>
+                    <UserInfoItem 
+                        name={row.title}
+                        avatar={row.imageUrl}
+                        subtitle={`Created: ${row.createdDate || 'Recently'}`}
+                        sx={{ '& .MuiAvatar-root': { borderRadius: '8px' } }}
+                    />
                   </TableCell>
                   <TableCell><Badge status={row.category} /></TableCell> 
                   <TableCell sx={{ fontWeight: "bold" }}>${row.price}</TableCell>
@@ -83,7 +81,6 @@ const MyVenturesTable = ({ ventures }) => {
         </Table>
       </TableContainer>
 
-      {/* Modales controlados por estado local, acciones controladas por el hook */}
       <ConfirmationModal 
         open={!!deleteId}
         title="Delete Venture?"

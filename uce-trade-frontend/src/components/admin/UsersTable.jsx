@@ -1,7 +1,8 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Avatar } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { TableRowSkeleton } from '../ui/Skeletons';
-import TableActions from '../ui/TableActions'; // <--- IMPORTANTE
+import TableActions from '../ui/TableActions';
+import UserInfoItem from '../common/UserInfoItem'; // <--- IMPORTADO
 
 const UsersTable = ({ users, onDelete, loading }) => {
   const navigate = useNavigate();
@@ -25,17 +26,15 @@ const UsersTable = ({ users, onDelete, loading }) => {
                 ) : (
                     users.map((row) => (
                     <TableRow key={row.id} hover>
+                        
                         <TableCell>
-                            <Box display="flex" alignItems="center" gap={2}>
-                                <Avatar src={row.avatar} sx={{ bgcolor: '#0d2149', color: 'white' }}>
-                                    {row.fullName?.charAt(0)}
-                                </Avatar>
-                                <Box>
-                                    <Typography fontWeight="bold" color="#0d2149">{row.fullName}</Typography>
-                                    <Typography variant="caption" color="text.secondary">{row.email}</Typography>
-                                </Box>
-                            </Box>
+                            <UserInfoItem 
+                                name={row.fullName} 
+                                avatar={row.avatar} 
+                                subtitle={row.email} 
+                            />
                         </TableCell>
+
                         <TableCell>{row.faculty}</TableCell>
                         <TableCell sx={{ color: 'text.secondary' }}>{row.joinDate}</TableCell>
                         <TableCell align="center">
@@ -49,7 +48,6 @@ const UsersTable = ({ users, onDelete, loading }) => {
                              </Typography>
                         </TableCell>
                         
-                        {/* LIMPIEZA AQUI */}
                         <TableCell align="right">
                             <TableActions 
                                 onView={() => navigate(`/profile/${row.id}`)}
