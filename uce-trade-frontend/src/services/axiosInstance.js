@@ -2,8 +2,10 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore'; 
 import { toast } from 'react-toastify';
 
+const BASE_URL = 'http://3.225.220.112:8080/api';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', 
+  baseURL: BASE_URL, 
   withCredentials: true, 
   headers: {
     'Content-Type': 'application/json',
@@ -34,7 +36,7 @@ api.interceptors.response.use(
         if (refreshToken) {
             console.log("🔄 Token de 15min expiró. Usando RefreshToken para renovar...");
 
-            await axios.post('http://localhost:8080/api/auth/refreshtoken', {
+            await axios.post(`${BASE_URL}/auth/refreshtoken`, {
                 refreshToken: refreshToken
             }, { withCredentials: true });
 

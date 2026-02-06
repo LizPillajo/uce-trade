@@ -3,7 +3,7 @@ spring:
     name: UCE-Trade
   
   datasource:
-    url: jdbc:postgresql://localhost:5433/uce_trade_db
+    url: jdbc:postgresql://localhost:5432/uce_trade_db
     username: admin
     password: admin
     driver-class-name: org.postgresql.Driver

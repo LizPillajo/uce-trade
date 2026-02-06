@@ -9,7 +9,7 @@ export const useWebSocket = () => {
   const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
   
-  // REF para mantener la instancia del cliente entre renderizados
+  // Mantener la instancia del cliente entre renderizados
   const clientRef = useRef(null);
 
   useEffect(() => {
@@ -18,13 +18,14 @@ export const useWebSocket = () => {
 
     console.log("🔌 Iniciando conexión WebSocket...");
 
+    const WS_URL = 'http://3.225.220.112:8080/ws';
+    
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS(WS_URL),
       reconnectDelay: 5000,
       onConnect: () => {
         console.log('✅ SOCKET CONECTADO');
 
-        // Suscripción Estudiante (Ventas personales)
         if (user.role === 'STUDENT') {
           client.subscribe(`/topic/sales/${user.email}`, (message) => {
             const notif = JSON.parse(message.body);

@@ -2,7 +2,7 @@ import StoreIcon from "@mui/icons-material/Store";
 import PeopleIcon from "@mui/icons-material/People";
 import WarningIcon from "@mui/icons-material/Warning";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import KpiGrid from "../common/KpiGrid"; // <--- Usamos el genérico aquí
+import KpiGrid from "../common/KpiGrid"; 
 
 const AdminKpiGroup = ({ kpi }) => {
   // Aquí definimos la configuración específica del Admin

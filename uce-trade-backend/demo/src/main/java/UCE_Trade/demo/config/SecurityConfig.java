@@ -49,10 +49,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/ventures").authenticated() 
                 .requestMatchers(HttpMethod.PUT, "/api/ventures/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/ventures/**").authenticated()
-                
-                // 5. TODO LO DEMÁS
+               
                 .anyRequest().authenticated()
             )
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -71,12 +71,14 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Asegúrate de incluir el puerto exacto de tu frontend
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"));
+    
+        // EN LUGAR DE setAllowedOrigins, USA ESTO:
+        configuration.setAllowedOriginPatterns(List.of("*")); 
+    
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
-        configuration.setExposedHeaders(List.of("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+        configuration.setAllowedHeaders(List.of("*"));        
         configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("Set-Cookie"));
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

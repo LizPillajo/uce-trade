@@ -45,7 +45,7 @@ public class AuthController {
         String password = credentials.get("password");
 
         try {
-            // Verificar credenciales con Spring Security
+            // Verificar credenciales
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
             );
@@ -58,9 +58,9 @@ public class AuthController {
 
             // CREAR LA COOKIE 
             Cookie cookie = new Cookie("jwt_token", accessToken);
-            cookie.setHttpOnly(true); // ¡Importante! JS no puede leerla (seguridad)
+            cookie.setHttpOnly(true); // No puede leerla 
             cookie.setSecure(false);  // false para localhost, true en producción (AWS)
-            cookie.setPath("/");      // Disponible en toda la app
+            cookie.setPath("/");    
             cookie.setMaxAge(7 * 24 * 60 * 60); // 7 días
 
             response.addCookie(cookie);
@@ -97,7 +97,7 @@ public class AuthController {
                     cookie.setHttpOnly(true);
                     cookie.setSecure(false);
                     cookie.setPath("/");
-                    cookie.setMaxAge(7 * 24 * 60 * 60); // 7 días
+                    cookie.setMaxAge(7 * 24 * 60 * 60); 
                     response.addCookie(cookie);
 
                     return ResponseEntity.ok(Map.of(
