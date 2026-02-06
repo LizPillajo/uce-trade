@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Typography, Box, Link, TextField, MenuItem, Alert, Divider } from '@mui/material';
+import { Typography, Box, Link, Divider, Alert } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -7,16 +7,17 @@ import GoogleIcon from '@mui/icons-material/Google';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'react-toastify';
 
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import FacultySelect from '../../components/common/FacultySelect'; // <--- NUEVO
 import AuthSplitLayout from '../../components/layout/AuthSplitLayout'; 
 
 import { useAuthStore } from '../../store/authStore';
 import { registerUser, googleLogin } from '../../services/api';
 import { auth, googleProvider } from "../../services/firebase"; 
 import { signInWithPopup } from "firebase/auth"; 
-import { toast } from 'react-toastify';
 
 const registerSchema = z.object({
   fullName: z.string().min(3, "Full name is required"),
@@ -43,9 +44,7 @@ const RegisterPage = () => {
     setServerError('');
     try {
       const { confirmPassword, ...payload } = data;
-      
       await registerUser(payload);
-      
       toast.success('Account created successfully! Please log in. 🎉');
       navigate('/login');
     } catch (err) {
@@ -82,8 +81,6 @@ const RegisterPage = () => {
       }
     }
   };
-
-  const facultyRegister = register("faculty");
 
   return (
     <AuthSplitLayout 
@@ -127,45 +124,8 @@ const RegisterPage = () => {
             helperText={errors.email?.message}
           />
           
-          <TextField 
-            select 
-            label="College / Major" 
-            fullWidth 
-            variant="outlined" 
-            defaultValue=""
-            inputRef={facultyRegister.ref} 
-            {...facultyRegister}          
-            error={!!errors.faculty} 
-            helperText={errors.faculty?.message}
-            sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#f9fafb' } }}
-          >
-            {[
-              'Arts',
-              'Architecture and Urban Planning',
-              'Sciences',
-              'Administrative Sciences',
-              'Agricultural Sciences',
-              'Biological Sciences',
-              'Disability Sciences, Pre-hospital Care and Disasters',
-              'Economic Sciences',
-              'Medical Sciences',
-              'Psychological Sciences',
-              'Chemical Sciences',
-              'Social and Human Sciences',
-              'Social Communication',
-              'Physical Culture',
-              'Engineering and Applied Sciences',
-              'Philosophy, Literature, and Education Sciences',
-              'Geological, Mining, Petroleum, and Environmental Engineering',
-              'Chemical Engineering',
-              'Jurisprudence, Political and Social Sciences',
-              'Veterinary Medicine and Animal Husbandry',
-              'Dentistry', 'External Client'
-            ].map(opt => (
-              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-            ))}
-
-          </TextField>
+          {/* AQUÍ ESTÁ EL CAMBIO IMPORTANTE: COMPONENTE REUTILIZABLE */}
+          <FacultySelect register={register} errors={errors} />
 
           <Input 
             label="Password" 

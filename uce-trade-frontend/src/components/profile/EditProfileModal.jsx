@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Grid, TextField, InputAdornment, Box, Typography } from '@mui/material';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import { Grid, Box, Typography } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,6 +10,7 @@ import { updateUserProfile } from '../../services/api';
 import { useAuthStore} from '../../store/authStore';
 import { supabase } from '../../services/supabaseClient'; 
 import ImageUploadBox from '../common/ImageUploadBox';
+import ProfileFormFields from './ProfileFormFields'; // <--- NUEVO
 import Button from '../ui/Button';
 import BaseModal from '../ui/BaseModal'; 
 
@@ -30,10 +29,6 @@ const EditProfileModal = ({ open, handleClose, user }) => {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(profileSchema)
-  });
-
-  const [formData, setFormData] = useState({
-    fullName: '', faculty: '', phoneNumber: '', githubUser: '', description: '', avatarUrl: ''
   });
 
   useEffect(() => {
@@ -110,7 +105,7 @@ const EditProfileModal = ({ open, handleClose, user }) => {
        <Box component="form" id="profile-form" onSubmit={handleSubmit(onSubmit)} pt={1}>
             <Grid container spacing={2}>
             
-            {/* Foto */}
+            {/* Foto (Se mantiene lógica de UI aquí) */}
             <Grid size={{ xs: 12 }}>
                 <Typography variant="caption" color="text.secondary" mb={1} display="block">Profile Picture</Typography>
                 <ImageUploadBox 
@@ -121,38 +116,9 @@ const EditProfileModal = ({ open, handleClose, user }) => {
                 />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField 
-                    fullWidth label="Full Name" 
-                    {...register("fullName")} error={!!errors.fullName} helperText={errors.fullName?.message}
-                />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField 
-                    fullWidth label="Faculty / Major" 
-                    {...register("faculty")} error={!!errors.faculty} helperText={errors.faculty?.message}
-                />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-                <TextField 
-                    fullWidth label="WhatsApp Number" placeholder="593..."
-                    InputProps={{ startAdornment: <InputAdornment position="start"><WhatsAppIcon color="success" /></InputAdornment> }}
-                    {...register("phoneNumber")} error={!!errors.phoneNumber} helperText={errors.phoneNumber?.message}
-                />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-                <TextField 
-                    fullWidth label="GitHub Username" placeholder="username"
-                    InputProps={{ startAdornment: <InputAdornment position="start"><GitHubIcon /></InputAdornment> }}
-                    {...register("githubUser")} error={!!errors.githubUser} helperText={errors.githubUser?.message}
-                />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-                <TextField 
-                    fullWidth label="About Me" multiline rows={3} placeholder="Tell us about yourself..."
-                    {...register("description")} error={!!errors.description} helperText={errors.description?.message}
-                />
-            </Grid>
+            {/* Campos refactorizados */}
+            <ProfileFormFields register={register} errors={errors} />
+
             </Grid>
         </Box>
     </BaseModal>
