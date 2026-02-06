@@ -12,6 +12,7 @@ import UCE_Trade.demo.model.Venture;
 import UCE_Trade.demo.service.EmailService;
 import UCE_Trade.demo.service.PdfService;
 import UCE_Trade.demo.service.UserService;
+import jakarta.validation.Valid;
 import UCE_Trade.demo.repository.VentureRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -150,7 +151,7 @@ public class PaymentController {
     }
 
     @PostMapping("/create-intent")
-    public ResponseEntity<?> createPaymentIntent(@RequestBody PaymentRequest request) {
+    public ResponseEntity<?> createPaymentIntent(@Valid @RequestBody PaymentRequest request) {
         try {
             PaymentResponse response = paymentService.createPaymentIntent(request);
             return ResponseEntity.ok(response);

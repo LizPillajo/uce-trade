@@ -1,6 +1,7 @@
 package UCE_Trade.demo.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*; // <--- IMPORTANTE
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,13 +22,19 @@ public class Venture implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "The title is mandatory.") 
+    @Size(min = 5, message = "The title must be at least 5 characters long.") 
     private String title;
     
     @Column(length = 1000) 
+    @NotBlank(message = "The description is mandatory.") 
     private String description;
     
+    @NotNull(message = "The price is mandatory") 
+    @DecimalMin(value = "1.0", message = "The minimum price is $1.0")
     private BigDecimal price;
     
+    @NotBlank(message = "The category is mandatory") 
     private String category; 
     
     private String imageUrl;
