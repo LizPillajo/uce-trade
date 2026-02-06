@@ -9,6 +9,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableCaching 
 @EnableAsync
 public class UceTradeApplication {
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("America/Guayaquil"));
+    }
     public static void main(String[] args) {
         SpringApplication.run(UceTradeApplication.class, args);
     }

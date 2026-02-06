@@ -50,11 +50,16 @@ const StudentDashboard = () => {
   // Transformaciones de datos
   const lineChartData = stats?.chartSales 
     ? Object.keys(stats.chartSales)
-        .map(date => ({ name: date, income: stats.chartSales[date] }))
-        .sort((a, b) => { 
-           const [dayA] = a.name.split('/');
-           const [dayB] = b.name.split('/');
-           return dayA - dayB; 
+      .map(key => ({ 
+        name: key, 
+        income: stats.chartSales[key] 
+      }))
+      .sort((a, b) => {
+          const [dayA, monthA] = a.name.split('/').map(Number);
+          const [dayB, monthB] = b.name.split('/').map(Number);
+        
+          if (monthA !== monthB) return monthA - monthB;
+          return dayA - dayB;
         })
     : [];
 
