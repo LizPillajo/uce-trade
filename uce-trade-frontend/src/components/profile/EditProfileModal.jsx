@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Grid, InputAdornment, Box, Typography } from '@mui/material';
+import { Grid, TextField, InputAdornment, Box, Typography } from '@mui/material';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import Button from '../ui/Button';
 import { useMutation } from '@tanstack/react-query';
-import { updateUserProfile } from '../../services/api';
-import { useAuthStore} from '../../store/authStore';
-import { toast } from 'react-toastify';
-import { supabase } from '../../services/supabaseClient'; 
-import ImageUploadBox from '../common/ImageUploadBox';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'react-toastify';
+
+import { updateUserProfile } from '../../services/api';
+import { useAuthStore} from '../../store/authStore';
+import { supabase } from '../../services/supabaseClient'; 
+import ImageUploadBox from '../common/ImageUploadBox';
+import Button from '../ui/Button';
+import BaseModal from '../ui/BaseModal'; 
 
 const profileSchema = z.object({
   fullName: z.string().min(3, "Name must be at least 3 characters"),
@@ -31,15 +33,9 @@ const EditProfileModal = ({ open, handleClose, user }) => {
   });
 
   const [formData, setFormData] = useState({
-    fullName: '',
-    faculty: '',
-    phoneNumber: '',
-    githubUser: '',
-    description: '',
-    avatarUrl: ''
+    fullName: '', faculty: '', phoneNumber: '', githubUser: '', description: '', avatarUrl: ''
   });
 
-  // Rellenar datos al abrir
   useEffect(() => {
     if (user && open) {
       reset({
@@ -52,10 +48,6 @@ const EditProfileModal = ({ open, handleClose, user }) => {
       setAvatarPreview(user.avatar);
     }
   }, [user, open, reset]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleImageUpload = async (e) => {
     try {
@@ -90,24 +82,32 @@ const EditProfileModal = ({ open, handleClose, user }) => {
         githubUser: updatedUser.githubUser,
         avatar: updatedUser.avatarUrl
       });
-
       toast.success("Profile updated successfully!");
       handleClose();
     },
-    onError: () => {
-      toast.error("Failed to update profile.");
-    }
+    onError: () => toast.error("Failed to update profile.")
   });
 
   const onSubmit = (data) => {
     const finalData = { ...data, avatarUrl: avatarPreview };
     mutation.mutate(finalData);
   };
+
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' }}}>
-      <DialogTitle sx={{ fontWeight: 'bold', color: '#0d2149' }}>Edit Profile</DialogTitle>
-      <DialogContent dividers>
-        <Box component="form" id="profile-form" onSubmit={handleSubmit(onSubmit)} pt={1}>
+    <BaseModal
+        open={open}
+        onClose={handleClose}
+        title="Edit Profile"
+        actions={
+            <>
+                <Button variant="text" onClick={handleClose} sx={{ color: '#666' }}>Cancel</Button>
+                <Button type="submit" form="profile-form" disabled={mutation.isPending || uploading}>
+                    {mutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+            </>
+        }
+    >
+       <Box component="form" id="profile-form" onSubmit={handleSubmit(onSubmit)} pt={1}>
             <Grid container spacing={2}>
             
             {/* Foto */}
@@ -155,14 +155,7 @@ const EditProfileModal = ({ open, handleClose, user }) => {
             </Grid>
             </Grid>
         </Box>
-      </DialogContent>
-      <DialogActions sx={{ p: 3 }}>
-        <Button variant="text" onClick={handleClose} sx={{ color: '#666' }}>Cancel</Button>
-        <Button type="submit" form="profile-form" disabled={mutation.isPending || uploading}>
-            {mutation.isPending ? "Saving..." : "Save Changes"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    </BaseModal>
   );
 };
 
